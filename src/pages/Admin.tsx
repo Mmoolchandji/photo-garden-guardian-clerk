@@ -1,22 +1,69 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Camera, ArrowLeft, User, Plus, Settings, Grid } from 'lucide-react';
+import { Camera, ArrowLeft, User, Plus, Settings, Grid, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import PhotoUpload from '@/components/PhotoUpload';
+import PhotoEdit from '@/components/PhotoEdit';
+import AdminPhotoGrid from '@/components/AdminPhotoGrid';
+
+interface Photo {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string;
+  created_at: string;
+}
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
+  const [showUpload, setShowUpload] = useState(false);
+  const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchPhotos();
+    }
+  }, [user]);
+
+  const fetchPhotos = async () => {
+    try {
+      setLoadingPhotos(true);
+      const { data, error } = await supabase
+        .from('photos')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      setPhotos(data || []);
+    } catch (error: any) {
+      console.error('Fetch photos error:', error);
+      toast({
+        title: "Error loading photos",
+        description: error.message || "Failed to load photos. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPhotos(false);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -35,6 +82,20 @@ const Admin = () => {
     }
   };
 
+  const handlePhotoUploaded = () => {
+    setShowUpload(false);
+    fetchPhotos();
+  };
+
+  const handlePhotoUpdated = () => {
+    setEditingPhoto(null);
+    fetchPhotos();
+  };
+
+  const handlePhotoDeleted = () => {
+    fetchPhotos();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -48,6 +109,29 @@ const Admin = () => {
 
   if (!user) {
     return null; // Will redirect to auth page
+  }
+
+  if (showUpload) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <PhotoUpload 
+          onPhotoUploaded={handlePhotoUploaded}
+          onCancel={() => setShowUpload(false)}
+        />
+      </div>
+    );
+  }
+
+  if (editingPhoto) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <PhotoEdit 
+          photo={editingPhoto}
+          onPhotoUpdated={handlePhotoUpdated}
+          onCancel={() => setEditingPhoto(null)}
+        />
+      </div>
+    );
   }
 
   return (
@@ -101,8 +185,10 @@ const Admin = () => {
               <Camera className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-gray-500">Ready to add your first photo</p>
+              <div className="text-2xl font-bold">{photos.length}</div>
+              <p className="text-xs text-gray-500">
+                {photos.length === 0 ? 'Ready to add your first photo' : 'Photos in gallery'}
+              </p>
             </CardContent>
           </Card>
           
@@ -112,8 +198,8 @@ const Admin = () => {
               <Grid className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-gray-500">Views will appear here</p>
+              <div className="text-2xl font-bold">-</div>
+              <p className="text-xs text-gray-500">Views tracking coming soon</p>
             </CardContent>
           </Card>
           
@@ -123,46 +209,52 @@ const Admin = () => {
               <Settings className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0 MB</div>
-              <p className="text-xs text-gray-500">of available storage</p>
+              <div className="text-2xl font-bold">-</div>
+              <p className="text-xs text-gray-500">Storage tracking coming soon</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 mb-8">
-          <Button className="bg-emerald-600 hover:bg-emerald-700">
+          <Button 
+            className="bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => setShowUpload(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add New Photo
           </Button>
-          <Button variant="outline">
-            <Grid className="h-4 w-4 mr-2" />
-            Manage Gallery
-          </Button>
-          <Button variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
+          <Button 
+            variant="outline"
+            onClick={fetchPhotos}
+            disabled={loadingPhotos}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loadingPhotos ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
         </div>
 
         {/* Photos Management */}
         <Card>
           <CardHeader>
-            <CardTitle>Photo Gallery</CardTitle>
+            <CardTitle>Photo Gallery Management</CardTitle>
             <CardDescription>
-              Your photos will appear here once you start adding them
+              Manage your photos - edit details, delete, or add new ones
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
-              <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No photos yet</h3>
-              <p className="text-gray-500 mb-4">Get started by adding your first photo to the gallery.</p>
-              <Button className="bg-emerald-600 hover:bg-emerald-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Your First Photo
-              </Button>
-            </div>
+            {loadingPhotos ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading photos...</p>
+              </div>
+            ) : (
+              <AdminPhotoGrid 
+                photos={photos}
+                onPhotoEdit={setEditingPhoto}
+                onPhotoDeleted={handlePhotoDeleted}
+              />
+            )}
           </CardContent>
         </Card>
       </div>
