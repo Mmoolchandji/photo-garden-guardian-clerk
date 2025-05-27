@@ -1,48 +1,53 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Camera, ArrowLeft, LogIn, User, Plus, Settings, Grid, List } from 'lucide-react';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Camera, ArrowLeft, User, Plus, Settings, Grid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 const Admin = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, loading, signOut } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  if (!isAuthenticated) {
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You've been signed out successfully.",
+      });
+      navigate('/auth');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-emerald-100 rounded-full">
-                <Camera className="h-8 w-8 text-emerald-600" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl">Admin Access</CardTitle>
-            <CardDescription>
-              Sign in to manage the photo gallery
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
-              onClick={() => setIsAuthenticated(true)}
-            >
-              <LogIn className="h-4 w-4 mr-2" />
-              Sign In with Clerk
-            </Button>
-            <p className="text-center text-sm text-gray-500">
-              This will be connected to Clerk authentication
-            </p>
-            <div className="text-center">
-              <Link to="/" className="text-emerald-600 hover:underline text-sm">
-                ← Back to Gallery
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
       </div>
     );
+  }
+
+  if (!user) {
+    return null; // Will redirect to auth page
   }
 
   return (
@@ -72,12 +77,12 @@ const Admin = () => {
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
                 <User className="h-4 w-4 mr-2" />
-                Admin User
+                {user.email}
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => setIsAuthenticated(false)}
+                onClick={handleSignOut}
               >
                 Sign Out
               </Button>
@@ -96,8 +101,8 @@ const Admin = () => {
               <Camera className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">8</div>
-              <p className="text-xs text-gray-500">+2 from last month</p>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-gray-500">Ready to add your first photo</p>
             </CardContent>
           </Card>
           
@@ -107,8 +112,8 @@ const Admin = () => {
               <Grid className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,234</div>
-              <p className="text-xs text-gray-500">+12% from last month</p>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-gray-500">Views will appear here</p>
             </CardContent>
           </Card>
           
@@ -118,8 +123,8 @@ const Admin = () => {
               <Settings className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24 MB</div>
-              <p className="text-xs text-gray-500">of 1 GB total</p>
+              <div className="text-2xl font-bold">0 MB</div>
+              <p className="text-xs text-gray-500">of available storage</p>
             </CardContent>
           </Card>
         </div>
@@ -140,31 +145,23 @@ const Admin = () => {
           </Button>
         </div>
 
-        {/* Recent Photos Management */}
+        {/* Photos Management */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Photos</CardTitle>
+            <CardTitle>Photo Gallery</CardTitle>
             <CardDescription>
-              Manage your photo gallery content
+              Your photos will appear here once you start adding them
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
-                  <div className="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center">
-                    <Camera className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">Sample Photo {i}</h4>
-                    <p className="text-sm text-gray-500">Added 2024-01-1{i}</p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">Edit</Button>
-                    <Button variant="outline" size="sm">Delete</Button>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-12">
+              <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No photos yet</h3>
+              <p className="text-gray-500 mb-4">Get started by adding your first photo to the gallery.</p>
+              <Button className="bg-emerald-600 hover:bg-emerald-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Your First Photo
+              </Button>
             </div>
           </CardContent>
         </Card>
