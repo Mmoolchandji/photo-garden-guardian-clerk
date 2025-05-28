@@ -36,6 +36,9 @@ npm i
 npm run dev
 ```
 
+**Edit a file directly in VScode**
+- Check whether your repo is properly connected to github or not
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
