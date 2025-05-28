@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,25 +13,40 @@ interface PhotoUploadProps {
   onCancel: () => void;
 }
 
+type UploadStep = 'file-selection' | 'metadata';
+
 const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
+  const [step, setStep] = useState<UploadStep>('file-selection');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(selectedFile);
+      setImagePreview(previewUrl);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || !title.trim()) {
+  const generateTitleFromFilename = (filename: string) => {
+    return filename
+      .split('.')[0] // Remove extension
+      .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
+      .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+  };
+
+  const handleUpload = async (skipMetadata = false) => {
+    if (!file) {
       toast({
-        title: "Missing information",
-        description: "Please provide both a title and an image file.",
+        title: "No file selected",
+        description: "Please select a file to upload.",
         variant: "destructive",
       });
       return;
@@ -58,11 +73,14 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
         .from('photos')
         .getPublicUrl(filePath);
 
+      // Use provided title or generate from filename
+      const finalTitle = title.trim() || generateTitleFromFilename(file.name);
+
       // Save photo data to database
       const { error: dbError } = await supabase
         .from('photos')
         .insert({
-          title: title.trim(),
+          title: finalTitle,
           description: description.trim() || null,
           image_url: data.publicUrl,
         });
@@ -80,6 +98,8 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       setTitle('');
       setDescription('');
       setFile(null);
+      setImagePreview('');
+      setStep('file-selection');
       onPhotoUploaded();
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -93,61 +113,157 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
     }
   };
 
+  const handleContinueToMetadata = () => {
+    if (!file) return;
+    setStep('metadata');
+  };
+
+  const handleBackToFileSelection = () => {
+    setStep('file-selection');
+  };
+
+  const handleCancel = () => {
+    // Clean up preview URL
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setFile(null);
+    setImagePreview('');
+    setTitle('');
+    setDescription('');
+    setStep('file-selection');
+    onCancel();
+  };
+
+  if (step === 'file-selection') {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Add New Photo</CardTitle>
+            <Button variant="ghost" size="sm" onClick={handleCancel}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {!file ? (
+            <div className="text-center">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-emerald-400 transition-colors">
+                <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Select a photo</h3>
+                <p className="text-gray-500 mb-4">Choose an image file to upload to your gallery</p>
+                <label htmlFor="file-input" className="cursor-pointer">
+                  <Button className="bg-emerald-600 hover:bg-emerald-700">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Browse Files
+                  </Button>
+                  <Input
+                    id="file-input"
+                    type="file"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="text-center">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-48 object-cover rounded-lg mb-3"
+                />
+                <p className="text-sm text-gray-600 font-medium">{file.name}</p>
+                <p className="text-xs text-gray-400">
+                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+              
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={handleContinueToMetadata}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Add Details
+                </Button>
+                <Button 
+                  onClick={() => handleUpload(true)}
+                  variant="outline"
+                  className="flex-1"
+                  disabled={uploading}
+                >
+                  {uploading ? 'Uploading...' : 'Upload Now'}
+                </Button>
+              </div>
+              
+              <Button 
+                onClick={() => {
+                  setFile(null);
+                  setImagePreview('');
+                }}
+                variant="ghost"
+                className="w-full"
+              >
+                Choose Different File
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Add New Photo</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
+          <CardTitle>Add Photo Details</CardTitle>
+          <Button variant="ghost" size="sm" onClick={handleCancel}>
             <X className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="mb-4">
+          <img
+            src={imagePreview}
+            alt="Preview"
+            className="w-full h-32 object-cover rounded-lg"
+          />
+          <p className="text-sm text-gray-600 mt-2">{file?.name}</p>
+        </div>
+        
+        <form onSubmit={(e) => { e.preventDefault(); handleUpload(); }} className="space-y-4">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
+              Title (optional)
             </label>
             <Input
               id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter photo title"
-              required
+              placeholder={`e.g., "${generateTitleFromFilename(file?.name || '')}"`}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Leave empty to auto-generate from filename
+            </p>
           </div>
 
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              Description (optional)
             </label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter photo description (optional)"
+              placeholder="Add a description for your photo..."
               rows={3}
             />
-          </div>
-
-          <div>
-            <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-1">
-              Photo *
-            </label>
-            <Input
-              id="file"
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*"
-              required
-            />
-            {file && (
-              <p className="text-sm text-gray-500 mt-1">
-                Selected: {file.name}
-              </p>
-            )}
           </div>
 
           <div className="flex space-x-3">
@@ -168,10 +284,11 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={onCancel}
+              onClick={handleBackToFileSelection}
               disabled={uploading}
             >
-              Cancel
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
             </Button>
           </div>
         </form>
