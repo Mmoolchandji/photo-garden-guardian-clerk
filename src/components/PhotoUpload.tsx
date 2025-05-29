@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import BulkUploadModal from './BulkUploadModal';
 
 interface PhotoUploadProps {
   onPhotoUploaded: () => void;
@@ -19,19 +20,40 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [showBulkModal, setShowBulkModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
       
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(selectedFile);
-      setImagePreview(previewUrl);
+      // Check file limit
+      if (selectedFiles.length > 20) {
+        toast({
+          title: "Too many files selected",
+          description: "Please select a maximum of 20 files at once.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If multiple files selected, switch to bulk upload mode
+      if (selectedFiles.length > 1) {
+        setFiles(selectedFiles);
+        setShowBulkModal(true);
+      } else {
+        // Single file - keep existing behavior
+        const selectedFile = selectedFiles[0];
+        setFile(selectedFile);
+        
+        // Create preview URL
+        const previewUrl = URL.createObjectURL(selectedFile);
+        setImagePreview(previewUrl);
+      }
     }
   };
 
@@ -132,12 +154,41 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       URL.revokeObjectURL(imagePreview);
     }
     setFile(null);
+    setFiles([]);
     setImagePreview('');
     setTitle('');
     setDescription('');
     setStep('file-selection');
+    setShowBulkModal(false);
     onCancel();
   };
+
+  const handleBulkUploadComplete = () => {
+    setShowBulkModal(false);
+    setFiles([]);
+    onPhotoUploaded();
+  };
+
+  const handleChooseDifferentFiles = () => {
+    setShowBulkModal(false);
+    setFiles([]);
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Show bulk upload modal if multiple files are selected
+  if (showBulkModal) {
+    return (
+      <BulkUploadModal
+        files={files}
+        onUploadComplete={handleBulkUploadComplete}
+        onCancel={handleCancel}
+        onChooseDifferentFiles={handleChooseDifferentFiles}
+      />
+    );
+  }
 
   if (step === 'file-selection') {
     return (
@@ -155,8 +206,8 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
             <div className="text-center">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-emerald-400 transition-colors">
                 <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Select a photo</h3>
-                <p className="text-gray-500 mb-4">Choose an image file to upload to your gallery</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Select photo(s)</h3>
+                <p className="text-gray-500 mb-4">Choose one or multiple image files to upload to your gallery</p>
                 <Button 
                   className="bg-emerald-600 hover:bg-emerald-700"
                   onClick={handleBrowseClick}
@@ -169,8 +220,12 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
                   type="file"
                   onChange={handleFileChange}
                   accept="image/*"
+                  multiple
                   className="hidden"
                 />
+                <p className="text-xs text-gray-400 mt-2">
+                  Select multiple files for bulk upload (max 20 files)
+                </p>
               </div>
             </div>
           ) : (
