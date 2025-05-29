@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Upload, X, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +21,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,6 +33,10 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       const previewUrl = URL.createObjectURL(selectedFile);
       setImagePreview(previewUrl);
     }
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
   };
 
   const generateTitleFromFilename = (filename: string) => {
@@ -153,19 +157,20 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
                 <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Select a photo</h3>
                 <p className="text-gray-500 mb-4">Choose an image file to upload to your gallery</p>
-                <label htmlFor="file-input" className="cursor-pointer">
-                  <Button className="bg-emerald-600 hover:bg-emerald-700">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Browse Files
-                  </Button>
-                  <Input
-                    id="file-input"
-                    type="file"
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                </label>
+                <Button 
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                  onClick={handleBrowseClick}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Browse Files
+                </Button>
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  className="hidden"
+                />
               </div>
             </div>
           ) : (
