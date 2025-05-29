@@ -1,12 +1,13 @@
 import { useState, useRef } from 'react';
-import { Upload, X, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import BulkUploadModal from './BulkUploadModal';
+import FileSelectionCard from './FileSelectionCard';
+import PhotoPreviewCard from './PhotoPreviewCard';
+import PhotoMetadataForm from './PhotoMetadataForm';
 
 interface PhotoUploadProps {
   onPhotoUploaded: () => void;
@@ -55,10 +56,6 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
         setImagePreview(previewUrl);
       }
     }
-  };
-
-  const handleBrowseClick = () => {
-    fileInputRef.current?.click();
   };
 
   const generateTitleFromFilename = (filename: string) => {
@@ -203,73 +200,19 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
         </CardHeader>
         <CardContent className="space-y-6">
           {!file ? (
-            <div className="text-center">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-emerald-400 transition-colors">
-                <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Select photo(s)</h3>
-                <p className="text-gray-500 mb-4">Choose one or multiple image files to upload to your gallery</p>
-                <Button 
-                  className="bg-emerald-600 hover:bg-emerald-700"
-                  onClick={handleBrowseClick}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Browse Files
-                </Button>
-                <Input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                />
-                <p className="text-xs text-gray-400 mt-2">
-                  Select multiple files for bulk upload (max 20 files)
-                </p>
-              </div>
-            </div>
+            <FileSelectionCard onFileChange={handleFileChange} />
           ) : (
-            <div className="space-y-4">
-              <div className="text-center">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg mb-3"
-                />
-                <p className="text-sm text-gray-600 font-medium">{file.name}</p>
-                <p className="text-xs text-gray-400">
-                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                </p>
-              </div>
-              
-              <div className="flex space-x-3">
-                <Button 
-                  onClick={handleContinueToMetadata}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                >
-                  Add Details
-                </Button>
-                <Button 
-                  onClick={() => handleUpload(true)}
-                  variant="outline"
-                  className="flex-1"
-                  disabled={uploading}
-                >
-                  {uploading ? 'Uploading...' : 'Upload Now'}
-                </Button>
-              </div>
-              
-              <Button 
-                onClick={() => {
-                  setFile(null);
-                  setImagePreview('');
-                }}
-                variant="ghost"
-                className="w-full"
-              >
-                Choose Different File
-              </Button>
-            </div>
+            <PhotoPreviewCard
+              file={file}
+              imagePreview={imagePreview}
+              uploading={uploading}
+              onContinueToMetadata={handleContinueToMetadata}
+              onUploadNow={() => handleUpload(true)}
+              onChooseDifferentFile={() => {
+                setFile(null);
+                setImagePreview('');
+              }}
+            />
           )}
         </CardContent>
       </Card>
@@ -287,71 +230,18 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <img
-            src={imagePreview}
-            alt="Preview"
-            className="w-full h-32 object-cover rounded-lg"
-          />
-          <p className="text-sm text-gray-600 mt-2">{file?.name}</p>
-        </div>
-        
-        <form onSubmit={(e) => { e.preventDefault(); handleUpload(); }} className="space-y-4">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-              Title (optional)
-            </label>
-            <Input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={`e.g., "${generateTitleFromFilename(file?.name || '')}"`}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Leave empty to auto-generate from filename
-            </p>
-          </div>
-
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Description (optional)
-            </label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add a description for your photo..."
-              rows={3}
-            />
-          </div>
-
-          <div className="flex space-x-3">
-            <Button 
-              type="submit" 
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-              disabled={uploading}
-            >
-              {uploading ? (
-                'Uploading...'
-              ) : (
-                <>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Photo
-                </>
-              )}
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleBackToFileSelection}
-              disabled={uploading}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </div>
-        </form>
+        <PhotoMetadataForm
+          file={file!}
+          imagePreview={imagePreview}
+          title={title}
+          description={description}
+          uploading={uploading}
+          onTitleChange={setTitle}
+          onDescriptionChange={setDescription}
+          onUpload={handleUpload}
+          onBack={handleBackToFileSelection}
+          generateTitleFromFilename={generateTitleFromFilename}
+        />
       </CardContent>
     </Card>
   );
