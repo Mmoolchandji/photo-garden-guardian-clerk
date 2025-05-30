@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -191,7 +190,7 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 overflow-hidden">
+        <CardContent className="flex-1 overflow-hidden p-6">
           {step === 'preview' ? (
             <BulkPreviewStep
               filesWithMetadata={filesWithMetadata}

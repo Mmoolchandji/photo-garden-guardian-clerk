@@ -56,94 +56,101 @@ const BulkMetadataStep = ({
   if (!currentFile) return null;
 
   return (
-    <ScrollArea className="h-full max-h-[70vh]">
-      <div className="space-y-4 pr-4">
-        {/* Photo Preview */}
-        <div className="mb-4">
-          <img
-            src={currentFile.preview}
-            alt="Preview"
-            className="w-full h-48 object-cover rounded-lg"
-          />
-          <p className="text-sm text-gray-600 mt-2">
-            {currentFile.file.name}
-          </p>
-        </div>
+    <div className="flex flex-col h-full max-h-[70vh]">
+      {/* Photo Preview - Fixed at top */}
+      <div className="flex-shrink-0 mb-4">
+        <img
+          src={currentFile.preview}
+          alt="Preview"
+          className="w-full h-32 object-cover rounded-lg"
+        />
+        <p className="text-sm text-gray-600 mt-2">
+          {currentFile.file.name}
+        </p>
+      </div>
 
-        {/* Upload Progress */}
+      {/* Upload Progress and Results - Fixed */}
+      <div className="flex-shrink-0 space-y-4">
         <BulkUploadProgress uploading={uploading} uploadProgress={uploadProgress} />
-
-        {/* Upload Results */}
         <BulkUploadResults uploadResults={uploadResults} />
+      </div>
 
-        {/* Metadata Form */}
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-              Title (optional)
-            </label>
-            <Input
-              id="title"
-              type="text"
-              value={currentFile.title}
-              onChange={(e) => onMetadataChange('title', e.target.value)}
-              placeholder="Enter photo title..."
-            />
-          </div>
+      {/* Scrollable Content Area */}
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="space-y-4 pr-4">
+          {/* Metadata Form */}
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                Title (optional)
+              </label>
+              <Input
+                id="title"
+                type="text"
+                value={currentFile.title}
+                onChange={(e) => onMetadataChange('title', e.target.value)}
+                placeholder="Enter photo title..."
+              />
+            </div>
 
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Description (optional)
-            </label>
-            <Textarea
-              id="description"
-              value={currentFile.description}
-              onChange={(e) => onMetadataChange('description', e.target.value)}
-              placeholder="Add a description for your photo..."
-              rows={3}
-            />
-          </div>
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                Description (optional)
+              </label>
+              <Textarea
+                id="description"
+                value={currentFile.description}
+                onChange={(e) => onMetadataChange('description', e.target.value)}
+                placeholder="Add a description for your photo..."
+                rows={3}
+              />
+            </div>
 
-          <div>
-            <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
-              Fabric Type (optional)
-            </label>
-            <FabricSelector
-              value={currentFile.fabric}
-              onChange={(value) => onMetadataChange('fabric', value)}
-            />
-          </div>
+            <div>
+              <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
+                Fabric Type (optional)
+              </label>
+              <FabricSelector
+                value={currentFile.fabric}
+                onChange={(value) => onMetadataChange('fabric', value)}
+              />
+            </div>
 
-          <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Price (optional)
-            </label>
-            <Input
-              id="price"
-              type="text"
-              value={currentFile.price}
-              onChange={(e) => handlePriceChange(e.target.value)}
-              placeholder="Enter price..."
-            />
-          </div>
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                Price (optional)
+              </label>
+              <Input
+                id="price"
+                type="text"
+                value={currentFile.price}
+                onChange={(e) => handlePriceChange(e.target.value)}
+                placeholder="Enter price..."
+              />
+            </div>
 
-          <div>
-            <label htmlFor="stock-status" className="block text-sm font-medium text-gray-700 mb-1">
-              Stock Status (optional)
-            </label>
-            <StockStatusSelector
-              value={currentFile.stockStatus}
-              onChange={(value) => onMetadataChange('stockStatus', value)}
-            />
+            <div>
+              <label htmlFor="stock-status" className="block text-sm font-medium text-gray-700 mb-1">
+                Stock Status (optional)
+              </label>
+              <StockStatusSelector
+                value={currentFile.stockStatus}
+                onChange={(value) => onMetadataChange('stockStatus', value)}
+              />
+            </div>
           </div>
         </div>
+      </ScrollArea>
 
+      {/* Navigation and Action Buttons - Fixed at bottom */}
+      <div className="flex-shrink-0 pt-4 space-y-4">
         {/* Navigation */}
-        <div className="flex justify-between items-center pt-4">
+        <div className="flex justify-between items-center">
           <Button
             variant="outline"
             onClick={onPrevPhoto}
             disabled={currentIndex === 0}
+            size="sm"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Previous
@@ -157,6 +164,7 @@ const BulkMetadataStep = ({
             variant="outline"
             onClick={onNextPhoto}
             disabled={currentIndex === filesWithMetadata.length - 1}
+            size="sm"
           >
             Next
             <ArrowRight className="h-4 w-4 ml-2" />
@@ -164,7 +172,7 @@ const BulkMetadataStep = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-3 pt-4">
+        <div className="flex space-x-3">
           <Button 
             onClick={onUploadAll}
             className="flex-1 bg-emerald-600 hover:bg-emerald-700"
@@ -188,7 +196,7 @@ const BulkMetadataStep = ({
           </Button>
         </div>
       </div>
-    </ScrollArea>
+    </div>
   );
 };
 
