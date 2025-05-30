@@ -20,6 +20,9 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
   const [step, setStep] = useState<UploadStep>('file-selection');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [fabric, setFabric] = useState('New Fabric');
+  const [price, setPrice] = useState('');
+  const [stockStatus, setStockStatus] = useState('Available');
   const [file, setFile] = useState<File | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -99,13 +102,16 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       // Use provided title or generate from filename
       const finalTitle = title.trim() || generateTitleFromFilename(file.name);
 
-      // Save photo data to database
+      // Save photo data to database with new metadata fields
       const { error: dbError } = await supabase
         .from('photos')
         .insert({
           title: finalTitle,
           description: description.trim() || null,
           image_url: data.publicUrl,
+          fabric: fabric,
+          price: price ? parseFloat(price) : null,
+          stock_status: stockStatus,
         });
 
       if (dbError) {
@@ -120,6 +126,9 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       // Reset form
       setTitle('');
       setDescription('');
+      setFabric('New Fabric');
+      setPrice('');
+      setStockStatus('Available');
       setFile(null);
       setImagePreview('');
       setStep('file-selection');
@@ -155,6 +164,9 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
     setImagePreview('');
     setTitle('');
     setDescription('');
+    setFabric('New Fabric');
+    setPrice('');
+    setStockStatus('Available');
     setStep('file-selection');
     setShowBulkModal(false);
     onCancel();
@@ -235,9 +247,15 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
           imagePreview={imagePreview}
           title={title}
           description={description}
+          fabric={fabric}
+          price={price}
+          stockStatus={stockStatus}
           uploading={uploading}
           onTitleChange={setTitle}
           onDescriptionChange={setDescription}
+          onFabricChange={setFabric}
+          onPriceChange={setPrice}
+          onStockStatusChange={setStockStatus}
           onUpload={handleUpload}
           onBack={handleBackToFileSelection}
           generateTitleFromFilename={generateTitleFromFilename}

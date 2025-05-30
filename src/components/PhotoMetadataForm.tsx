@@ -3,15 +3,23 @@ import { Upload, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import FabricSelector from './FabricSelector';
+import StockStatusSelector from './StockStatusSelector';
 
 interface PhotoMetadataFormProps {
   file: File;
   imagePreview: string;
   title: string;
   description: string;
+  fabric: string;
+  price: string;
+  stockStatus: string;
   uploading: boolean;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
+  onFabricChange: (value: string) => void;
+  onPriceChange: (value: string) => void;
+  onStockStatusChange: (value: string) => void;
   onUpload: () => void;
   onBack: () => void;
   generateTitleFromFilename: (filename: string) => string;
@@ -22,13 +30,27 @@ const PhotoMetadataForm = ({
   imagePreview,
   title,
   description,
+  fabric,
+  price,
+  stockStatus,
   uploading,
   onTitleChange,
   onDescriptionChange,
+  onFabricChange,
+  onPriceChange,
+  onStockStatusChange,
   onUpload,
   onBack,
   generateTitleFromFilename
 }: PhotoMetadataFormProps) => {
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only numbers and decimal points
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      onPriceChange(value);
+    }
+  };
+
   return (
     <>
       <div className="mb-4">
@@ -67,6 +89,39 @@ const PhotoMetadataForm = ({
             onChange={(e) => onDescriptionChange(e.target.value)}
             placeholder="Add a description for your photo..."
             rows={3}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
+            Fabric Type (optional)
+          </label>
+          <FabricSelector
+            value={fabric}
+            onChange={onFabricChange}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+            Price (optional)
+          </label>
+          <Input
+            id="price"
+            type="text"
+            value={price}
+            onChange={handlePriceChange}
+            placeholder="Enter price..."
+          />
+        </div>
+
+        <div>
+          <label htmlFor="stock-status" className="block text-sm font-medium text-gray-700 mb-1">
+            Stock Status (optional)
+          </label>
+          <StockStatusSelector
+            value={stockStatus}
+            onChange={onStockStatusChange}
           />
         </div>
 

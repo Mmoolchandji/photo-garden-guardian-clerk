@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Upload, X, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import FabricSelector from './FabricSelector';
+import StockStatusSelector from './StockStatusSelector';
 
 interface BulkUploadModalProps {
   files: File[];
@@ -21,6 +22,9 @@ interface FileWithMetadata {
   preview: string;
   title: string;
   description: string;
+  fabric: string;
+  price: string;
+  stockStatus: string;
 }
 
 type BulkUploadStep = 'preview' | 'metadata';
@@ -40,7 +44,10 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
       file,
       preview: URL.createObjectURL(file),
       title: generateTitleFromFilename(file.name),
-      description: ''
+      description: '',
+      fabric: 'New Fabric',
+      price: '',
+      stockStatus: 'Available'
     }));
     setFilesWithMetadata(initialFiles);
 
@@ -87,13 +94,16 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
             .from('photos')
             .getPublicUrl(filePath);
 
-          // Save photo data to database
+          // Save photo data to database with new metadata fields
           const { error: dbError } = await supabase
             .from('photos')
             .insert({
               title: fileData.title.trim() || fileData.title,
               description: fileData.description.trim() || null,
               image_url: data.publicUrl,
+              fabric: fileData.fabric,
+              price: fileData.price ? parseFloat(fileData.price) : null,
+              stock_status: fileData.stockStatus,
             });
 
           if (dbError) {
@@ -146,12 +156,19 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
     }
   };
 
-  const handleMetadataChange = (field: 'title' | 'description', value: string) => {
+  const handleMetadataChange = (field: 'title' | 'description' | 'fabric' | 'price' | 'stockStatus', value: string) => {
     setFilesWithMetadata(prev => 
       prev.map((item, index) => 
         index === currentIndex ? { ...item, [field]: value } : item
       )
     );
+  };
+
+  const handlePriceChange = (value: string) => {
+    // Allow only numbers and decimal points
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      handleMetadataChange('price', value);
+    }
   };
 
   const nextPhoto = () => {
@@ -333,6 +350,39 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
                     onChange={(e) => handleMetadataChange('description', e.target.value)}
                     placeholder="Add a description for your photo..."
                     rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
+                    Fabric Type (optional)
+                  </label>
+                  <FabricSelector
+                    value={filesWithMetadata[currentIndex].fabric}
+                    onChange={(value) => handleMetadataChange('fabric', value)}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                    Price (optional)
+                  </label>
+                  <Input
+                    id="price"
+                    type="text"
+                    value={filesWithMetadata[currentIndex].price}
+                    onChange={(e) => handlePriceChange(e.target.value)}
+                    placeholder="Enter price..."
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="stock-status" className="block text-sm font-medium text-gray-700 mb-1">
+                    Stock Status (optional)
+                  </label>
+                  <StockStatusSelector
+                    value={filesWithMetadata[currentIndex].stockStatus}
+                    onChange={(value) => handleMetadataChange('stockStatus', value)}
                   />
                 </div>
               </div>

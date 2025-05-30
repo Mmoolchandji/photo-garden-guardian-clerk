@@ -13,24 +13,33 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          fabric: string | null
           id: string
           image_url: string
+          price: number | null
+          stock_status: string | null
           title: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          fabric?: string | null
           id?: string
           image_url: string
+          price?: number | null
+          stock_status?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          fabric?: string | null
           id?: string
           image_url?: string
+          price?: number | null
+          stock_status?: string | null
           title?: string
           updated_at?: string
         }
