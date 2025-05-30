@@ -1,16 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { Upload, X, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import FabricSelector from './FabricSelector';
-import StockStatusSelector from './StockStatusSelector';
+import BulkPreviewStep from './BulkPreviewStep';
+import BulkMetadataStep from './BulkMetadataStep';
 
 interface BulkUploadModalProps {
   files: File[];
@@ -166,13 +162,6 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
     );
   };
 
-  const handlePriceChange = (value: string) => {
-    // Allow only numbers and decimal points
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      handleMetadataChange('price', value);
-    }
-  };
-
   const nextPhoto = () => {
     setCurrentIndex(prev => (prev + 1) % filesWithMetadata.length);
   };
@@ -186,295 +175,50 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
     onCancel();
   };
 
-  if (step === 'preview') {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <Card className="w-full max-w-2xl mx-auto max-h-[90vh] flex flex-col">
-          <CardHeader className="flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <CardTitle>Bulk Photo Upload ({files.length} photos)</CardTitle>
-              <Button variant="ghost" size="sm" onClick={handleCancel}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="space-y-6 pr-4">
-                {/* Carousel Preview */}
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={prevPhoto}
-                      disabled={filesWithMetadata.length <= 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-gray-600">
-                      {currentIndex + 1} of {filesWithMetadata.length}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={nextPhoto}
-                      disabled={filesWithMetadata.length <= 1}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  {filesWithMetadata[currentIndex] && (
-                    <div className="text-center">
-                      <img
-                        src={filesWithMetadata[currentIndex].preview}
-                        alt="Preview"
-                        className="w-full h-64 object-cover rounded-lg mb-3"
-                      />
-                      <p className="text-sm text-gray-600 font-medium">
-                        {filesWithMetadata[currentIndex].file.name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {(filesWithMetadata[currentIndex].file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Upload Progress - Always visible when uploading */}
-                {uploading && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Uploading photos...</span>
-                      <span>{Math.round(uploadProgress)}%</span>
-                    </div>
-                    <Progress value={uploadProgress} className="w-full" />
-                  </div>
-                )}
-
-                {/* Upload Results */}
-                {uploadResults && (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm">
-                      <span className="font-medium text-green-600">
-                        {uploadResults.success} successful
-                      </span>
-                      {uploadResults.failed.length > 0 && (
-                        <span className="text-red-600 ml-2">
-                          • {uploadResults.failed.length} failed
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex space-x-3">
-                  <Button 
-                    onClick={() => setStep('metadata')}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                    disabled={uploading}
-                  >
-                    Add Details
-                  </Button>
-                  <Button 
-                    onClick={handleUploadAll}
-                    variant="outline"
-                    className="flex-1"
-                    disabled={uploading}
-                  >
-                    {uploading ? 'Uploading...' : 'Upload Now'}
-                  </Button>
-                </div>
-                
-                <Button 
-                  onClick={onChooseDifferentFiles}
-                  variant="ghost"
-                  className="w-full"
-                  disabled={uploading}
-                >
-                  Choose Different Files
-                </Button>
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Metadata editing step with improved layout and scrolling
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl mx-auto max-h-[90vh] flex flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Edit Photo Details ({currentIndex + 1} of {filesWithMetadata.length})</CardTitle>
+            <CardTitle>
+              {step === 'preview' 
+                ? `Bulk Photo Upload (${files.length} photos)` 
+                : `Edit Photo Details (${currentIndex + 1} of ${filesWithMetadata.length})`
+              }
+            </CardTitle>
             <Button variant="ghost" size="sm" onClick={handleCancel}>
               <X className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="space-y-4 pr-4">
-              {filesWithMetadata[currentIndex] && (
-                <>
-                  {/* Photo Preview */}
-                  <div className="mb-4">
-                    <img
-                      src={filesWithMetadata[currentIndex].preview}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                    <p className="text-sm text-gray-600 mt-2">
-                      {filesWithMetadata[currentIndex].file.name}
-                    </p>
-                  </div>
-
-                  {/* Upload Progress - Also visible in metadata step */}
-                  {uploading && (
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between text-sm">
-                        <span>Uploading photos...</span>
-                        <span>{Math.round(uploadProgress)}%</span>
-                      </div>
-                      <Progress value={uploadProgress} className="w-full" />
-                    </div>
-                  )}
-
-                  {/* Upload Results */}
-                  {uploadResults && (
-                    <div className="p-4 bg-gray-50 rounded-lg mb-4">
-                      <p className="text-sm">
-                        <span className="font-medium text-green-600">
-                          {uploadResults.success} successful
-                        </span>
-                        {uploadResults.failed.length > 0 && (
-                          <span className="text-red-600 ml-2">
-                            • {uploadResults.failed.length} failed
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Metadata Form */}
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                        Title (optional)
-                      </label>
-                      <Input
-                        id="title"
-                        type="text"
-                        value={filesWithMetadata[currentIndex].title}
-                        onChange={(e) => handleMetadataChange('title', e.target.value)}
-                        placeholder="Enter photo title..."
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                        Description (optional)
-                      </label>
-                      <Textarea
-                        id="description"
-                        value={filesWithMetadata[currentIndex].description}
-                        onChange={(e) => handleMetadataChange('description', e.target.value)}
-                        placeholder="Add a description for your photo..."
-                        rows={3}
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
-                        Fabric Type (optional)
-                      </label>
-                      <FabricSelector
-                        value={filesWithMetadata[currentIndex].fabric}
-                        onChange={(value) => handleMetadataChange('fabric', value)}
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                        Price (optional)
-                      </label>
-                      <Input
-                        id="price"
-                        type="text"
-                        value={filesWithMetadata[currentIndex].price}
-                        onChange={(e) => handlePriceChange(e.target.value)}
-                        placeholder="Enter price..."
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="stock-status" className="block text-sm font-medium text-gray-700 mb-1">
-                        Stock Status (optional)
-                      </label>
-                      <StockStatusSelector
-                        value={filesWithMetadata[currentIndex].stockStatus}
-                        onChange={(value) => handleMetadataChange('stockStatus', value)}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Navigation */}
-                  <div className="flex justify-between items-center pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={prevPhoto}
-                      disabled={currentIndex === 0}
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Previous
-                    </Button>
-                    
-                    <span className="text-sm text-gray-600">
-                      {currentIndex + 1} of {filesWithMetadata.length}
-                    </span>
-                    
-                    <Button
-                      variant="outline"
-                      onClick={nextPhoto}
-                      disabled={currentIndex === filesWithMetadata.length - 1}
-                    >
-                      Next
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-3 pt-4">
-                    <Button 
-                      onClick={handleUploadAll}
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                      disabled={uploading}
-                    >
-                      {uploading ? (
-                        'Uploading...'
-                      ) : (
-                        <>
-                          <Upload className="h-4 w-4 mr-2" />
-                          Upload All Photos
-                        </>
-                      )}
-                    </Button>
-                    <Button 
-                      onClick={() => setStep('preview')}
-                      variant="outline"
-                      disabled={uploading}
-                    >
-                      Back to Preview
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-          </ScrollArea>
+          {step === 'preview' ? (
+            <BulkPreviewStep
+              filesWithMetadata={filesWithMetadata}
+              currentIndex={currentIndex}
+              uploading={uploading}
+              uploadProgress={uploadProgress}
+              uploadResults={uploadResults}
+              onNextPhoto={nextPhoto}
+              onPrevPhoto={prevPhoto}
+              onSetStep={setStep}
+              onUploadAll={handleUploadAll}
+              onChooseDifferentFiles={onChooseDifferentFiles}
+            />
+          ) : (
+            <BulkMetadataStep
+              filesWithMetadata={filesWithMetadata}
+              currentIndex={currentIndex}
+              uploading={uploading}
+              uploadProgress={uploadProgress}
+              uploadResults={uploadResults}
+              onMetadataChange={handleMetadataChange}
+              onNextPhoto={nextPhoto}
+              onPrevPhoto={prevPhoto}
+              onUploadAll={handleUploadAll}
+              onSetStep={setStep}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
