@@ -23,23 +23,28 @@ const StockStatusFilter = ({ selectedStatuses, onChange }: StockStatusFilterProp
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">Stock Status</label>
-      <div className="space-y-2">
-        {STOCK_OPTIONS.map((status) => (
-          <div key={status} className="flex items-center space-x-2">
-            <Checkbox
-              id={`status-${status}`}
-              checked={selectedStatuses.includes(status)}
-              onCheckedChange={() => toggleStatus(status)}
-            />
-            <label
-              htmlFor={`status-${status}`}
-              className="text-sm text-gray-600 cursor-pointer"
-            >
-              {status}
-            </label>
-          </div>
-        ))}
+      <label className="text-sm font-medium text-gray-700" id="stock-status-filter-label">
+        Stock Status
+      </label>
+      <div className="space-y-2" role="group" aria-labelledby="stock-status-filter-label">
+        {STOCK_OPTIONS.map((status) => {
+          const checkboxId = `stock-status-${status.toLowerCase().replace(/\s+/g, '-')}`;
+          return (
+            <div key={status} className="flex items-center space-x-2">
+              <Checkbox
+                id={checkboxId}
+                checked={selectedStatuses.includes(status)}
+                onCheckedChange={() => toggleStatus(status)}
+              />
+              <label
+                htmlFor={checkboxId}
+                className="text-sm text-gray-600 cursor-pointer"
+              >
+                {status}
+              </label>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

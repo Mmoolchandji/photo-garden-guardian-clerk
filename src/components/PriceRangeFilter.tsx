@@ -23,12 +23,15 @@ const PriceRangeFilter = ({ selectedRange, onChange }: PriceRangeFilterProps) =>
 
   // Convert empty string to 'all' for display
   const displayValue = selectedRange === '' ? 'all' : selectedRange;
+  const selectId = 'price-range-filter';
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">Price Range</label>
+      <label htmlFor={selectId} className="text-sm font-medium text-gray-700">
+        Price Range
+      </label>
       <Select value={displayValue} onValueChange={handleChange}>
-        <SelectTrigger>
+        <SelectTrigger id={selectId}>
           <SelectValue placeholder="Select price range..." />
         </SelectTrigger>
         <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">

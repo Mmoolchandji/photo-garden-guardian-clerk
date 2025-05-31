@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -15,39 +15,51 @@ const FabricFilter = ({ selectedFabrics, onChange }: FabricFilterProps) => {
   const [availableFabrics, setAvailableFabrics] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch fabrics only once on mount
   useEffect(() => {
+    let isMounted = true;
+    
+    const fetchAvailableFabrics = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('photos')
+          .select('fabric')
+          .not('fabric', 'is', null);
+
+        if (error) throw error;
+
+        if (isMounted) {
+          const uniqueFabrics = [...new Set(data.map(item => item.fabric).filter(Boolean))];
+          setAvailableFabrics(uniqueFabrics.sort());
+        }
+      } catch (error) {
+        console.error('Error fetching fabrics:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchAvailableFabrics();
-  }, []);
 
-  const fetchAvailableFabrics = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('photos')
-        .select('fabric')
-        .not('fabric', 'is', null);
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array - only run once
 
-      if (error) throw error;
-
-      const uniqueFabrics = [...new Set(data.map(item => item.fabric).filter(Boolean))];
-      setAvailableFabrics(uniqueFabrics.sort());
-    } catch (error) {
-      console.error('Error fetching fabrics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleFabric = (fabric: string) => {
+  // Memoize handlers to prevent recreation
+  const toggleFabric = useMemo(() => (fabric: string) => {
     if (selectedFabrics.includes(fabric)) {
       onChange(selectedFabrics.filter(f => f !== fabric));
     } else {
       onChange([...selectedFabrics, fabric]);
     }
-  };
+  }, [selectedFabrics, onChange]);
 
-  const removeFabric = (fabric: string) => {
+  const removeFabric = useMemo(() => (fabric: string) => {
     onChange(selectedFabrics.filter(f => f !== fabric));
-  };
+  }, [selectedFabrics, onChange]);
 
   if (loading) {
     return (
@@ -70,7 +82,7 @@ const FabricFilter = ({ selectedFabrics, onChange }: FabricFilterProps) => {
             <SelectItem key={fabric} value={fabric} className="flex items-center space-x-2">
               <Checkbox
                 checked={selectedFabrics.includes(fabric)}
-                onChange={() => toggleFabric(fabric)}
+                readOnly
               />
               <span>{fabric}</span>
             </SelectItem>
