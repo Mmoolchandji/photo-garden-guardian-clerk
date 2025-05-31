@@ -7,7 +7,7 @@ interface PriceRangeFilterProps {
 }
 
 const PRICE_RANGES = [
-  { label: 'All Prices', value: '' },
+  { label: 'All Prices', value: 'all' },
   { label: 'Under ₹300', value: '0-300' },
   { label: '₹300-₹500', value: '300-500' },
   { label: '₹500-₹700', value: '500-700' },
@@ -16,10 +16,18 @@ const PRICE_RANGES = [
 ];
 
 const PriceRangeFilter = ({ selectedRange, onChange }: PriceRangeFilterProps) => {
+  const handleChange = (value: string) => {
+    // Convert 'all' back to empty string for filtering logic
+    onChange(value === 'all' ? '' : value);
+  };
+
+  // Convert empty string to 'all' for display
+  const displayValue = selectedRange === '' ? 'all' : selectedRange;
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-gray-700">Price Range</label>
-      <Select value={selectedRange} onValueChange={onChange}>
+      <Select value={displayValue} onValueChange={handleChange}>
         <SelectTrigger>
           <SelectValue placeholder="Select price range..." />
         </SelectTrigger>
