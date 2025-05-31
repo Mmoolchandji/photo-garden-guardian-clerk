@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Camera, Grid, User, LogIn } from 'lucide-react';
+import { Camera, Grid, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PhotoGrid from '@/components/PhotoGrid';
 import { Link } from 'react-router-dom';
@@ -74,7 +74,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Photo Gallery */}
+      {/* Photo Gallery with Search & Filters */}
       <section className="py-8 px-4">
         <div className="container mx-auto">
           <PhotoGrid viewMode={viewMode} />
