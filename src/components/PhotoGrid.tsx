@@ -90,7 +90,8 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
     const fetchPhotos = async () => {
       try {
         setLoading(true);
-        const { data, error } = await buildQuery()();
+        const query = buildQuery();
+        const { data, error } = await query;
 
         if (error) {
           throw error;
