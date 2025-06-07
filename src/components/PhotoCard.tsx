@@ -1,17 +1,10 @@
 
 import { Calendar, Eye } from 'lucide-react';
+import { PhotoCardData } from '@/types/photo';
 import WhatsAppShareButton from './WhatsAppShareButton';
 
-interface Photo {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  createdAt: string;
-}
-
 interface PhotoCardProps {
-  photo: Photo;
+  photo: PhotoCardData;
   onClick: () => void;
 }
 
@@ -37,6 +30,7 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
               id: photo.id,
               title: photo.title,
               imageUrl: photo.imageUrl,
+              price: photo.price,
             }}
             variant="icon"
           />

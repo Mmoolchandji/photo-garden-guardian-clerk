@@ -1,18 +1,11 @@
 
 import { X, Calendar, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PhotoCardData } from '@/types/photo';
 import WhatsAppShareButton from './WhatsAppShareButton';
 
-interface Photo {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  createdAt: string;
-}
-
 interface PhotoModalProps {
-  photo: Photo | null;
+  photo: PhotoCardData | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -54,6 +47,7 @@ const PhotoModal = ({ photo, isOpen, onClose }: PhotoModalProps) => {
                   id: photo.id,
                   title: photo.title,
                   imageUrl: photo.imageUrl,
+                  price: photo.price,
                 }}
               />
               <Button variant="outline" size="sm">
