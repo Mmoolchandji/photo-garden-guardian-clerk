@@ -1,5 +1,6 @@
 
 import { Calendar, Eye } from 'lucide-react';
+import WhatsAppShareButton from './WhatsAppShareButton';
 
 interface Photo {
   id: string;
@@ -27,8 +28,18 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
           className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Eye className="h-4 w-4 text-gray-700" />
+        <div className="absolute top-3 right-3 flex space-x-2">
+          <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Eye className="h-4 w-4 text-gray-700" />
+          </div>
+          <WhatsAppShareButton
+            photo={{
+              id: photo.id,
+              title: photo.title,
+              imageUrl: photo.imageUrl,
+            }}
+            variant="icon"
+          />
         </div>
       </div>
       

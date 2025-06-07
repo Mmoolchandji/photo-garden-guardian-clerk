@@ -1,6 +1,7 @@
 
-import { X, Calendar, Download, Share2 } from 'lucide-react';
+import { X, Calendar, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import WhatsAppShareButton from './WhatsAppShareButton';
 
 interface Photo {
   id: string;
@@ -48,10 +49,13 @@ const PhotoModal = ({ photo, isOpen, onClose }: PhotoModalProps) => {
               </div>
             </div>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
+              <WhatsAppShareButton
+                photo={{
+                  id: photo.id,
+                  title: photo.title,
+                  imageUrl: photo.imageUrl,
+                }}
+              />
               <Button variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-2" />
                 Download

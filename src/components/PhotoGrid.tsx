@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useRef } from 'react';
 import PhotoCard from './PhotoCard';
 import PhotoModal from './PhotoModal';
@@ -176,7 +175,8 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
                     title: photo.title,
                     description: photo.description || '',
                     imageUrl: photo.image_url,
-                    createdAt: new Date(photo.created_at).toLocaleDateString()
+                    createdAt: new Date(photo.created_at).toLocaleDateString(),
+                    price: photo.price,
                   }}
                   onClick={() => setSelectedPhoto(photo)}
                 />
@@ -224,7 +224,8 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
           title: selectedPhoto.title,
           description: selectedPhoto.description || '',
           imageUrl: selectedPhoto.image_url,
-          createdAt: new Date(selectedPhoto.created_at).toLocaleDateString()
+          createdAt: new Date(selectedPhoto.created_at).toLocaleDateString(),
+          price: selectedPhoto.price,
         } : null}
         isOpen={!!selectedPhoto}
         onClose={() => setSelectedPhoto(null)}
