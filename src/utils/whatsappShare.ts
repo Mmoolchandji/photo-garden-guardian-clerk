@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 
 export interface ShareablePhoto {
@@ -32,7 +31,7 @@ export const canShareFiles = (): boolean => {
          typeof navigator.canShare === 'function';
 };
 
-// Optimized message formatting with better encoding
+// Enhanced message formatting with better encoding
 export const formatWhatsAppMessage = (photo: ShareablePhoto): string => {
   let message = `✨ Check out this beautiful saree: *${photo.title}*`;
   
@@ -41,6 +40,23 @@ export const formatWhatsAppMessage = (photo: ShareablePhoto): string => {
   }
   
   message += '\n\n📸 View the complete collection at our gallery!';
+  
+  return message;
+};
+
+// New function for formatting multiple photos message
+export const formatMultiplePhotosMessage = (photos: ShareablePhoto[]): string => {
+  let message = `✨ Check out these beautiful sarees:\n\n`;
+  
+  photos.forEach((photo, index) => {
+    message += `${index + 1}. *${photo.title}*`;
+    if (photo.price) {
+      message += ` - ₹${photo.price.toLocaleString('en-IN')}`;
+    }
+    message += '\n';
+  });
+  
+  message += '\n📸 View our complete collection at our gallery!';
   
   return message;
 };
@@ -80,6 +96,147 @@ const fetchImageAsBlob = async (imageUrl: string): Promise<Blob | null> => {
     }
     
     return null;
+  }
+};
+
+// Enhanced multi-photo Web Share API implementation
+const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Promise<boolean> => {
+  try {
+    console.log('Attempting Web Share API for multiple photos:', photos.length);
+    
+    const files: File[] = [];
+    const failedPhotos: ShareablePhoto[] = [];
+    
+    // Fetch all images as blobs
+    for (const photo of photos) {
+      const imageBlob = await fetchImageAsBlob(photo.imageUrl);
+      if (imageBlob) {
+        const extension = imageBlob.type.split('/')[1] || 'jpg';
+        const fileName = `${photo.title.replace(/[^a-zA-Z0-9]/g, '_')}.${extension}`;
+        const file = new File([imageBlob], fileName, { type: imageBlob.type });
+        files.push(file);
+      } else {
+        failedPhotos.push(photo);
+      }
+    }
+
+    if (files.length === 0) {
+      console.log('No images could be fetched for sharing');
+      return false;
+    }
+
+    const shareData = {
+      title: `${photos.length} Beautiful Sarees`,
+      text: formatMultiplePhotosMessage(photos),
+      files: files,
+    };
+
+    // Check if sharing files is supported
+    if (navigator.canShare && navigator.canShare(shareData)) {
+      await navigator.share(shareData);
+      console.log('Successfully shared multiple photos via Web Share API');
+      
+      if (failedPhotos.length > 0) {
+        toast({
+          title: "Partial success",
+          description: `${files.length} photos shared successfully. ${failedPhotos.length} failed to load.`,
+        });
+      }
+      
+      return true;
+    }
+    
+    console.log('File sharing not supported, trying text-only share');
+    return false;
+    
+  } catch (error) {
+    console.error('Multi-photo Web Share API error:', error);
+    
+    if (error.name === 'AbortError') {
+      console.log('User cancelled the share');
+      return true;
+    }
+    
+    return false;
+  }
+};
+
+// Enhanced WhatsApp URL sharing for multiple photos
+const shareMultipleViaWhatsAppURL = (photos: ShareablePhoto[]): boolean => {
+  try {
+    const message = formatMultiplePhotosMessage(photos);
+    
+    // Add image URLs at the end
+    const imageUrls = photos.map(photo => photo.imageUrl).join('\n');
+    const fullMessage = `${message}\n\n${imageUrls}`;
+    const encodedMessage = encodeURIComponent(fullMessage);
+    
+    let whatsappURL: string;
+    
+    if (isMobileDevice()) {
+      whatsappURL = `whatsapp://send?text=${encodedMessage}`;
+      console.log('Opening WhatsApp native app on mobile for multiple photos');
+      window.location.href = whatsappURL;
+      
+      setTimeout(() => {
+        console.log('Fallback to WhatsApp Web for multiple photos');
+        window.open(`https://web.whatsapp.com/send?text=${encodedMessage}`, '_blank');
+      }, 2000);
+    } else {
+      whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+      console.log('Opening WhatsApp Web on desktop for multiple photos');
+      window.open(whatsappURL, '_blank');
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('WhatsApp URL sharing error for multiple photos:', error);
+    return false;
+  }
+};
+
+// Main sharing function for multiple photos
+export const shareMultipleToWhatsApp = async (photos: ShareablePhoto[], shareAsFiles: boolean = true): Promise<void> => {
+  console.log('Starting WhatsApp share for multiple photos:', photos.length);
+  
+  try {
+    const loadingToast = toast({
+      title: "Preparing to share...",
+      description: `Setting up ${photos.length} photos for WhatsApp share`,
+    });
+
+    if (shareAsFiles && isMobileDevice() && canShareFiles()) {
+      console.log('Trying Web Share API for multiple photos on mobile device');
+      const webShareSuccess = await shareMultipleViaWebShareAPI(photos);
+      
+      if (webShareSuccess) {
+        loadingToast.dismiss();
+        return;
+      }
+    }
+    
+    console.log('Falling back to WhatsApp URL sharing for multiple photos');
+    const urlShareSuccess = shareMultipleViaWhatsAppURL(photos);
+    
+    loadingToast.dismiss();
+    
+    if (urlShareSuccess) {
+      toast({
+        title: "Opening WhatsApp",
+        description: `Redirecting to WhatsApp to share ${photos.length} photos`,
+      });
+    } else {
+      throw new Error('All sharing methods failed');
+    }
+    
+  } catch (error) {
+    console.error('All WhatsApp sharing methods failed for multiple photos:', error);
+    
+    toast({
+      title: "Sharing failed",
+      description: "Unable to share multiple photos. Please try sharing them individually.",
+      variant: "destructive",
+    });
   }
 };
 

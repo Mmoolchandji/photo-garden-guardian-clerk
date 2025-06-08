@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Photo, PhotoCardData } from '@/types/photo';
 import PhotoModal from './PhotoModal';
@@ -6,9 +5,13 @@ import PhotoLoadingState from './PhotoLoadingState';
 import PhotoEmptyState from './PhotoEmptyState';
 import PhotoGridView from './PhotoGridView';
 import SearchAndFilters, { FilterState } from './SearchAndFilters';
+import FloatingShareButton from './FloatingShareButton';
+import ShareOptionsModal from './ShareOptionsModal';
 import useURLFilters from '@/hooks/useURLFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
+import { shareMultipleToWhatsApp, type ShareablePhoto } from '@/utils/whatsappShare';
 
 interface PhotoGridProps {
   viewMode: 'grid' | 'list';
@@ -18,8 +21,10 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showShareModal, setShowShareModal] = useState(false);
   const { toast } = useToast();
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
+  const { selectedPhotos, isSelectionMode } = usePhotoSelection();
   
   // Use ref to track the last filter state to prevent unnecessary API calls
   const lastFiltersRef = useRef<string>('');
@@ -124,6 +129,35 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
     price: photo.price,
   });
 
+  const handleMultiShare = () => {
+    if (selectedPhotos.length === 0) return;
+    setShowShareModal(true);
+  };
+
+  const handleShareAsFiles = async () => {
+    const shareablePhotos: ShareablePhoto[] = selectedPhotos.map(photo => ({
+      id: photo.id,
+      title: photo.title,
+      imageUrl: photo.image_url,
+      price: photo.price,
+    }));
+
+    setShowShareModal(false);
+    await shareMultipleToWhatsApp(shareablePhotos, true);
+  };
+
+  const handleShareAsLinks = async () => {
+    const shareablePhotos: ShareablePhoto[] = selectedPhotos.map(photo => ({
+      id: photo.id,
+      title: photo.title,
+      imageUrl: photo.image_url,
+      price: photo.price,
+    }));
+
+    setShowShareModal(false);
+    await shareMultipleToWhatsApp(shareablePhotos, false);
+  };
+
   if (loading) {
     return (
       <PhotoLoadingState
@@ -143,12 +177,15 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
       />
 
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">Gallery Collection</h3>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+          {isSelectionMode ? 'Select Photos' : 'Gallery Collection'}
+        </h3>
         <p className="text-gray-600">
           {photos.length === 0 
             ? "No photos match your search criteria" 
             : `Showing ${photos.length} photo${photos.length !== 1 ? 's' : ''}`
           }
+          {isSelectionMode && ` • Long press to start selection mode`}
         </p>
       </div>
 
@@ -162,9 +199,19 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
         />
       )}
 
+      <FloatingShareButton onShare={handleMultiShare} />
+
+      <ShareOptionsModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        photos={selectedPhotos}
+        onShareAsFiles={handleShareAsFiles}
+        onShareAsLinks={handleShareAsLinks}
+      />
+
       <PhotoModal
         photo={selectedPhoto ? transformSelectedPhoto(selectedPhoto) : null}
-        isOpen={!!selectedPhoto}
+        isOpen={!!selectedPhoto && !isSelectionMode}
         onClose={() => setSelectedPhoto(null)}
       />
     </>
