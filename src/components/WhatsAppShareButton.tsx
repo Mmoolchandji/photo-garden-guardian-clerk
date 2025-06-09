@@ -1,7 +1,7 @@
 
 import { MessageCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { shareToWhatsApp, type ShareablePhoto } from '@/utils/whatsappShare';
+import { shareToWhatsApp, type ShareablePhoto } from '@/utils/sharing';
 import { useState } from 'react';
 
 interface WhatsAppShareButtonProps {

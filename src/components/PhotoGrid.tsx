@@ -11,7 +11,7 @@ import useURLFilters from '@/hooks/useURLFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
-import { shareMultipleToWhatsApp, type ShareablePhoto } from '@/utils/whatsappShare';
+import { shareMultipleToWhatsApp, type ShareablePhoto } from '@/utils/sharing';
 
 interface PhotoGridProps {
   viewMode: 'grid' | 'list';
