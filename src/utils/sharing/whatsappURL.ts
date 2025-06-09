@@ -3,10 +3,10 @@ import { ShareablePhoto } from './types';
 import { isMobileDevice } from './deviceDetection';
 import { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
 
-// Enhanced WhatsApp URL sharing for multiple photos
-export const shareMultipleViaWhatsAppURL = (photos: ShareablePhoto[]): boolean => {
+// Enhanced WhatsApp URL sharing for multiple photos with custom message support
+export const shareMultipleViaWhatsAppURL = (photos: ShareablePhoto[], customMessage?: string): boolean => {
   try {
-    const message = formatMultiplePhotosMessage(photos);
+    const message = customMessage || formatMultiplePhotosMessage(photos);
     
     // Add image URLs at the end
     const imageUrls = photos.map(photo => photo.imageUrl).join('\n');

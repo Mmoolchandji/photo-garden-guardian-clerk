@@ -6,12 +6,12 @@ import PhotoEmptyState from './PhotoEmptyState';
 import PhotoGridView from './PhotoGridView';
 import SearchAndFilters, { FilterState } from './SearchAndFilters';
 import FloatingShareButton from './FloatingShareButton';
-import ShareOptionsModal from './ShareOptionsModal';
+import EnhancedShareOptionsModal from './EnhancedShareOptionsModal';
 import useURLFilters from '@/hooks/useURLFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
-import { shareMultipleToWhatsApp, type ShareablePhoto } from '@/utils/sharing';
+import { shareMultipleToWhatsApp, shareBatchedToWhatsApp, shareGalleryToWhatsApp, type ShareablePhoto } from '@/utils/sharing';
 
 interface PhotoGridProps {
   viewMode: 'grid' | 'list';
@@ -143,10 +143,10 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
     }));
 
     setShowShareModal(false);
-    await shareMultipleToWhatsApp(shareablePhotos, true);
+    await shareMultipleToWhatsApp(shareablePhotos, 'files');
   };
 
-  const handleShareAsLinks = async () => {
+  const handleShareBatched = async () => {
     const shareablePhotos: ShareablePhoto[] = selectedPhotos.map(photo => ({
       id: photo.id,
       title: photo.title,
@@ -155,7 +155,19 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
     }));
 
     setShowShareModal(false);
-    await shareMultipleToWhatsApp(shareablePhotos, false);
+    await shareBatchedToWhatsApp(shareablePhotos, true);
+  };
+
+  const handleShareAsGallery = async () => {
+    const shareablePhotos: ShareablePhoto[] = selectedPhotos.map(photo => ({
+      id: photo.id,
+      title: photo.title,
+      imageUrl: photo.image_url,
+      price: photo.price,
+    }));
+
+    setShowShareModal(false);
+    await shareGalleryToWhatsApp(shareablePhotos);
   };
 
   if (loading) {
@@ -201,12 +213,13 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
 
       <FloatingShareButton onShare={handleMultiShare} />
 
-      <ShareOptionsModal
+      <EnhancedShareOptionsModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         photos={selectedPhotos}
         onShareAsFiles={handleShareAsFiles}
-        onShareAsLinks={handleShareAsLinks}
+        onShareBatched={handleShareBatched}
+        onShareAsGallery={handleShareAsGallery}
       />
 
       <PhotoModal
