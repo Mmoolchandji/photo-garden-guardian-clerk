@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Photo } from '@/types/photo';
+import { WEB_SHARE_LIMITS } from '@/utils/sharing/webShareAPI';
 
 interface PhotoSelectionContextType {
   selectedPhotos: Photo[];
@@ -15,13 +16,14 @@ interface PhotoSelectionContextType {
   exitSelectionMode: () => void;
   isPhotoSelected: (photoId: string) => boolean;
   canAddMore: () => boolean;
+  exceedsFileShareLimit: () => boolean;
 }
 
 const PhotoSelectionContext = createContext<PhotoSelectionContextType | undefined>(undefined);
 
-const MAX_PHOTOS = 99;
-const MAX_SIZE_MB = 40;
-const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+// Use more realistic limits based on common platform constraints
+const MAX_PHOTOS = 99; // Keep high limit for link sharing
+const MAX_SIZE_BYTES = WEB_SHARE_LIMITS.MAX_TOTAL_SIZE; // Use the Web Share API limit
 
 // Estimate image size (rough calculation based on typical image compression)
 const estimateImageSize = (imageUrl: string): number => {
@@ -96,6 +98,10 @@ export const PhotoSelectionProvider = ({ children }: { children: ReactNode }) =>
            totalSelectedSize < MAX_SIZE_BYTES;
   };
 
+  const exceedsFileShareLimit = () => {
+    return selectedPhotos.length > WEB_SHARE_LIMITS.MAX_FILES;
+  };
+
   return (
     <PhotoSelectionContext.Provider value={{
       selectedPhotos,
@@ -110,6 +116,7 @@ export const PhotoSelectionProvider = ({ children }: { children: ReactNode }) =>
       exitSelectionMode,
       isPhotoSelected,
       canAddMore,
+      exceedsFileShareLimit,
     }}>
       {children}
     </PhotoSelectionContext.Provider>

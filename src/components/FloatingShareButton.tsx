@@ -1,5 +1,5 @@
 
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
 
@@ -8,7 +8,7 @@ interface FloatingShareButtonProps {
 }
 
 const FloatingShareButton = ({ onShare }: FloatingShareButtonProps) => {
-  const { selectedPhotos, totalSelectedSize, clearSelection } = usePhotoSelection();
+  const { selectedPhotos, totalSelectedSize, clearSelection, exceedsFileShareLimit } = usePhotoSelection();
 
   if (selectedPhotos.length === 0) return null;
 
@@ -16,6 +16,8 @@ const FloatingShareButton = ({ onShare }: FloatingShareButtonProps) => {
     const mb = bytes / (1024 * 1024);
     return mb < 1 ? `${(bytes / 1024).toFixed(0)}KB` : `${mb.toFixed(1)}MB`;
   };
+
+  const showFileShareWarning = exceedsFileShareLimit();
 
   return (
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
@@ -30,11 +32,17 @@ const FloatingShareButton = ({ onShare }: FloatingShareButtonProps) => {
         </Button>
         
         <div className="flex-1 text-sm">
-          <div className="font-medium">
+          <div className="font-medium flex items-center gap-1">
             {selectedPhotos.length} photo{selectedPhotos.length !== 1 ? 's' : ''} selected
+            {showFileShareWarning && (
+              <AlertTriangle className="h-3 w-3 text-amber-500" />
+            )}
           </div>
           <div className="text-xs text-gray-500">
             {formatSize(totalSelectedSize)}
+            {showFileShareWarning && (
+              <span className="text-amber-600 ml-1">• Link sharing only</span>
+            )}
           </div>
         </div>
         
