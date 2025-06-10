@@ -4,6 +4,7 @@ import { PhotoCardData } from '@/types/photo';
 import WhatsAppShareButton from './WhatsAppShareButton';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PhotoCardProps {
   photo: PhotoCardData;
@@ -19,11 +20,12 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
     canAddMore
   } = usePhotoSelection();
   
+  const { user } = useAuth();
   const [isLongPress, setIsLongPress] = useState(false);
   const selected = isPhotoSelected(photo.id);
 
   const handleLongPress = () => {
-    if (!isSelectionMode) {
+    if (!isSelectionMode && user) {
       enterSelectionMode();
       togglePhoto({
         id: photo.id,
@@ -32,12 +34,14 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
         image_url: photo.imageUrl,
         created_at: photo.createdAt,
         price: photo.price,
+        user_id: user.id,
+        legacy: false,
       });
     }
   };
 
   const handleClick = () => {
-    if (isSelectionMode) {
+    if (isSelectionMode && user) {
       if (!selected && !canAddMore()) {
         return; // Don't allow selection if limits reached
       }
@@ -48,6 +52,8 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
         image_url: photo.imageUrl,
         created_at: photo.createdAt,
         price: photo.price,
+        user_id: user.id,
+        legacy: false,
       });
     } else {
       onClick();

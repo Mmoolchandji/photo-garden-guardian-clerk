@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Camera, ArrowLeft, User, Plus, Settings, Grid, RefreshCw } from 'lucide-react';
@@ -98,6 +99,10 @@ const Admin = () => {
 
   const handlePhotoDeleted = () => {
     fetchPhotos();
+  };
+
+  const handlePhotoEdit = (photo: Photo) => {
+    setEditingPhoto(photo);
   };
 
   if (loading) {
@@ -255,7 +260,7 @@ const Admin = () => {
             ) : (
               <AdminPhotoGrid 
                 photos={photos}
-                onPhotoEdit={setEditingPhoto}
+                onPhotoEdit={handlePhotoEdit}
                 onPhotoDeleted={handlePhotoDeleted}
               />
             )}
