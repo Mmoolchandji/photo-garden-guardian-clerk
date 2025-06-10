@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import BulkUploadModal from './BulkUploadModal';
 import FileSelectionCard from './FileSelectionCard';
 import PhotoPreviewCard from './PhotoPreviewCard';
@@ -17,6 +18,7 @@ interface PhotoUploadProps {
 type UploadStep = 'file-selection' | 'metadata';
 
 const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
+  const { user } = useAuth();
   const [step, setStep] = useState<UploadStep>('file-selection');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -30,6 +32,17 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Ensure user is authenticated
+  if (!user) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="p-6 text-center">
+          <p className="text-gray-600">Please sign in to upload photos.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -69,10 +82,10 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
   };
 
   const handleUpload = async (skipMetadata = false) => {
-    if (!file) {
+    if (!file || !user) {
       toast({
-        title: "No file selected",
-        description: "Please select a file to upload.",
+        title: "Upload failed",
+        description: "No file selected or user not authenticated.",
         variant: "destructive",
       });
       return;
@@ -81,10 +94,10 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
     setUploading(true);
 
     try {
-      // Upload file to Supabase Storage
+      // Upload file to user-specific folder in Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `photos/${fileName}`;
+      const filePath = `${user.id}/${fileName}`; // User-specific path
 
       const { error: uploadError } = await supabase.storage
         .from('photos')
@@ -102,7 +115,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       // Use provided title or generate from filename
       const finalTitle = title.trim() || generateTitleFromFilename(file.name);
 
-      // Save photo data to database with new metadata fields
+      // Save photo data to database with user_id
       const { error: dbError } = await supabase
         .from('photos')
         .insert({
@@ -112,6 +125,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
           fabric: fabric,
           price: price ? parseFloat(price) : null,
           stock_status: stockStatus,
+          user_id: user.id, // Associate with current user
         });
 
       if (dbError) {
@@ -120,7 +134,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
 
       toast({
         title: "Photo uploaded successfully!",
-        description: "Your photo has been added to the gallery.",
+        description: "Your photo has been added to your gallery.",
       });
 
       // Reset form

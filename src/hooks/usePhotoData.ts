@@ -4,18 +4,29 @@ import { Photo } from '@/types/photo';
 import { FilterState } from '@/components/SearchAndFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const usePhotoData = (filters: FilterState) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
   const lastFiltersRef = useRef<string>('');
 
   const buildQuery = useMemo(() => {
     return () => {
+      if (!user) {
+        // If user is not authenticated, return a query that will return no results
+        return supabase
+          .from('photos')
+          .select('*')
+          .eq('id', '00000000-0000-0000-0000-000000000000'); // Non-existent ID
+      }
+
       let query = supabase
         .from('photos')
         .select('*')
+        .eq('user_id', user.id) // Only fetch photos for the authenticated user
         .order('created_at', { ascending: false });
 
       if (filters.search) {
@@ -46,10 +57,10 @@ export const usePhotoData = (filters: FilterState) => {
 
       return query;
     };
-  }, [filters]);
+  }, [filters, user]);
 
   useEffect(() => {
-    const filtersString = JSON.stringify(filters);
+    const filtersString = JSON.stringify(filters) + (user?.id || 'no-user');
     
     if (filtersString === lastFiltersRef.current) {
       return;
@@ -62,6 +73,15 @@ export const usePhotoData = (filters: FilterState) => {
     const fetchPhotos = async () => {
       try {
         setLoading(true);
+        
+        if (!user) {
+          // If no user is authenticated, show empty gallery
+          if (isMounted) {
+            setPhotos([]);
+          }
+          return;
+        }
+
         const query = buildQuery();
         const { data, error } = await query;
 
@@ -93,7 +113,7 @@ export const usePhotoData = (filters: FilterState) => {
     return () => {
       isMounted = false;
     };
-  }, [buildQuery, toast]);
+  }, [buildQuery, toast, user]);
 
   return { photos, loading };
 };

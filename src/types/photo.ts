@@ -8,6 +8,8 @@ export interface Photo {
   fabric?: string;
   price?: number;
   stock_status?: string;
+  user_id: string;
+  legacy?: boolean;
 }
 
 export interface PhotoCardData {

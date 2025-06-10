@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Camera, ArrowLeft, User, Plus, Settings, Grid, RefreshCw } from 'lucide-react';
@@ -17,6 +16,8 @@ interface Photo {
   description: string | null;
   image_url: string;
   created_at: string;
+  user_id: string;
+  legacy?: boolean;
 }
 
 const Admin = () => {
@@ -41,11 +42,14 @@ const Admin = () => {
   }, [user]);
 
   const fetchPhotos = async () => {
+    if (!user) return;
+    
     try {
       setLoadingPhotos(true);
       const { data, error } = await supabase
         .from('photos')
         .select('*')
+        .eq('user_id', user.id) // Only fetch user's own photos
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -153,7 +157,7 @@ const Admin = () => {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
-                  <p className="text-sm text-gray-500">Photo Garden Keeper</p>
+                  <p className="text-sm text-gray-500">Your Personal Gallery</p>
                 </div>
               </div>
             </div>
@@ -181,25 +185,25 @@ const Admin = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Photos</CardTitle>
+              <CardTitle className="text-sm font-medium">Your Photos</CardTitle>
               <Camera className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{photos.length}</div>
               <p className="text-xs text-gray-500">
-                {photos.length === 0 ? 'Ready to add your first photo' : 'Photos in gallery'}
+                {photos.length === 0 ? 'Ready to add your first photo' : 'Photos in your gallery'}
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Gallery Views</CardTitle>
+              <CardTitle className="text-sm font-medium">Legacy Photos</CardTitle>
               <Grid className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">-</div>
-              <p className="text-xs text-gray-500">Views tracking coming soon</p>
+              <div className="text-2xl font-bold">{photos.filter(p => p.legacy).length}</div>
+              <p className="text-xs text-gray-500">Photos from before user accounts</p>
             </CardContent>
           </Card>
           
@@ -237,16 +241,16 @@ const Admin = () => {
         {/* Photos Management */}
         <Card>
           <CardHeader>
-            <CardTitle>Photo Gallery Management</CardTitle>
+            <CardTitle>Your Photo Gallery Management</CardTitle>
             <CardDescription>
-              Manage your photos - edit details, delete, or add new ones
+              Manage your personal photos - edit details, delete, or add new ones
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loadingPhotos ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading photos...</p>
+                <p className="text-gray-600">Loading your photos...</p>
               </div>
             ) : (
               <AdminPhotoGrid 
