@@ -12,6 +12,7 @@ export const usePhotoData = (filters: FilterState) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const lastFiltersRef = useRef<string>('');
+  const lastUserIdRef = useRef<string>('');
 
   const buildQuery = useMemo(() => {
     return () => {
@@ -60,13 +61,16 @@ export const usePhotoData = (filters: FilterState) => {
   }, [filters, user]);
 
   useEffect(() => {
-    const filtersString = JSON.stringify(filters) + (user?.id || 'no-user');
+    const filtersString = JSON.stringify(filters);
+    const currentUserId = user?.id || '';
     
-    if (filtersString === lastFiltersRef.current) {
+    // Check if filters OR user changed - this ensures we refetch when user logs in
+    if (filtersString === lastFiltersRef.current && currentUserId === lastUserIdRef.current) {
       return;
     }
     
     lastFiltersRef.current = filtersString;
+    lastUserIdRef.current = currentUserId;
     
     let isMounted = true;
     
@@ -82,6 +86,7 @@ export const usePhotoData = (filters: FilterState) => {
           return;
         }
 
+        console.log('Fetching photos for user:', user.id);
         const query = buildQuery();
         const { data, error } = await query;
 
@@ -90,6 +95,7 @@ export const usePhotoData = (filters: FilterState) => {
         }
 
         if (isMounted) {
+          console.log('Photos fetched successfully:', data?.length || 0);
           setPhotos(data || []);
         }
       } catch (error: any) {
