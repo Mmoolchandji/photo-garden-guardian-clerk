@@ -10,10 +10,10 @@ export const usePhotoData = (filters: FilterState) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { user, loading: authLoading } = useAuth();
+  const { user, authReady } = useAuth();
   const lastFiltersRef = useRef<string>('');
   const lastUserIdRef = useRef<string>('');
-  const lastAuthLoadingRef = useRef<boolean>(true);
+  const lastAuthReadyRef = useRef<boolean>(false);
 
   const buildQuery = useMemo(() => {
     return () => {
@@ -65,32 +65,32 @@ export const usePhotoData = (filters: FilterState) => {
     const filtersString = JSON.stringify(filters);
     const currentUserId = user?.id || '';
     
-    // Check if filters, user, OR auth loading state changed
+    // Check if filters, user, OR auth ready state changed
     const hasFiltersChanged = filtersString !== lastFiltersRef.current;
     const hasUserChanged = currentUserId !== lastUserIdRef.current;
-    const hasAuthLoadingChanged = authLoading !== lastAuthLoadingRef.current;
+    const hasAuthReadyChanged = authReady !== lastAuthReadyRef.current;
     
     // Only proceed if something actually changed
-    if (!hasFiltersChanged && !hasUserChanged && !hasAuthLoadingChanged) {
+    if (!hasFiltersChanged && !hasUserChanged && !hasAuthReadyChanged) {
       return;
     }
     
     console.log('usePhotoData: Dependencies changed', {
-      authLoading,
+      authReady,
       hasFiltersChanged,
       hasUserChanged,
-      hasAuthLoadingChanged,
+      hasAuthReadyChanged,
       userId: currentUserId
     });
     
     // Update refs
     lastFiltersRef.current = filtersString;
     lastUserIdRef.current = currentUserId;
-    lastAuthLoadingRef.current = authLoading;
+    lastAuthReadyRef.current = authReady;
     
-    // Don't fetch photos while auth is still loading
-    if (authLoading) {
-      console.log('usePhotoData: Auth still loading, waiting...');
+    // Don't fetch photos until auth is ready (session hydration complete)
+    if (!authReady) {
+      console.log('usePhotoData: Auth not ready yet, waiting for session hydration...');
       setLoading(true);
       return;
     }
@@ -144,7 +144,7 @@ export const usePhotoData = (filters: FilterState) => {
     return () => {
       isMounted = false;
     };
-  }, [buildQuery, toast, user, authLoading]);
+  }, [buildQuery, toast, user, authReady]);
 
   return { photos, loading };
 };
