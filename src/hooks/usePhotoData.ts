@@ -10,9 +10,10 @@ export const usePhotoData = (filters: FilterState) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const lastFiltersRef = useRef<string>('');
   const lastUserIdRef = useRef<string>('');
+  const lastAuthLoadingRef = useRef<boolean>(true);
 
   const buildQuery = useMemo(() => {
     return () => {
@@ -64,29 +65,53 @@ export const usePhotoData = (filters: FilterState) => {
     const filtersString = JSON.stringify(filters);
     const currentUserId = user?.id || '';
     
-    // Check if filters OR user changed - this ensures we refetch when user logs in
-    if (filtersString === lastFiltersRef.current && currentUserId === lastUserIdRef.current) {
+    // Check if filters, user, OR auth loading state changed
+    const hasFiltersChanged = filtersString !== lastFiltersRef.current;
+    const hasUserChanged = currentUserId !== lastUserIdRef.current;
+    const hasAuthLoadingChanged = authLoading !== lastAuthLoadingRef.current;
+    
+    // Only proceed if something actually changed
+    if (!hasFiltersChanged && !hasUserChanged && !hasAuthLoadingChanged) {
       return;
     }
     
+    console.log('usePhotoData: Dependencies changed', {
+      authLoading,
+      hasFiltersChanged,
+      hasUserChanged,
+      hasAuthLoadingChanged,
+      userId: currentUserId
+    });
+    
+    // Update refs
     lastFiltersRef.current = filtersString;
     lastUserIdRef.current = currentUserId;
+    lastAuthLoadingRef.current = authLoading;
+    
+    // Don't fetch photos while auth is still loading
+    if (authLoading) {
+      console.log('usePhotoData: Auth still loading, waiting...');
+      setLoading(true);
+      return;
+    }
     
     let isMounted = true;
     
     const fetchPhotos = async () => {
       try {
+        console.log('usePhotoData: Starting photo fetch for user:', currentUserId || 'no user');
         setLoading(true);
         
         if (!user) {
           // If no user is authenticated, show empty gallery
+          console.log('usePhotoData: No authenticated user, setting empty photos');
           if (isMounted) {
             setPhotos([]);
           }
           return;
         }
 
-        console.log('Fetching photos for user:', user.id);
+        console.log('usePhotoData: Fetching photos for user:', user.id);
         const query = buildQuery();
         const { data, error } = await query;
 
@@ -95,11 +120,11 @@ export const usePhotoData = (filters: FilterState) => {
         }
 
         if (isMounted) {
-          console.log('Photos fetched successfully:', data?.length || 0);
+          console.log('usePhotoData: Photos fetched successfully:', data?.length || 0);
           setPhotos(data || []);
         }
       } catch (error: any) {
-        console.error('Fetch photos error:', error);
+        console.error('usePhotoData: Fetch photos error:', error);
         if (isMounted) {
           toast({
             title: "Error loading photos",
@@ -119,7 +144,7 @@ export const usePhotoData = (filters: FilterState) => {
     return () => {
       isMounted = false;
     };
-  }, [buildQuery, toast, user]);
+  }, [buildQuery, toast, user, authLoading]);
 
   return { photos, loading };
 };
