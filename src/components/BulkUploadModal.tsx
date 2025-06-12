@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import BulkPreviewStep from './BulkPreviewStep';
 import BulkMetadataStep from './BulkMetadataStep';
 
@@ -27,6 +28,7 @@ interface FileWithMetadata {
 type BulkUploadStep = 'preview' | 'metadata';
 
 const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentFiles }: BulkUploadModalProps) => {
+  const { user } = useAuth();
   const [step, setStep] = useState<BulkUploadStep>('preview');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filesWithMetadata, setFilesWithMetadata] = useState<FileWithMetadata[]>([]);
@@ -34,6 +36,17 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResults, setUploadResults] = useState<{ success: number; failed: string[] } | null>(null);
   const { toast } = useToast();
+
+  // Ensure user is authenticated before proceeding
+  if (!user) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="p-6 text-center">
+          <p className="text-gray-600">Please sign in to upload photos.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   useEffect(() => {
     // Initialize files with metadata and previews
@@ -62,27 +75,51 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
   };
 
   const handleUploadAll = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to upload photos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
     setUploadProgress(0);
     
     const results = { success: 0, failed: [] as string[] };
     const totalFiles = filesWithMetadata.length;
 
+    console.log('BulkUpload: Starting bulk upload for user:', user.id, 'Total files:', totalFiles);
+
     try {
+      // Process uploads sequentially to avoid overwhelming the server and RLS issues
       for (let i = 0; i < filesWithMetadata.length; i++) {
         const fileData = filesWithMetadata[i];
         
         try {
-          // Upload file to Supabase Storage
+          console.log(`BulkUpload: Processing file ${i + 1}/${totalFiles}:`, fileData.file.name);
+          
+          // Verify user session is still valid before each upload
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError || !session || !session.user) {
+            console.error('BulkUpload: Session invalid during upload:', sessionError);
+            throw new Error('Session expired. Please sign in again.');
+          }
+
+          // Upload file to Supabase Storage with user-specific path
           const fileExt = fileData.file.name.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-          const filePath = `photos/${fileName}`;
+          const filePath = `${user.id}/${fileName}`; // User-specific path for RLS compliance
 
+          console.log(`BulkUpload: Uploading to storage path:`, filePath);
+          
           const { error: uploadError } = await supabase.storage
             .from('photos')
             .upload(filePath, fileData.file);
 
           if (uploadError) {
+            console.error(`BulkUpload: Storage upload error for ${fileData.file.name}:`, uploadError);
             throw uploadError;
           }
 
@@ -91,25 +128,39 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
             .from('photos')
             .getPublicUrl(filePath);
 
-          // Save photo data to database with new metadata fields
+          console.log(`BulkUpload: Got public URL:`, data.publicUrl);
+
+          // Save photo data to database with explicit user_id for RLS compliance
+          const photoData = {
+            title: fileData.title.trim() || fileData.title,
+            description: fileData.description.trim() || null,
+            image_url: data.publicUrl,
+            fabric: fileData.fabric,
+            price: fileData.price ? parseFloat(fileData.price) : null,
+            stock_status: fileData.stockStatus,
+            user_id: user.id, // Explicitly set user_id for RLS
+          };
+
+          console.log(`BulkUpload: Inserting photo data:`, { ...photoData, image_url: '[URL]' });
+
           const { error: dbError } = await supabase
             .from('photos')
-            .insert({
-              title: fileData.title.trim() || fileData.title,
-              description: fileData.description.trim() || null,
-              image_url: data.publicUrl,
-              fabric: fileData.fabric,
-              price: fileData.price ? parseFloat(fileData.price) : null,
-              stock_status: fileData.stockStatus,
-            });
+            .insert(photoData);
 
           if (dbError) {
+            console.error(`BulkUpload: Database insert error for ${fileData.file.name}:`, dbError);
             throw dbError;
           }
 
+          console.log(`BulkUpload: Successfully uploaded ${fileData.file.name}`);
           results.success++;
+          
+          // Small delay between uploads to prevent overwhelming the server
+          if (i < filesWithMetadata.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
         } catch (error: any) {
-          console.error(`Upload error for ${fileData.file.name}:`, error);
+          console.error(`BulkUpload: Upload error for ${fileData.file.name}:`, error);
           results.failed.push(fileData.file.name);
         }
 
@@ -142,7 +193,7 @@ const BulkUploadModal = ({ files, onUploadComplete, onCancel, onChooseDifferentF
         }, 2000);
       }
     } catch (error: any) {
-      console.error('Bulk upload error:', error);
+      console.error('BulkUpload: Bulk upload error:', error);
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload photos. Please try again.",

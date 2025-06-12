@@ -94,16 +94,28 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
     setUploading(true);
 
     try {
+      console.log('PhotoUpload: Starting single upload for user:', user.id);
+      
+      // Verify user session is still valid
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session || !session.user) {
+        console.error('PhotoUpload: Session invalid during upload:', sessionError);
+        throw new Error('Session expired. Please sign in again.');
+      }
+
       // Upload file to user-specific folder in Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`; // User-specific path
+      const filePath = `${user.id}/${fileName}`; // User-specific path for RLS compliance
+
+      console.log('PhotoUpload: Uploading to storage path:', filePath);
 
       const { error: uploadError } = await supabase.storage
         .from('photos')
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error('PhotoUpload: Storage upload error:', uploadError);
         throw uploadError;
       }
 
@@ -115,22 +127,29 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       // Use provided title or generate from filename
       const finalTitle = title.trim() || generateTitleFromFilename(file.name);
 
-      // Save photo data to database with user_id
+      // Save photo data to database with explicit user_id for RLS compliance
+      const photoData = {
+        title: finalTitle,
+        description: description.trim() || null,
+        image_url: data.publicUrl,
+        fabric: fabric,
+        price: price ? parseFloat(price) : null,
+        stock_status: stockStatus,
+        user_id: user.id, // Explicitly set user_id for RLS
+      };
+
+      console.log('PhotoUpload: Inserting photo data:', { ...photoData, image_url: '[URL]' });
+
       const { error: dbError } = await supabase
         .from('photos')
-        .insert({
-          title: finalTitle,
-          description: description.trim() || null,
-          image_url: data.publicUrl,
-          fabric: fabric,
-          price: price ? parseFloat(price) : null,
-          stock_status: stockStatus,
-          user_id: user.id, // Associate with current user
-        });
+        .insert(photoData);
 
       if (dbError) {
+        console.error('PhotoUpload: Database insert error:', dbError);
         throw dbError;
       }
+
+      console.log('PhotoUpload: Successfully uploaded photo');
 
       toast({
         title: "Photo uploaded successfully!",
@@ -148,7 +167,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       setStep('file-selection');
       onPhotoUploaded();
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error('PhotoUpload: Upload error:', error);
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload photo. Please try again.",
