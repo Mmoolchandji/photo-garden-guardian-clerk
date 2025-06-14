@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { ShareablePhoto } from './types';
 import { isMobileDevice, canShareFiles } from './deviceDetection';
@@ -50,7 +49,7 @@ export const shareMultipleToWhatsApp = async (
         }
         if (!success) {
           console.log('Falling back to WhatsApp URL sharing for files');
-          success = shareMultipleViaWhatsAppURL(photos);
+          success = await shareMultipleViaWhatsAppURL(photos);
         }
         break;
 
