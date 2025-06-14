@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface Photo {
   id: string;
@@ -88,6 +87,13 @@ export const AdminPhotoSelectionProvider = ({ children }: AdminPhotoSelectionPro
   const getSelectedCount = () => {
     return selectedPhotoIds.size;
   };
+
+  // Auto-exit selection mode when no photos are selected
+  React.useEffect(() => {
+    if (isSelectionMode && selectedPhotoIds.size === 0) {
+      setIsSelectionMode(false);
+    }
+  }, [selectedPhotoIds.size, isSelectionMode]);
 
   const value: AdminPhotoSelectionContextType = {
     selectedPhotoIds,

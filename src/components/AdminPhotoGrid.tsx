@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
+import { useLongPress } from '@/hooks/useLongPress';
 import { Photo } from '@/types/photo';
 import BulkActionToolbar from './BulkActionToolbar';
 
@@ -88,11 +88,17 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     }
   };
 
-  const handlePhotoToggle = (photo: Photo) => {
+  const handlePhotoLongPress = (photo: Photo) => {
     if (!isSelectionMode) {
       enterSelectionMode();
+      togglePhoto(photo);
     }
-    togglePhoto(photo);
+  };
+
+  const handlePhotoClick = (photo: Photo) => {
+    if (isSelectionMode) {
+      togglePhoto(photo);
+    }
   };
 
   if (photos.length === 0) {
@@ -141,13 +147,20 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
         {photos.map((photo) => {
           const isSelected = isPhotoSelected(photo.id);
           
+          const longPressHandlers = useLongPress({
+            onLongPress: () => handlePhotoLongPress(photo),
+            onClick: () => handlePhotoClick(photo),
+            delay: 500,
+          });
+          
           return (
             <div
               key={photo.id}
-              className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-lg transition-all duration-300 ${
+              {...longPressHandlers}
+              className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer select-none ${
                 isSelected 
-                  ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50' 
-                  : 'border-gray-200'
+                  ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50 scale-[1.02]' 
+                  : 'border-gray-200 hover:scale-[1.01]'
               }`}
             >
               <div className="relative">
@@ -155,20 +168,35 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
                   src={photo.image_url}
                   alt={photo.title}
                   className="w-full h-48 object-cover"
+                  draggable={false}
                 />
                 
                 {/* Selection Checkbox Overlay */}
                 <div className="absolute top-3 left-3">
                   <Checkbox
                     checked={isSelected}
-                    onCheckedChange={() => handlePhotoToggle(photo)}
+                    onCheckedChange={() => {
+                      if (!isSelectionMode) {
+                        enterSelectionMode();
+                      }
+                      togglePhoto(photo);
+                    }}
                     className="bg-white/90 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
                   />
                 </div>
                 
                 {/* Selection Overlay */}
                 {isSelected && (
-                  <div className="absolute inset-0 bg-emerald-500/20" />
+                  <div className="absolute inset-0 bg-emerald-500/20 animate-fade-in" />
+                )}
+
+                {/* Long press hint for first photo when not in selection mode */}
+                {!isSelectionMode && photos.indexOf(photo) === 0 && (
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <div className="bg-black/60 text-white text-xs px-2 py-1 rounded text-center animate-pulse">
+                      Hold to select
+                    </div>
+                  </div>
                 )}
               </div>
               
@@ -193,7 +221,10 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onPhotoEdit(photo)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPhotoEdit(photo);
+                      }}
                       className="flex-1"
                     >
                       <Edit className="h-3 w-3 mr-1" />
@@ -202,7 +233,10 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(photo)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(photo);
+                      }}
                       disabled={deletingId === photo.id}
                       className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
                     >

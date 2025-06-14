@@ -3,7 +3,7 @@ import { Calendar, Eye, Check } from 'lucide-react';
 import { PhotoCardData } from '@/types/photo';
 import WhatsAppShareButton from './WhatsAppShareButton';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
-import { useState, useEffect } from 'react';
+import { useLongPress } from '@/hooks/useLongPress';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PhotoCardProps {
@@ -21,7 +21,6 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
   } = usePhotoSelection();
   
   const { user } = useAuth();
-  const [isLongPress, setIsLongPress] = useState(false);
   const selected = isPhotoSelected(photo.id);
 
   const handleLongPress = () => {
@@ -60,57 +59,29 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
     }
   };
 
-  // Long press detection
-  useEffect(() => {
-    let pressTimer: NodeJS.Timeout;
-    
-    const startPress = () => {
-      pressTimer = setTimeout(() => {
-        setIsLongPress(true);
-        handleLongPress();
-      }, 500);
-    };
-
-    const endPress = () => {
-      clearTimeout(pressTimer);
-      setIsLongPress(false);
-    };
-
-    const photoElement = document.getElementById(`photo-${photo.id}`);
-    if (photoElement) {
-      photoElement.addEventListener('touchstart', startPress);
-      photoElement.addEventListener('touchend', endPress);
-      photoElement.addEventListener('mousedown', startPress);
-      photoElement.addEventListener('mouseup', endPress);
-      photoElement.addEventListener('mouseleave', endPress);
-
-      return () => {
-        photoElement.removeEventListener('touchstart', startPress);
-        photoElement.removeEventListener('touchend', endPress);
-        photoElement.removeEventListener('mousedown', startPress);
-        photoElement.removeEventListener('mouseup', endPress);
-        photoElement.removeEventListener('mouseleave', endPress);
-      };
-    }
-  }, [photo.id]);
+  const longPressHandlers = useLongPress({
+    onLongPress: handleLongPress,
+    onClick: handleClick,
+    delay: 500,
+  });
 
   return (
     <div
-      id={`photo-${photo.id}`}
-      className={`group bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer ${
+      {...longPressHandlers}
+      className={`group bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer select-none ${
         selected 
           ? 'border-emerald-500 ring-2 ring-emerald-200' 
           : isSelectionMode 
             ? 'border-gray-300' 
             : 'border-gray-200'
       }`}
-      onClick={handleClick}
     >
       <div className="relative overflow-hidden">
         <img
           src={photo.imageUrl}
           alt={photo.title}
           className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+          draggable={false}
         />
         
         {/* Selection overlay */}
