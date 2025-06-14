@@ -2,10 +2,14 @@
 import { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Plus, Check } from 'lucide-react';
 
 interface FabricSelectorProps {
   value: string;
   onChange: (value: string) => void;
+  availableCustomFabrics?: string[];
+  onAddCustomFabric?: (fabricName: string) => void;
 }
 
 const PREDEFINED_FABRICS = [
@@ -16,45 +20,84 @@ const PREDEFINED_FABRICS = [
   'Banarasi Silk'
 ];
 
-const FabricSelector = ({ value, onChange }: FabricSelectorProps) => {
-  const [isCustom, setIsCustom] = useState(() => {
-    return !PREDEFINED_FABRICS.includes(value) && value !== '';
-  });
+const FabricSelector = ({ 
+  value, 
+  onChange, 
+  availableCustomFabrics = [], 
+  onAddCustomFabric 
+}: FabricSelectorProps) => {
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customFabricInput, setCustomFabricInput] = useState('');
+
+  // Combine all available fabrics
+  const allFabrics = [...PREDEFINED_FABRICS, ...availableCustomFabrics];
 
   const handleSelectChange = (selectedValue: string) => {
-    if (selectedValue === 'custom') {
-      setIsCustom(true);
-      onChange('');
+    if (selectedValue === '__add_custom__') {
+      setShowCustomInput(true);
+      setCustomFabricInput('');
     } else {
-      setIsCustom(false);
       onChange(selectedValue);
+      setShowCustomInput(false);
     }
   };
 
-  const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+  const handleAddCustomFabric = () => {
+    const trimmedFabric = customFabricInput.trim();
+    if (trimmedFabric && !allFabrics.includes(trimmedFabric)) {
+      // Add to session custom fabrics
+      onAddCustomFabric?.(trimmedFabric);
+      // Set as current value
+      onChange(trimmedFabric);
+    }
+    setShowCustomInput(false);
+    setCustomFabricInput('');
   };
 
-  if (isCustom) {
+  const handleCancelCustomInput = () => {
+    setShowCustomInput(false);
+    setCustomFabricInput('');
+  };
+
+  if (showCustomInput) {
     return (
       <div className="space-y-2">
         <Input
           type="text"
-          value={value}
-          onChange={handleCustomInputChange}
+          value={customFabricInput}
+          onChange={(e) => setCustomFabricInput(e.target.value)}
           placeholder="Enter custom fabric type..."
           className="w-full"
-        />
-        <button
-          type="button"
-          onClick={() => {
-            setIsCustom(false);
-            onChange('New Fabric');
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleAddCustomFabric();
+            } else if (e.key === 'Escape') {
+              handleCancelCustomInput();
+            }
           }}
-          className="text-xs text-blue-600 hover:text-blue-800"
-        >
-          Choose from predefined options
-        </button>
+          autoFocus
+        />
+        <div className="flex space-x-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleAddCustomFabric}
+            disabled={!customFabricInput.trim()}
+            className="flex items-center"
+          >
+            <Check className="h-3 w-3 mr-1" />
+            Add
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleCancelCustomInput}
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
     );
   }
@@ -64,13 +107,35 @@ const FabricSelector = ({ value, onChange }: FabricSelectorProps) => {
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select fabric type..." />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-white">
+        {/* Predefined fabrics */}
         {PREDEFINED_FABRICS.map((fabric) => (
           <SelectItem key={fabric} value={fabric}>
             {fabric}
           </SelectItem>
         ))}
-        <SelectItem value="custom">Custom Fabric</SelectItem>
+        
+        {/* Custom fabrics added during session */}
+        {availableCustomFabrics.length > 0 && (
+          <>
+            {availableCustomFabrics.map((fabric) => (
+              <SelectItem key={fabric} value={fabric}>
+                <span className="flex items-center">
+                  {fabric} 
+                  <span className="ml-2 text-xs text-gray-500">(Custom)</span>
+                </span>
+              </SelectItem>
+            ))}
+          </>
+        )}
+        
+        {/* Add custom fabric option */}
+        <SelectItem value="__add_custom__" className="text-blue-600">
+          <span className="flex items-center">
+            <Plus className="h-3 w-3 mr-2" />
+            Add Custom Fabric...
+          </span>
+        </SelectItem>
       </SelectContent>
     </Select>
   );

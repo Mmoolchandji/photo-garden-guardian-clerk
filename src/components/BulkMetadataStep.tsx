@@ -19,10 +19,12 @@ interface FileWithMetadata {
 interface BulkMetadataStepProps {
   filesWithMetadata: FileWithMetadata[];
   currentIndex: number;
+  sessionCustomFabrics?: string[];
   uploading: boolean;
   uploadProgress: number;
   uploadResults: { success: number; failed: string[] } | null;
   onMetadataChange: (field: 'title' | 'description' | 'fabric' | 'price' | 'stockStatus', value: string) => void;
+  onAddCustomFabric?: (fabricName: string) => void;
   onNextPhoto: () => void;
   onPrevPhoto: () => void;
   onUploadAll: () => void;
@@ -32,10 +34,12 @@ interface BulkMetadataStepProps {
 const BulkMetadataStep = ({
   filesWithMetadata,
   currentIndex,
+  sessionCustomFabrics = [],
   uploading,
   uploadProgress,
   uploadResults,
   onMetadataChange,
+  onAddCustomFabric,
   onNextPhoto,
   onPrevPhoto,
   onUploadAll,
@@ -46,7 +50,7 @@ const BulkMetadataStep = ({
   if (!currentFile) return null;
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(90vh-120px)]">
+    <div className="flex flex-col h-full">
       {/* Upload Progress and Results - Fixed at top */}
       <div className="flex-shrink-0 space-y-4 mb-4">
         <BulkUploadProgress uploading={uploading} uploadProgress={uploadProgress} />
@@ -59,7 +63,9 @@ const BulkMetadataStep = ({
           <div className="pr-4 pb-6">
             <BulkMetadataForm
               currentFile={currentFile}
+              availableCustomFabrics={sessionCustomFabrics}
               onMetadataChange={onMetadataChange}
+              onAddCustomFabric={onAddCustomFabric}
             />
           </div>
         </ScrollArea>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +20,7 @@ export const useBulkUploadLogic = (files: File[]) => {
   const [step, setStep] = useState<BulkUploadStep>('preview');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filesWithMetadata, setFilesWithMetadata] = useState<FileWithMetadata[]>([]);
+  const [sessionCustomFabrics, setSessionCustomFabrics] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResults, setUploadResults] = useState<{ success: number; failed: string[] } | null>(null);
@@ -33,7 +33,7 @@ export const useBulkUploadLogic = (files: File[]) => {
       preview: URL.createObjectURL(file),
       title: generateTitleFromFilename(file.name),
       description: '',
-      fabric: 'New Fabric',
+      fabric: '',
       price: '',
       stockStatus: 'Available'
     }));
@@ -50,6 +50,13 @@ export const useBulkUploadLogic = (files: File[]) => {
       .split('.')[0]
       .replace(/[-_]/g, ' ')
       .replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const addCustomFabric = (fabricName: string) => {
+    const trimmedFabric = fabricName.trim();
+    if (trimmedFabric && !sessionCustomFabrics.includes(trimmedFabric)) {
+      setSessionCustomFabrics(prev => [...prev, trimmedFabric]);
+    }
   };
 
   const handleUploadAll = async () => {
@@ -113,7 +120,7 @@ export const useBulkUploadLogic = (files: File[]) => {
             title: fileData.title.trim() || fileData.title,
             description: fileData.description.trim() || null,
             image_url: data.publicUrl,
-            fabric: fileData.fabric,
+            fabric: fileData.fabric || 'New Fabric',
             price: fileData.price ? parseFloat(fileData.price) : null,
             stock_status: fileData.stockStatus,
             user_id: user.id, // Explicitly set user_id for RLS
@@ -197,11 +204,13 @@ export const useBulkUploadLogic = (files: File[]) => {
     setStep,
     currentIndex,
     filesWithMetadata,
+    sessionCustomFabrics,
     uploading,
     uploadProgress,
     uploadResults,
     handleUploadAll,
     handleMetadataChange,
+    addCustomFabric,
     nextPhoto,
     prevPhoto,
   };

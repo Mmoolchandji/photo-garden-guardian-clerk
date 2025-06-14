@@ -16,10 +16,17 @@ interface FileWithMetadata {
 
 interface BulkMetadataFormProps {
   currentFile: FileWithMetadata;
+  availableCustomFabrics?: string[];
   onMetadataChange: (field: 'title' | 'description' | 'fabric' | 'price' | 'stockStatus', value: string) => void;
+  onAddCustomFabric?: (fabricName: string) => void;
 }
 
-const BulkMetadataForm = ({ currentFile, onMetadataChange }: BulkMetadataFormProps) => {
+const BulkMetadataForm = ({ 
+  currentFile, 
+  availableCustomFabrics = [],
+  onMetadataChange,
+  onAddCustomFabric 
+}: BulkMetadataFormProps) => {
   const handlePriceChange = (value: string) => {
     // Allow only numbers and decimal points
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
@@ -76,6 +83,8 @@ const BulkMetadataForm = ({ currentFile, onMetadataChange }: BulkMetadataFormPro
           <FabricSelector
             value={currentFile.fabric}
             onChange={(value) => onMetadataChange('fabric', value)}
+            availableCustomFabrics={availableCustomFabrics}
+            onAddCustomFabric={onAddCustomFabric}
           />
         </div>
 
