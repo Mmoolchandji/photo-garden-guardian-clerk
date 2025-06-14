@@ -1,6 +1,7 @@
 
 import { Photo, PhotoCardData } from '@/types/photo';
-import PhotoCard from './PhotoCard';
+import OptimizedPhotoCard from './OptimizedPhotoCard';
+import LazyImage from './LazyImage';
 
 interface PhotoGridViewProps {
   photos: Photo[];
@@ -22,7 +23,7 @@ const PhotoGridView = ({ photos, viewMode, onPhotoClick }: PhotoGridViewProps) =
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {photos.map((photo) => (
-          <PhotoCard
+          <OptimizedPhotoCard
             key={photo.id}
             photo={transformPhotoData(photo)}
             onClick={() => onPhotoClick(photo)}
@@ -41,10 +42,10 @@ const PhotoGridView = ({ photos, viewMode, onPhotoClick }: PhotoGridViewProps) =
           onClick={() => onPhotoClick(photo)}
         >
           <div className="flex space-x-4">
-            <img
+            <LazyImage
               src={photo.image_url}
               alt={photo.title}
-              className="w-24 h-24 object-cover rounded-lg"
+              className="w-24 h-24 rounded-lg"
             />
             <div className="flex-1">
               <h4 className="font-semibold text-gray-900 mb-1">{photo.title}</h4>
