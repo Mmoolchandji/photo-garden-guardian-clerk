@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -187,7 +186,6 @@ const PhotoEdit = ({ photo, onPhotoUpdated, onCancel }: PhotoEditProps) => {
             <FabricSelector
               value={fabric || ''}
               onChange={(val) => setFabric(val)}
-              disabled={isReadOnly || updating}
             />
           </div>
 
@@ -222,7 +220,6 @@ const PhotoEdit = ({ photo, onPhotoUpdated, onCancel }: PhotoEditProps) => {
             <StockStatusSelector
               value={stockStatus || 'Available'}
               onChange={setStockStatus}
-              disabled={isReadOnly || updating}
             />
           </div>
 
@@ -258,4 +255,3 @@ const PhotoEdit = ({ photo, onPhotoUpdated, onCancel }: PhotoEditProps) => {
 };
 
 export default PhotoEdit;
-
