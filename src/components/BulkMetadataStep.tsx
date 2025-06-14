@@ -56,91 +56,93 @@ const BulkMetadataStep = ({
   if (!currentFile) return null;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full max-h-[calc(90vh-120px)]">
       {/* Upload Progress and Results - Fixed at top */}
       <div className="flex-shrink-0 space-y-4 mb-4">
         <BulkUploadProgress uploading={uploading} uploadProgress={uploadProgress} />
         <BulkUploadResults uploadResults={uploadResults} />
       </div>
 
-      {/* Scrollable Content Area - This will take remaining height */}
-      <ScrollArea className="flex-1 min-h-0">
-        <div className="space-y-4 pr-4 pb-4">
-          {/* Photo Preview */}
-          <div className="mb-4">
-            <img
-              src={currentFile.preview}
-              alt="Preview"
-              className="w-full h-32 object-cover rounded-lg"
-            />
-            <p className="text-sm text-gray-600 mt-2">
-              {currentFile.file.name}
-            </p>
+      {/* Scrollable Content Area */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ScrollArea className="h-full w-full">
+          <div className="space-y-4 pr-4 pb-6">
+            {/* Photo Preview */}
+            <div className="mb-4">
+              <img
+                src={currentFile.preview}
+                alt="Preview"
+                className="w-full h-32 object-cover rounded-lg"
+              />
+              <p className="text-sm text-gray-600 mt-2">
+                {currentFile.file.name}
+              </p>
+            </div>
+
+            {/* Metadata Form */}
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Title (optional)
+                </label>
+                <Input
+                  id="title"
+                  type="text"
+                  value={currentFile.title}
+                  onChange={(e) => onMetadataChange('title', e.target.value)}
+                  placeholder="Enter photo title..."
+                />
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Description (optional)
+                </label>
+                <Textarea
+                  id="description"
+                  value={currentFile.description}
+                  onChange={(e) => onMetadataChange('description', e.target.value)}
+                  placeholder="Add a description for your photo..."
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
+                  Fabric Type (optional)
+                </label>
+                <FabricSelector
+                  value={currentFile.fabric}
+                  onChange={(value) => onMetadataChange('fabric', value)}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                  Price (optional)
+                </label>
+                <Input
+                  id="price"
+                  type="text"
+                  value={currentFile.price}
+                  onChange={(e) => handlePriceChange(e.target.value)}
+                  placeholder="Enter price..."
+                />
+              </div>
+
+              <div>
+                <label htmlFor="stock-status" className="block text-sm font-medium text-gray-700 mb-1">
+                  Stock Status (optional)
+                </label>
+                <StockStatusSelector
+                  value={currentFile.stockStatus}
+                  onChange={(value) => onMetadataChange('stockStatus', value)}
+                />
+              </div>
+            </div>
           </div>
-
-          {/* Metadata Form */}
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                Title (optional)
-              </label>
-              <Input
-                id="title"
-                type="text"
-                value={currentFile.title}
-                onChange={(e) => onMetadataChange('title', e.target.value)}
-                placeholder="Enter photo title..."
-              />
-            </div>
-
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Description (optional)
-              </label>
-              <Textarea
-                id="description"
-                value={currentFile.description}
-                onChange={(e) => onMetadataChange('description', e.target.value)}
-                placeholder="Add a description for your photo..."
-                rows={3}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
-                Fabric Type (optional)
-              </label>
-              <FabricSelector
-                value={currentFile.fabric}
-                onChange={(value) => onMetadataChange('fabric', value)}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                Price (optional)
-              </label>
-              <Input
-                id="price"
-                type="text"
-                value={currentFile.price}
-                onChange={(e) => handlePriceChange(e.target.value)}
-                placeholder="Enter price..."
-              />
-            </div>
-
-            <div>
-              <label htmlFor="stock-status" className="block text-sm font-medium text-gray-700 mb-1">
-                Stock Status (optional)
-              </label>
-              <StockStatusSelector
-                value={currentFile.stockStatus}
-                onChange={(value) => onMetadataChange('stockStatus', value)}
-              />
-            </div>
-          </div>
-        </div>
-      </ScrollArea>
+        </ScrollArea>
+      </div>
 
       {/* Navigation and Action Buttons - Fixed at bottom */}
       <div className="flex-shrink-0 pt-4 space-y-4 border-t bg-white">
