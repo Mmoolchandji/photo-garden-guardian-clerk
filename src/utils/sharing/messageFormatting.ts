@@ -14,6 +14,14 @@ export const formatWhatsAppMessage = (photo: ShareablePhoto): string => {
   return message;
 };
 
+// New function for individual photo messages (used in batch/multiple sharing)
+export const formatIndividualPhotoMessage = (photo: ShareablePhoto): string => {
+  if (photo.price) {
+    return `💰 Price: ₹${photo.price.toLocaleString('en-IN')}`;
+  }
+  return `✨ ${photo.title}`;
+};
+
 // New function for formatting multiple photos message
 export const formatMultiplePhotosMessage = (photos: ShareablePhoto[]): string => {
   let message = `✨ Check out these beautiful sarees:\n\n`;
@@ -29,4 +37,9 @@ export const formatMultiplePhotosMessage = (photos: ShareablePhoto[]): string =>
   message += '\n📸 View our complete collection at our gallery!';
   
   return message;
+};
+
+// Utility function for delays
+export const delay = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
 };
