@@ -56,28 +56,28 @@ const BulkMetadataStep = ({
   if (!currentFile) return null;
 
   return (
-    <div className="flex flex-col h-full max-h-[70vh]">
-      {/* Photo Preview - Fixed at top */}
-      <div className="flex-shrink-0 mb-4">
-        <img
-          src={currentFile.preview}
-          alt="Preview"
-          className="w-full h-32 object-cover rounded-lg"
-        />
-        <p className="text-sm text-gray-600 mt-2">
-          {currentFile.file.name}
-        </p>
-      </div>
-
-      {/* Upload Progress and Results - Fixed */}
-      <div className="flex-shrink-0 space-y-4">
+    <div className="flex flex-col h-full">
+      {/* Upload Progress and Results - Fixed at top */}
+      <div className="flex-shrink-0 space-y-4 mb-4">
         <BulkUploadProgress uploading={uploading} uploadProgress={uploadProgress} />
         <BulkUploadResults uploadResults={uploadResults} />
       </div>
 
-      {/* Scrollable Content Area */}
+      {/* Scrollable Content Area - This will take remaining height */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="space-y-4 pr-4">
+        <div className="space-y-4 pr-4 pb-4">
+          {/* Photo Preview */}
+          <div className="mb-4">
+            <img
+              src={currentFile.preview}
+              alt="Preview"
+              className="w-full h-32 object-cover rounded-lg"
+            />
+            <p className="text-sm text-gray-600 mt-2">
+              {currentFile.file.name}
+            </p>
+          </div>
+
           {/* Metadata Form */}
           <div className="space-y-4">
             <div>
@@ -143,7 +143,7 @@ const BulkMetadataStep = ({
       </ScrollArea>
 
       {/* Navigation and Action Buttons - Fixed at bottom */}
-      <div className="flex-shrink-0 pt-4 space-y-4">
+      <div className="flex-shrink-0 pt-4 space-y-4 border-t bg-white">
         {/* Navigation */}
         <div className="flex justify-between items-center">
           <Button
