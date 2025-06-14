@@ -55,12 +55,17 @@ export const useBulkUploadLogic = (files: File[]) => {
   const addCustomFabric = (fabricName: string) => {
     const trimmedFabric = fabricName.trim();
     console.log('useBulkUploadLogic: Adding custom fabric:', trimmedFabric);
-    console.log('useBulkUploadLogic: Current sessionCustomFabrics:', sessionCustomFabrics);
+    console.log('useBulkUploadLogic: Current sessionCustomFabrics before:', sessionCustomFabrics);
     
     if (trimmedFabric && !sessionCustomFabrics.includes(trimmedFabric)) {
       const newCustomFabrics = [...sessionCustomFabrics, trimmedFabric];
       setSessionCustomFabrics(newCustomFabrics);
-      console.log('useBulkUploadLogic: Updated sessionCustomFabrics:', newCustomFabrics);
+      console.log('useBulkUploadLogic: Updated sessionCustomFabrics to:', newCustomFabrics);
+      
+      // Force a re-render to ensure the fabric is immediately available
+      setFilesWithMetadata(prev => [...prev]);
+    } else {
+      console.log('useBulkUploadLogic: Fabric already exists or is empty');
     }
   };
 
@@ -189,7 +194,7 @@ export const useBulkUploadLogic = (files: File[]) => {
   };
 
   const handleMetadataChange = (field: 'title' | 'description' | 'fabric' | 'price' | 'stockStatus', value: string) => {
-    console.log('useBulkUploadLogic: Metadata change:', field, value);
+    console.log('useBulkUploadLogic: Metadata change:', { field, value, currentIndex });
     setFilesWithMetadata(prev => 
       prev.map((item, index) => 
         index === currentIndex ? { ...item, [field]: value } : item

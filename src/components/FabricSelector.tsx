@@ -29,18 +29,20 @@ const FabricSelector = ({
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customFabricInput, setCustomFabricInput] = useState('');
 
-  console.log('FabricSelector: Current value:', value);
-  console.log('FabricSelector: Available custom fabrics:', availableCustomFabrics);
+  console.log('FabricSelector render - Current value:', value);
+  console.log('FabricSelector render - Available custom fabrics:', availableCustomFabrics);
+  console.log('FabricSelector render - Show custom input:', showCustomInput);
 
   // Combine all available fabrics
   const allFabrics = [...PREDEFINED_FABRICS, ...availableCustomFabrics];
 
   const handleSelectChange = (selectedValue: string) => {
-    console.log('FabricSelector: Selected value:', selectedValue);
+    console.log('FabricSelector: Select change - Selected value:', selectedValue);
     if (selectedValue === '__add_custom__') {
       setShowCustomInput(true);
       setCustomFabricInput('');
     } else {
+      console.log('FabricSelector: Setting value to:', selectedValue);
       onChange(selectedValue);
       setShowCustomInput(false);
     }
@@ -50,9 +52,9 @@ const FabricSelector = ({
     const trimmedFabric = customFabricInput.trim();
     console.log('FabricSelector: Adding custom fabric:', trimmedFabric);
     if (trimmedFabric && !allFabrics.includes(trimmedFabric)) {
-      // Add to session custom fabrics
+      console.log('FabricSelector: Calling onAddCustomFabric with:', trimmedFabric);
       onAddCustomFabric?.(trimmedFabric);
-      // Set as current value
+      console.log('FabricSelector: Setting onChange value to:', trimmedFabric);
       onChange(trimmedFabric);
     }
     setShowCustomInput(false);
@@ -72,7 +74,7 @@ const FabricSelector = ({
           value={customFabricInput}
           onChange={(e) => setCustomFabricInput(e.target.value)}
           placeholder="Enter custom fabric type..."
-          className="w-full"
+          className="w-full bg-white text-gray-900"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
@@ -109,16 +111,20 @@ const FabricSelector = ({
 
   return (
     <Select value={value} onValueChange={handleSelectChange}>
-      <SelectTrigger className="w-full bg-white">
+      <SelectTrigger className="w-full bg-white border border-gray-300">
         <SelectValue 
           placeholder="Select fabric type..." 
           className="text-gray-900"
         />
       </SelectTrigger>
-      <SelectContent className="bg-white z-50">
+      <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
         {/* Predefined fabrics */}
         {PREDEFINED_FABRICS.map((fabric) => (
-          <SelectItem key={fabric} value={fabric} className="text-gray-900">
+          <SelectItem 
+            key={fabric} 
+            value={fabric} 
+            className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+          >
             {fabric}
           </SelectItem>
         ))}
@@ -127,10 +133,14 @@ const FabricSelector = ({
         {availableCustomFabrics.length > 0 && (
           <>
             {availableCustomFabrics.map((fabric) => (
-              <SelectItem key={fabric} value={fabric} className="text-gray-900">
+              <SelectItem 
+                key={`custom-${fabric}`} 
+                value={fabric} 
+                className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+              >
                 <span className="flex items-center">
-                  {fabric} 
-                  <span className="ml-2 text-xs text-blue-600">(Custom)</span>
+                  <span className="text-gray-900">{fabric}</span>
+                  <span className="ml-2 text-xs text-blue-600 font-medium">(Custom)</span>
                 </span>
               </SelectItem>
             ))}
@@ -138,7 +148,10 @@ const FabricSelector = ({
         )}
         
         {/* Add custom fabric option */}
-        <SelectItem value="__add_custom__" className="text-blue-600">
+        <SelectItem 
+          value="__add_custom__" 
+          className="text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
+        >
           <span className="flex items-center">
             <Plus className="h-3 w-3 mr-2" />
             Add Custom Fabric...
