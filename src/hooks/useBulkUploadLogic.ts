@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImageCompression } from './useImageCompression';
 
 interface FileWithMetadata {
   file: File;
@@ -24,7 +26,11 @@ export const useBulkUploadLogic = (files: File[]) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResults, setUploadResults] = useState<{ success: number; failed: string[] } | null>(null);
+  const [enableCompression, setEnableCompression] = useState(true);
   const { toast } = useToast();
+  
+  // Image compression hook
+  const { compressMultipleImages } = useImageCompression();
 
   useEffect(() => {
     // Initialize files with metadata and previews
@@ -88,9 +94,28 @@ export const useBulkUploadLogic = (files: File[]) => {
     console.log('BulkUpload: Starting bulk upload for user:', user.id, 'Total files:', totalFiles);
 
     try {
+      // Get files to upload
+      let filesToUpload = filesWithMetadata.map(f => f.file);
+
+      // Apply compression if enabled
+      if (enableCompression) {
+        console.log('BulkUpload: Compressing images before upload');
+        const compressionResults = await compressMultipleImages(filesToUpload, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.85
+        });
+
+        if (compressionResults.length > 0) {
+          filesToUpload = compressionResults.map(result => result.compressedFile);
+          console.log('BulkUpload: Compression complete for', compressionResults.length, 'files');
+        }
+      }
+
       // Process uploads sequentially to avoid overwhelming the server and RLS issues
       for (let i = 0; i < filesWithMetadata.length; i++) {
         const fileData = filesWithMetadata[i];
+        const fileToUpload = filesToUpload[i];
         
         try {
           console.log(`BulkUpload: Processing file ${i + 1}/${totalFiles}:`, fileData.file.name);
@@ -103,7 +128,7 @@ export const useBulkUploadLogic = (files: File[]) => {
           }
 
           // Upload file to Supabase Storage with user-specific path
-          const fileExt = fileData.file.name.split('.').pop();
+          const fileExt = fileToUpload.name.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           const filePath = `${user.id}/${fileName}`; // User-specific path for RLS compliance
 
@@ -111,7 +136,7 @@ export const useBulkUploadLogic = (files: File[]) => {
           
           const { error: uploadError } = await supabase.storage
             .from('photos')
-            .upload(filePath, fileData.file);
+            .upload(filePath, fileToUpload);
 
           if (uploadError) {
             console.error(`BulkUpload: Storage upload error for ${fileData.file.name}:`, uploadError);
@@ -166,11 +191,12 @@ export const useBulkUploadLogic = (files: File[]) => {
       setUploadResults(results);
 
       if (results.success > 0) {
+        const compressionMessage = enableCompression ? " with smart compression" : "";
         toast({
           title: `${results.success} photo${results.success > 1 ? 's' : ''} uploaded successfully!`,
           description: results.failed.length > 0 
             ? `${results.failed.length} file${results.failed.length > 1 ? 's' : ''} failed to upload.`
-            : "All photos have been added to the gallery.",
+            : `All photos have been added to the gallery${compressionMessage}.`,
         });
       }
 
@@ -219,6 +245,8 @@ export const useBulkUploadLogic = (files: File[]) => {
     uploading,
     uploadProgress,
     uploadResults,
+    enableCompression,
+    setEnableCompression,
     handleUploadAll,
     handleMetadataChange,
     addCustomFabric,

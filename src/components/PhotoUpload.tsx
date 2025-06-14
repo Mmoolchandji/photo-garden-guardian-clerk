@@ -24,6 +24,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
     imagePreview,
     showBulkModal,
     user,
+    enableCompression,
     
     // Setters
     setTitle,
@@ -31,6 +32,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
     setFabric,
     setPrice,
     setStockStatus,
+    setEnableCompression,
     
     // Handlers
     handleFileChange,
@@ -77,6 +79,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       fabric={fabric}
       price={price}
       stockStatus={stockStatus}
+      enableCompression={enableCompression}
       onFileChange={handleFileChange}
       onContinueToMetadata={handleContinueToMetadata}
       onUploadNow={() => handleUpload(true)}
@@ -93,6 +96,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
       onFabricChange={setFabric}
       onPriceChange={setPrice}
       onStockStatusChange={setStockStatus}
+      onCompressionToggle={setEnableCompression}
       onUpload={() => handleUpload()}
       onBack={handleBackToFileSelection}
       onCancel={handleCancel}

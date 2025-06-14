@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import FileSelectionCard from './FileSelectionCard';
 import PhotoPreviewCard from './PhotoPreviewCard';
 import PhotoMetadataForm from './PhotoMetadataForm';
+import CompressionToggle from './CompressionToggle';
 
 interface PhotoUploadContainerProps {
   step: 'file-selection' | 'metadata';
@@ -16,6 +17,7 @@ interface PhotoUploadContainerProps {
   fabric: string;
   price: string;
   stockStatus: string;
+  enableCompression: boolean;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onContinueToMetadata: () => void;
   onUploadNow: () => void;
@@ -25,6 +27,7 @@ interface PhotoUploadContainerProps {
   onFabricChange: (value: string) => void;
   onPriceChange: (value: string) => void;
   onStockStatusChange: (value: string) => void;
+  onCompressionToggle: (enabled: boolean) => void;
   onUpload: () => void;
   onBack: () => void;
   onCancel: () => void;
@@ -41,6 +44,7 @@ const PhotoUploadContainer = ({
   fabric,
   price,
   stockStatus,
+  enableCompression,
   onFileChange,
   onContinueToMetadata,
   onUploadNow,
@@ -50,6 +54,7 @@ const PhotoUploadContainer = ({
   onFabricChange,
   onPriceChange,
   onStockStatusChange,
+  onCompressionToggle,
   onUpload,
   onBack,
   onCancel,
@@ -68,7 +73,13 @@ const PhotoUploadContainer = ({
         </CardHeader>
         <CardContent className="space-y-6">
           {!file ? (
-            <FileSelectionCard onFileChange={onFileChange} />
+            <>
+              <FileSelectionCard onFileChange={onFileChange} />
+              <CompressionToggle 
+                enabled={enableCompression}
+                onToggle={onCompressionToggle}
+              />
+            </>
           ) : (
             <PhotoPreviewCard
               file={file}

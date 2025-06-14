@@ -1,7 +1,9 @@
+
 import { useState, useRef } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImageCompression } from './useImageCompression';
 
 type UploadStep = 'file-selection' | 'metadata';
 
@@ -18,8 +20,12 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [showBulkModal, setShowBulkModal] = useState(false);
+  const [enableCompression, setEnableCompression] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
+  // Image compression hook
+  const { compressSingleImage, compressing } = useImageCompression();
 
   const generateTitleFromFilename = (filename: string) => {
     return filename
@@ -80,8 +86,27 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
         throw new Error('Session expired. Please sign in again.');
       }
 
+      let fileToUpload = file;
+
+      // Apply compression if enabled
+      if (enableCompression) {
+        console.log('PhotoUpload: Compressing image before upload');
+        const compressionResult = await compressSingleImage(file, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.85
+        });
+
+        if (compressionResult) {
+          fileToUpload = compressionResult.compressedFile;
+          console.log('PhotoUpload: Compression complete. Original:', (file.size / 1024 / 1024).toFixed(2), 'MB -> Compressed:', (fileToUpload.size / 1024 / 1024).toFixed(2), 'MB');
+        } else {
+          console.log('PhotoUpload: Compression failed, using original file');
+        }
+      }
+
       // Upload file to user-specific folder in Supabase Storage
-      const fileExt = file.name.split('.').pop();
+      const fileExt = fileToUpload.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`; // User-specific path for RLS compliance
 
@@ -89,7 +114,7 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
 
       const { error: uploadError } = await supabase.storage
         .from('photos')
-        .upload(filePath, file);
+        .upload(filePath, fileToUpload);
 
       if (uploadError) {
         console.error('PhotoUpload: Storage upload error:', uploadError);
@@ -130,7 +155,7 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
 
       toast({
         title: "Photo uploaded successfully!",
-        description: "Your photo has been added to your gallery.",
+        description: enableCompression ? "Your photo has been compressed and added to your gallery." : "Your photo has been added to your gallery.",
       });
 
       // Reset form
@@ -206,11 +231,12 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
     stockStatus,
     file,
     files,
-    uploading,
+    uploading: uploading || compressing,
     imagePreview,
     showBulkModal,
     fileInputRef,
     user,
+    enableCompression,
     
     // Setters
     setTitle,
@@ -218,6 +244,7 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
     setFabric,
     setPrice,
     setStockStatus,
+    setEnableCompression,
     
     // Handlers
     handleFileChange,
