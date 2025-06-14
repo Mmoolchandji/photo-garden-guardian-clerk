@@ -20,10 +20,12 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
     // Check if we exceed the browser's file count limit
     if (photos.length > WEB_SHARE_LIMITS.MAX_FILES) {
       console.log(`Too many photos (${photos.length}) for Web Share API. Limit: ${WEB_SHARE_LIMITS.MAX_FILES}`);
-      toast({
-        title: "Too many photos for file sharing",
-        description: `Your device can only share ${WEB_SHARE_LIMITS.MAX_FILES} files at once. Switching to link sharing.`,
-      });
+      return false; // Don't show toast here, let the caller handle it
+    }
+    
+    // Verify Web Share API support before proceeding
+    if (!navigator.share || !navigator.canShare) {
+      console.log('Web Share API not supported');
       return false;
     }
     
@@ -31,39 +33,53 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
     const failedPhotos: ShareablePhoto[] = [];
     let totalSize = 0;
     
+    // Show loading state for file preparation
+    const loadingToast = toast({
+      title: "Preparing files...",
+      description: `Getting ${photos.length} photos ready for sharing`,
+    });
+    
     // Fetch all images as blobs with size checking
     for (const photo of photos) {
-      const imageBlob = await fetchImageAsBlob(photo.imageUrl);
-      if (imageBlob) {
-        // Check individual file size
-        if (imageBlob.size > WEB_SHARE_LIMITS.MAX_SINGLE_FILE_SIZE) {
-          console.log(`Photo ${photo.title} too large: ${imageBlob.size} bytes`);
+      try {
+        const imageBlob = await fetchImageAsBlob(photo.imageUrl);
+        if (imageBlob) {
+          // Check individual file size
+          if (imageBlob.size > WEB_SHARE_LIMITS.MAX_SINGLE_FILE_SIZE) {
+            console.log(`Photo ${photo.title} too large: ${imageBlob.size} bytes`);
+            failedPhotos.push(photo);
+            continue;
+          }
+          
+          // Check total size
+          if (totalSize + imageBlob.size > WEB_SHARE_LIMITS.MAX_TOTAL_SIZE) {
+            console.log(`Total size would exceed limit. Current: ${totalSize}, Adding: ${imageBlob.size}`);
+            failedPhotos.push(photo);
+            continue;
+          }
+          
+          const extension = imageBlob.type.split('/')[1] || 'jpg';
+          const fileName = `${photo.title.replace(/[^a-zA-Z0-9]/g, '_')}.${extension}`;
+          const file = new File([imageBlob], fileName, { type: imageBlob.type });
+          files.push(file);
+          totalSize += imageBlob.size;
+        } else {
           failedPhotos.push(photo);
-          continue;
         }
-        
-        // Check total size
-        if (totalSize + imageBlob.size > WEB_SHARE_LIMITS.MAX_TOTAL_SIZE) {
-          console.log(`Total size would exceed limit. Current: ${totalSize}, Adding: ${imageBlob.size}`);
-          failedPhotos.push(photo);
-          continue;
-        }
-        
-        const extension = imageBlob.type.split('/')[1] || 'jpg';
-        const fileName = `${photo.title.replace(/[^a-zA-Z0-9]/g, '_')}.${extension}`;
-        const file = new File([imageBlob], fileName, { type: imageBlob.type });
-        files.push(file);
-        totalSize += imageBlob.size;
-      } else {
+      } catch (error) {
+        console.error(`Failed to prepare ${photo.title}:`, error);
         failedPhotos.push(photo);
       }
     }
+
+    loadingToast.dismiss();
 
     if (files.length === 0) {
       console.log('No images could be fetched for sharing');
       toast({
         title: "Unable to prepare files",
-        description: "All selected photos failed to load. Switching to link sharing.",
+        description: "Could not prepare any photos for file sharing",
+        variant: "destructive",
       });
       return false;
     }
@@ -74,38 +90,47 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
       files: files,
     };
 
-    // Check if sharing files is supported
-    if (navigator.canShare && navigator.canShare(shareData)) {
-      await navigator.share(shareData);
-      console.log(`Successfully shared ${files.length} photos via Web Share API`);
-      
-      if (failedPhotos.length > 0) {
-        toast({
-          title: "Partial success",
-          description: `${files.length} photos shared as files. ${failedPhotos.length} shared as links due to size limits.`,
-        });
-      }
-      
-      return true;
+    // Double-check if sharing files is supported with actual data
+    if (!navigator.canShare(shareData)) {
+      console.log('File sharing not supported with this data');
+      return false;
+    }
+
+    // Attempt the share
+    await navigator.share(shareData);
+    console.log(`Successfully shared ${files.length} photos via Web Share API`);
+    
+    if (failedPhotos.length > 0) {
+      toast({
+        title: "Partial file sharing",
+        description: `${files.length} photos shared as files. ${failedPhotos.length} couldn't be prepared.`,
+      });
     }
     
-    console.log('File sharing not supported, trying text-only share');
-    return false;
+    return true;
     
   } catch (error) {
     console.error('Multi-photo Web Share API error:', error);
     
     if (error.name === 'AbortError') {
       console.log('User cancelled the share');
-      return true;
+      return true; // User cancellation is considered "successful" handling
     }
     
     // Handle specific Web Share API errors
     if (error.name === 'DataError') {
-      console.log('Web Share API data error - likely too many files or size limit exceeded');
+      console.log('Web Share API data error - likely file format or size issue');
       toast({
-        title: "File sharing limit exceeded",
-        description: "Your device cannot share this many files. Using link sharing instead.",
+        title: "File sharing issue",
+        description: "Some files couldn't be shared due to format or size limits",
+        variant: "destructive",
+      });
+    } else if (error.name === 'NotAllowedError') {
+      console.log('Web Share API not allowed - likely due to security restrictions');
+      toast({
+        title: "Sharing not allowed",
+        description: "File sharing was blocked by your browser's security settings",
+        variant: "destructive",
       });
     }
     
@@ -118,6 +143,12 @@ export const shareViaWebShareAPI = async (photo: ShareablePhoto): Promise<boolea
   try {
     console.log('Attempting Web Share API for photo:', photo.title);
     
+    // Verify Web Share API support
+    if (!navigator.share || !navigator.canShare) {
+      console.log('Web Share API not supported');
+      return false;
+    }
+    
     const imageBlob = await fetchImageAsBlob(photo.imageUrl);
     if (!imageBlob) {
       console.log('Failed to fetch image blob, falling back to URL sharing');
@@ -127,10 +158,6 @@ export const shareViaWebShareAPI = async (photo: ShareablePhoto): Promise<boolea
     // Check file size for single photo
     if (imageBlob.size > WEB_SHARE_LIMITS.MAX_SINGLE_FILE_SIZE) {
       console.log(`Photo too large for file sharing: ${imageBlob.size} bytes`);
-      toast({
-        title: "Photo too large for file sharing",
-        description: "Sharing as link instead due to file size.",
-      });
       return false;
     }
 
@@ -146,27 +173,28 @@ export const shareViaWebShareAPI = async (photo: ShareablePhoto): Promise<boolea
     };
 
     // Check if sharing files is supported
-    if (navigator.canShare && navigator.canShare(shareData)) {
-      await navigator.share(shareData);
-      console.log('Successfully shared via Web Share API');
-      return true;
+    if (!navigator.canShare(shareData)) {
+      console.log('File sharing not supported, trying text-only share');
+      
+      // Fallback to text-only sharing if file sharing isn't supported
+      const textShareData = {
+        title: photo.title,
+        text: `${formatWhatsAppMessage(photo)}\n\n${photo.imageUrl}`,
+      };
+      
+      if (navigator.canShare(textShareData)) {
+        await navigator.share(textShareData);
+        console.log('Successfully shared text via Web Share API');
+        return true;
+      }
+      
+      return false;
     }
     
-    console.log('File sharing not supported, trying text-only share');
+    await navigator.share(shareData);
+    console.log('Successfully shared via Web Share API');
+    return true;
     
-    // Fallback to text-only sharing if file sharing isn't supported
-    const textShareData = {
-      title: photo.title,
-      text: `${formatWhatsAppMessage(photo)}\n\n${photo.imageUrl}`,
-    };
-    
-    if (navigator.canShare && navigator.canShare(textShareData)) {
-      await navigator.share(textShareData);
-      console.log('Successfully shared text via Web Share API');
-      return true;
-    }
-    
-    return false;
   } catch (error) {
     console.error('Web Share API error:', error);
     
