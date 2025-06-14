@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,10 +33,10 @@ const Gallery = () => {
       if (error) throw error;
       if (!data) throw new Error('Gallery not found');
       
-      // Convert the JSON photos to ShareablePhoto array
+      // Convert the JSON photos to ShareablePhoto array with proper type casting
       const gallery: SharedGallery = {
         ...data,
-        photos: data.photos as ShareablePhoto[]
+        photos: (data.photos as unknown) as ShareablePhoto[]
       };
       
       return gallery;

@@ -1,4 +1,3 @@
-
 import { ShareablePhoto } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -39,13 +38,13 @@ export const createShareableGallery = async (
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + config.expirationHours);
     
-    // Store gallery data in Supabase
+    // Store gallery data in Supabase with proper JSON conversion
     const { error } = await supabase
       .from('shared_galleries')
       .insert({
         id: galleryId,
         title: config.title,
-        photos: photos,
+        photos: photos as any, // Convert to JSON-compatible format
         expires_at: expiresAt.toISOString(),
         include_business_info: config.includeBusinessInfo,
         watermark: config.watermark,
