@@ -54,8 +54,13 @@ export const useBulkUploadLogic = (files: File[]) => {
 
   const addCustomFabric = (fabricName: string) => {
     const trimmedFabric = fabricName.trim();
+    console.log('useBulkUploadLogic: Adding custom fabric:', trimmedFabric);
+    console.log('useBulkUploadLogic: Current sessionCustomFabrics:', sessionCustomFabrics);
+    
     if (trimmedFabric && !sessionCustomFabrics.includes(trimmedFabric)) {
-      setSessionCustomFabrics(prev => [...prev, trimmedFabric]);
+      const newCustomFabrics = [...sessionCustomFabrics, trimmedFabric];
+      setSessionCustomFabrics(newCustomFabrics);
+      console.log('useBulkUploadLogic: Updated sessionCustomFabrics:', newCustomFabrics);
     }
   };
 
@@ -184,6 +189,7 @@ export const useBulkUploadLogic = (files: File[]) => {
   };
 
   const handleMetadataChange = (field: 'title' | 'description' | 'fabric' | 'price' | 'stockStatus', value: string) => {
+    console.log('useBulkUploadLogic: Metadata change:', field, value);
     setFilesWithMetadata(prev => 
       prev.map((item, index) => 
         index === currentIndex ? { ...item, [field]: value } : item

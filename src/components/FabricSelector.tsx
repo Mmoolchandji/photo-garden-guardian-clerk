@@ -29,10 +29,14 @@ const FabricSelector = ({
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customFabricInput, setCustomFabricInput] = useState('');
 
+  console.log('FabricSelector: Current value:', value);
+  console.log('FabricSelector: Available custom fabrics:', availableCustomFabrics);
+
   // Combine all available fabrics
   const allFabrics = [...PREDEFINED_FABRICS, ...availableCustomFabrics];
 
   const handleSelectChange = (selectedValue: string) => {
+    console.log('FabricSelector: Selected value:', selectedValue);
     if (selectedValue === '__add_custom__') {
       setShowCustomInput(true);
       setCustomFabricInput('');
@@ -44,6 +48,7 @@ const FabricSelector = ({
 
   const handleAddCustomFabric = () => {
     const trimmedFabric = customFabricInput.trim();
+    console.log('FabricSelector: Adding custom fabric:', trimmedFabric);
     if (trimmedFabric && !allFabrics.includes(trimmedFabric)) {
       // Add to session custom fabrics
       onAddCustomFabric?.(trimmedFabric);
@@ -104,13 +109,16 @@ const FabricSelector = ({
 
   return (
     <Select value={value} onValueChange={handleSelectChange}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select fabric type..." />
+      <SelectTrigger className="w-full bg-white">
+        <SelectValue 
+          placeholder="Select fabric type..." 
+          className="text-gray-900"
+        />
       </SelectTrigger>
-      <SelectContent className="bg-white">
+      <SelectContent className="bg-white z-50">
         {/* Predefined fabrics */}
         {PREDEFINED_FABRICS.map((fabric) => (
-          <SelectItem key={fabric} value={fabric}>
+          <SelectItem key={fabric} value={fabric} className="text-gray-900">
             {fabric}
           </SelectItem>
         ))}
@@ -119,10 +127,10 @@ const FabricSelector = ({
         {availableCustomFabrics.length > 0 && (
           <>
             {availableCustomFabrics.map((fabric) => (
-              <SelectItem key={fabric} value={fabric}>
+              <SelectItem key={fabric} value={fabric} className="text-gray-900">
                 <span className="flex items-center">
                   {fabric} 
-                  <span className="ml-2 text-xs text-gray-500">(Custom)</span>
+                  <span className="ml-2 text-xs text-blue-600">(Custom)</span>
                 </span>
               </SelectItem>
             ))}
