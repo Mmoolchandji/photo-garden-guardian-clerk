@@ -10,7 +10,7 @@ import { shareGalleryToWhatsApp } from './gallerySharing';
 // Re-export types and utilities
 export type { ShareablePhoto };
 export { isMobileDevice, isIOSDevice, canShareFiles } from './deviceDetection';
-export { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
+export { formatWhatsAppMessage, formatMultiplePhotosMessage, formatIndividualPhotoMessage } from './messageFormatting';
 export { shareBatchedToWhatsApp } from './batchedSharing';
 export { shareGalleryToWhatsApp } from './gallerySharing';
 
@@ -24,7 +24,7 @@ export const shareMultipleToWhatsApp = async (
   try {
     const loadingToast = toast({
       title: "Preparing to share...",
-      description: `Setting up ${photos.length} photos for WhatsApp share`,
+      description: `Setting up ${photos.length} photos for individual WhatsApp sharing`,
     });
 
     let success = false;
@@ -45,17 +45,17 @@ export const shareMultipleToWhatsApp = async (
     switch (finalMethod) {
       case 'files':
         if (photos.length <= 10 && isMobileDevice() && canShareFiles()) {
-          console.log('Using Web Share API for files');
+          console.log('Using Web Share API for individual files');
           success = await shareMultipleViaWebShareAPI(photos);
         }
         if (!success) {
-          console.log('Falling back to WhatsApp URL sharing for files');
-          success = shareMultipleViaWhatsAppURL(photos);
+          console.log('Falling back to WhatsApp URL sharing for individual files');
+          success = await shareMultipleViaWhatsAppURL(photos);
         }
         break;
 
       case 'batched':
-        console.log('Using batched sharing');
+        console.log('Using batched sharing with individual messages');
         success = await shareBatchedToWhatsApp(photos, true);
         break;
 

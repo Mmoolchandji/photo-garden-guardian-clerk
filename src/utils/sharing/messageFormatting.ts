@@ -14,6 +14,14 @@ export const formatWhatsAppMessage = (photo: ShareablePhoto): string => {
   return message;
 };
 
+// NEW: Individual photo message for simplified sharing (price only)
+export const formatIndividualPhotoMessage = (photo: ShareablePhoto): string => {
+  if (photo.price) {
+    return `💰 Price: ₹${photo.price.toLocaleString('en-IN')}`;
+  }
+  return `✨ ${photo.title}`;
+};
+
 // New function for formatting multiple photos message
 export const formatMultiplePhotosMessage = (photos: ShareablePhoto[]): string => {
   let message = `✨ Check out these beautiful sarees:\n\n`;

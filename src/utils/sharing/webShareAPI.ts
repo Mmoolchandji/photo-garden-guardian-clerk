@@ -2,7 +2,7 @@
 import { toast } from '@/hooks/use-toast';
 import { ShareablePhoto } from './types';
 import { canShareFiles } from './deviceDetection';
-import { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
+import { formatWhatsAppMessage, formatIndividualPhotoMessage } from './messageFormatting';
 import { fetchImageAsBlob } from './imageUtils';
 
 // Browser/platform limits for Web Share API
@@ -12,15 +12,18 @@ const WEB_SHARE_LIMITS = {
   MAX_SINGLE_FILE_SIZE: 5 * 1024 * 1024, // 5MB per file limit
 };
 
-// Enhanced multi-photo Web Share API implementation with better limit handling
+// Helper function to add delay between shares
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Enhanced multi-photo Web Share API implementation with individual messages
 export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Promise<boolean> => {
   try {
-    console.log('Attempting Web Share API for multiple photos:', photos.length);
+    console.log('Attempting Web Share API for multiple photos (individual messages):', photos.length);
     
     // Check if we exceed the browser's file count limit
     if (photos.length > WEB_SHARE_LIMITS.MAX_FILES) {
       console.log(`Too many photos (${photos.length}) for Web Share API. Limit: ${WEB_SHARE_LIMITS.MAX_FILES}`);
-      return false; // Don't show toast here, let the caller handle it
+      return false;
     }
     
     // Verify Web Share API support before proceeding
@@ -29,111 +32,98 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
       return false;
     }
     
-    const files: File[] = [];
-    const failedPhotos: ShareablePhoto[] = [];
-    let totalSize = 0;
-    
-    // Show loading state for file preparation
     const loadingToast = toast({
       title: "Preparing files...",
-      description: `Getting ${photos.length} photos ready for sharing`,
+      description: `Getting ${photos.length} photos ready for individual sharing`,
     });
     
-    // Fetch all images as blobs with size checking
-    for (const photo of photos) {
+    let successCount = 0;
+    let failedCount = 0;
+    
+    // Share each photo individually with its own message
+    for (let i = 0; i < photos.length; i++) {
+      const photo = photos[i];
+      
       try {
-        const imageBlob = await fetchImageAsBlob(photo.imageUrl);
-        if (imageBlob) {
-          // Check individual file size
-          if (imageBlob.size > WEB_SHARE_LIMITS.MAX_SINGLE_FILE_SIZE) {
-            console.log(`Photo ${photo.title} too large: ${imageBlob.size} bytes`);
-            failedPhotos.push(photo);
-            continue;
-          }
-          
-          // Check total size
-          if (totalSize + imageBlob.size > WEB_SHARE_LIMITS.MAX_TOTAL_SIZE) {
-            console.log(`Total size would exceed limit. Current: ${totalSize}, Adding: ${imageBlob.size}`);
-            failedPhotos.push(photo);
-            continue;
-          }
-          
-          const extension = imageBlob.type.split('/')[1] || 'jpg';
-          const fileName = `${photo.title.replace(/[^a-zA-Z0-9]/g, '_')}.${extension}`;
-          const file = new File([imageBlob], fileName, { type: imageBlob.type });
-          files.push(file);
-          totalSize += imageBlob.size;
-        } else {
-          failedPhotos.push(photo);
+        // Add delay between shares (except for first photo)
+        if (i > 0) {
+          await delay(1200); // 1.2 second delay between shares
         }
+        
+        const imageBlob = await fetchImageAsBlob(photo.imageUrl);
+        if (!imageBlob) {
+          console.log(`Failed to fetch image for ${photo.title}`);
+          failedCount++;
+          continue;
+        }
+        
+        // Check individual file size
+        if (imageBlob.size > WEB_SHARE_LIMITS.MAX_SINGLE_FILE_SIZE) {
+          console.log(`Photo ${photo.title} too large: ${imageBlob.size} bytes`);
+          failedCount++;
+          continue;
+        }
+        
+        const extension = imageBlob.type.split('/')[1] || 'jpg';
+        const fileName = `${photo.title.replace(/[^a-zA-Z0-9]/g, '_')}.${extension}`;
+        const file = new File([imageBlob], fileName, { type: imageBlob.type });
+        
+        // Create individual share data with only this photo's price
+        const shareData = {
+          title: photo.title,
+          text: formatIndividualPhotoMessage(photo),
+          files: [file],
+        };
+        
+        // Check if sharing this individual file is supported
+        if (!navigator.canShare(shareData)) {
+          console.log(`File sharing not supported for ${photo.title}`);
+          failedCount++;
+          continue;
+        }
+        
+        // Share this individual photo
+        await navigator.share(shareData);
+        console.log(`Successfully shared ${photo.title} individually via Web Share API`);
+        successCount++;
+        
       } catch (error) {
-        console.error(`Failed to prepare ${photo.title}:`, error);
-        failedPhotos.push(photo);
+        console.error(`Failed to share ${photo.title}:`, error);
+        
+        if (error.name === 'AbortError') {
+          console.log(`User cancelled sharing ${photo.title}`);
+          // Don't count user cancellation as failure for the overall process
+          break;
+        }
+        
+        failedCount++;
       }
     }
-
-    loadingToast.dismiss();
-
-    if (files.length === 0) {
-      console.log('No images could be fetched for sharing');
-      toast({
-        title: "Unable to prepare files",
-        description: "Could not prepare any photos for file sharing",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    const shareData = {
-      title: `${photos.length} Beautiful Sarees`,
-      text: formatMultiplePhotosMessage(photos),
-      files: files,
-    };
-
-    // Double-check if sharing files is supported with actual data
-    if (!navigator.canShare(shareData)) {
-      console.log('File sharing not supported with this data');
-      return false;
-    }
-
-    // Attempt the share
-    await navigator.share(shareData);
-    console.log(`Successfully shared ${files.length} photos via Web Share API`);
     
-    if (failedPhotos.length > 0) {
+    loadingToast.dismiss();
+    
+    if (successCount === 0) {
+      console.log('No photos could be shared individually');
+      return false;
+    }
+    
+    // Show summary
+    if (failedCount > 0) {
       toast({
-        title: "Partial file sharing",
-        description: `${files.length} photos shared as files. ${failedPhotos.length} couldn't be prepared.`,
+        title: "Partial sharing completed",
+        description: `${successCount} photos shared individually. ${failedCount} couldn't be prepared.`,
+      });
+    } else {
+      toast({
+        title: "All photos shared! 🎉",
+        description: `${successCount} photos shared individually with their prices`,
       });
     }
     
     return true;
     
   } catch (error) {
-    console.error('Multi-photo Web Share API error:', error);
-    
-    if (error.name === 'AbortError') {
-      console.log('User cancelled the share');
-      return true; // User cancellation is considered "successful" handling
-    }
-    
-    // Handle specific Web Share API errors
-    if (error.name === 'DataError') {
-      console.log('Web Share API data error - likely file format or size issue');
-      toast({
-        title: "File sharing issue",
-        description: "Some files couldn't be shared due to format or size limits",
-        variant: "destructive",
-      });
-    } else if (error.name === 'NotAllowedError') {
-      console.log('Web Share API not allowed - likely due to security restrictions');
-      toast({
-        title: "Sharing not allowed",
-        description: "File sharing was blocked by your browser's security settings",
-        variant: "destructive",
-      });
-    }
-    
+    console.error('Multi-photo individual Web Share API error:', error);
     return false;
   }
 };
