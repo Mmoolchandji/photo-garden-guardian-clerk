@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Save, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -150,7 +149,6 @@ export default function PhotoEditForm({
         <FabricSelector
           value={fields.fabric}
           onChange={(val) => handleChange('fabric', val)}
-          disabled={disabled || saving}
         />
       </div>
 
@@ -184,7 +182,6 @@ export default function PhotoEditForm({
         <StockStatusSelector
           value={fields.stock_status}
           onChange={(v) => handleChange('stock_status', v)}
-          disabled={disabled || saving}
         />
       </div>
 
