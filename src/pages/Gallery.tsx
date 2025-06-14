@@ -34,7 +34,13 @@ const Gallery = () => {
       if (error) throw error;
       if (!data) throw new Error('Gallery not found');
       
-      return data as SharedGallery;
+      // Convert the JSON photos to ShareablePhoto array
+      const gallery: SharedGallery = {
+        ...data,
+        photos: data.photos as ShareablePhoto[]
+      };
+      
+      return gallery;
     },
     enabled: !!galleryId,
   });

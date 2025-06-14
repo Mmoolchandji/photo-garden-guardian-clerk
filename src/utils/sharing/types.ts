@@ -4,4 +4,5 @@ export interface ShareablePhoto {
   title: string;
   imageUrl: string;
   price?: number;
+  description?: string;
 }

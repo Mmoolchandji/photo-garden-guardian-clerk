@@ -16,6 +16,7 @@ export const transformPhotoToShareable = (photo: Photo): ShareablePhoto => ({
   title: photo.title,
   imageUrl: photo.image_url,
   price: photo.price,
+  description: photo.description || undefined,
 });
 
 export const transformPhotosToShareable = (photos: Photo[]): ShareablePhoto[] => {
