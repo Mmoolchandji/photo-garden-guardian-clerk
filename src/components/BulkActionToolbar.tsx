@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Trash2, X, Edit, AlertTriangle } from 'lucide-react';
+import { Trash2, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -14,7 +14,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import BulkEditModal from './BulkEditModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
 
@@ -24,7 +23,6 @@ interface BulkActionToolbarProps {
 
 const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showBulkEdit, setShowBulkEdit] = useState(false);
   const { toast } = useToast();
   const {
     selectedPhotos,
@@ -93,92 +91,64 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
   }
 
   return (
-    <>
-      {/* Bulk Edit Modal */}
-      {showBulkEdit &&
-        <BulkEditModal
-          open={showBulkEdit}
-          photos={selectedPhotos}
-          onClose={() => {
-            setShowBulkEdit(false);
-            clearSelection();
-            exitSelectionMode();
-          }}
-          onPhotoUpdated={onPhotosDeleted}
-        />
-      }
-
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-6 py-4 flex items-center space-x-4">
-          <div className="flex items-center space-x-3">
-            <div className="text-sm font-medium text-gray-900">
-              {getSelectedCount()} photo{getSelectedCount() > 1 ? 's' : ''} selected
-            </div>
-            
-            <div className="h-4 w-px bg-gray-300" />
-
-            {/* Edit Selected Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowBulkEdit(true)}
-              className="flex items-center"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Selected
-            </Button>
-
-            {/* Delete Selected Button */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={isDeleting}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Selected
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center space-x-2">
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
-                    <span>Delete {getSelectedCount()} Photo{getSelectedCount() > 1 ? 's' : ''}?</span>
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the selected 
-                    photo{getSelectedCount() > 1 ? 's' : ''} from your gallery and remove 
-                    {getSelectedCount() > 1 ? ' them' : ' it'} from our servers.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleBulkDelete}
-                    disabled={isDeleting}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete Photos'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={exitSelectionMode}
-              className="text-gray-600 hover:text-gray-800"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-6 py-4 flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
+          <div className="text-sm font-medium text-gray-900">
+            {getSelectedCount()} photo{getSelectedCount() > 1 ? 's' : ''} selected
           </div>
+          
+          <div className="h-4 w-px bg-gray-300" />
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isDeleting}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Selected
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center space-x-2">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                  <span>Delete {getSelectedCount()} Photo{getSelectedCount() > 1 ? 's' : ''}?</span>
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the selected 
+                  photo{getSelectedCount() > 1 ? 's' : ''} from your gallery and remove 
+                  {getSelectedCount() > 1 ? ' them' : ' it'} from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleBulkDelete}
+                  disabled={isDeleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Photos'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={exitSelectionMode}
+            className="text-gray-600 hover:text-gray-800"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Cancel
+          </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
