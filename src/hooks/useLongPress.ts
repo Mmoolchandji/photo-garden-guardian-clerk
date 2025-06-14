@@ -61,7 +61,7 @@ export const useLongPress = ({
     onMouseUp: endPress,
     onMouseLeave: cancelPress,
     ...(shouldPreventDefault && {
-      onContextMenu: (e: Event) => e.preventDefault(),
+      onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
     }),
   };
 };
