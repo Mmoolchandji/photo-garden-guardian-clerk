@@ -1,5 +1,5 @@
 
-import { PhotoCard } from '@/components/PhotoCard';
+import PhotoCard from '@/components/PhotoCard';
 
 const DemoGallery = () => {
   const demoPhotos = [
@@ -61,7 +61,7 @@ const DemoGallery = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {demoPhotos.map((photo) => (
             <div key={photo.id} className="relative">
-              <PhotoCard photo={photo} />
+              <PhotoCard photo={photo} onClick={() => {}} />
               <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                 <div className="text-center p-4">
                   <p className="text-sm text-gray-700 mb-2">Demo Preview</p>
