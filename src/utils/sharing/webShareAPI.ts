@@ -2,7 +2,7 @@
 import { toast } from '@/hooks/use-toast';
 import { ShareablePhoto } from './types';
 import { canShareFiles } from './deviceDetection';
-import { formatWhatsAppMessage, formatIndividualPhotoMessage } from './messageFormatting';
+import { formatWhatsAppMessage, formatCombinedWebShareMessage, validatePhotosForSharing } from './messageFormatting';
 import { fetchImageAsBlob } from './imageUtils';
 
 // Browser/platform limits for Web Share API
@@ -12,31 +12,36 @@ const WEB_SHARE_LIMITS = {
   MAX_SINGLE_FILE_SIZE: 5 * 1024 * 1024, // 5MB per file limit
 };
 
-// Create a combined message for multiple photos in Web Share API
-const formatCombinedWebShareMessage = (photos: ShareablePhoto[]): string => {
-  let message = `✨ Beautiful Saree Collection (${photos.length} photos)\n\n`;
-  
-  photos.forEach((photo, index) => {
-    message += `${index + 1}. *${photo.title}*`;
-    if (photo.price) {
-      message += ` - ₹${photo.price.toLocaleString('en-IN')}`;
-    }
-    message += '\n';
-  });
-  
-  message += '\n📸 View our complete collection at our gallery!';
-  
-  return message;
-};
-
-// Fixed multi-photo Web Share API implementation - shares all files at once
+// IMPROVED: Enhanced multi-photo Web Share API implementation with validation
 export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Promise<boolean> => {
   try {
-    console.log('Attempting Web Share API for multiple photos (combined share):', photos.length);
+    console.log('Attempting Web Share API for multiple photos (single combined share):', photos.length);
+    
+    // Step 1: Validate photos before processing
+    const validation = validatePhotosForSharing(photos);
+    
+    if (!validation.hasValidPhotos) {
+      console.log('No valid photos to share');
+      toast({
+        title: "No valid photos to share",
+        description: "All photos are missing required data (title or image URL).",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    // Use only valid photos and warn about invalid ones
+    const photosToShare = validation.validPhotos;
+    if (validation.invalidPhotos.length > 0) {
+      toast({
+        title: `${validation.invalidPhotos.length} photos skipped`,
+        description: `Sharing ${photosToShare.length} valid photos. Skipped photos were missing required data.`,
+      });
+    }
     
     // Check if we exceed the browser's file count limit
-    if (photos.length > WEB_SHARE_LIMITS.MAX_FILES) {
-      console.log(`Too many photos (${photos.length}) for Web Share API. Limit: ${WEB_SHARE_LIMITS.MAX_FILES}`);
+    if (photosToShare.length > WEB_SHARE_LIMITS.MAX_FILES) {
+      console.log(`Too many photos (${photosToShare.length}) for Web Share API. Limit: ${WEB_SHARE_LIMITS.MAX_FILES}`);
       return false;
     }
     
@@ -48,7 +53,7 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
     
     const loadingToast = toast({
       title: "Preparing files...",
-      description: `Getting ${photos.length} photos ready for sharing`,
+      description: `Getting ${photosToShare.length} photos ready for sharing`,
     });
     
     const files: File[] = [];
@@ -56,7 +61,7 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
     const failedPhotos: string[] = [];
     
     // Fetch all images and create files
-    for (const photo of photos) {
+    for (const photo of photosToShare) {
       try {
         const imageBlob = await fetchImageAsBlob(photo.imageUrl);
         if (!imageBlob) {
@@ -113,9 +118,9 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
     }
     
     // Filter photos to only include successfully processed ones
-    const successfulPhotos = photos.filter(photo => !failedPhotos.includes(photo.title));
+    const successfulPhotos = photosToShare.filter(photo => !failedPhotos.includes(photo.title));
     
-    // Create combined share data with all files
+    // IMPROVED: Create combined share data with enhanced message formatting
     const shareData = {
       title: `Saree Collection (${files.length} photos)`,
       text: formatCombinedWebShareMessage(successfulPhotos),
@@ -137,7 +142,7 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
         console.log('Successfully shared text via Web Share API');
         toast({
           title: "Shared collection info! 📝",
-          description: "Photos shared as text. Recipients can view images via gallery link.",
+          description: "Photos shared as text with prices. Recipients can view images via gallery link.",
         });
         return true;
       }
@@ -145,13 +150,13 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
       return false;
     }
     
-    // Share all files at once
+    // Share all files at once with combined message
     await navigator.share(shareData);
-    console.log('Successfully shared multiple files via Web Share API');
+    console.log('Successfully shared multiple files via Web Share API with combined message');
     
     toast({
       title: "Photos shared! 🎉",
-      description: `${files.length} photos shared with prices included`,
+      description: `${files.length} photos shared with a combined message including all prices`,
     });
     
     return true;
