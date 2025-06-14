@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -170,20 +171,6 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
                   className="w-full h-48 object-cover"
                   draggable={false}
                 />
-                
-                {/* Selection Checkbox Overlay */}
-                <div className="absolute top-3 left-3">
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => {
-                      if (!isSelectionMode) {
-                        enterSelectionMode();
-                      }
-                      togglePhoto(photo);
-                    }}
-                    className="bg-white/90 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  />
-                </div>
                 
                 {/* Selection Overlay */}
                 {isSelected && (
