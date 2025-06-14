@@ -1,104 +1,46 @@
 
 import { ShareablePhoto } from './types';
 import { isMobileDevice } from './deviceDetection';
-import { formatWhatsAppMessage, formatIndividualPhotoMessage } from './messageFormatting';
+import { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
 
-// Helper function to add delay between shares
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Optimized WhatsApp URL sharing for multiple photos with individual messages
-export const shareMultipleViaWhatsAppURL = async (photos: ShareablePhoto[], customMessage?: string): Promise<boolean> => {
+// Enhanced WhatsApp URL sharing for multiple photos with custom message support
+export const shareMultipleViaWhatsAppURL = (photos: ShareablePhoto[], customMessage?: string): boolean => {
   try {
-    console.log('Starting optimized WhatsApp URL sharing for', photos.length, 'photos');
+    const message = customMessage || formatMultiplePhotosMessage(photos);
     
-    let successCount = 0;
-    const isMobile = isMobileDevice();
+    // Add image URLs at the end
+    const imageUrls = photos.map(photo => photo.imageUrl).join('\n');
+    const fullMessage = `${message}\n\n${imageUrls}`;
+    const encodedMessage = encodeURIComponent(fullMessage);
     
-    // Optimize delays based on device type
-    const shareDelay = isMobile ? 800 : 500; // Reduced delays for better UX
-    const appOpenDelay = isMobile ? 1000 : 0; // Reduced mobile app open delay
+    let whatsappURL: string;
     
-    // Share each photo individually with its own price message
-    for (let i = 0; i < photos.length; i++) {
-      const photo = photos[i];
+    if (isMobileDevice()) {
+      whatsappURL = `whatsapp://send?text=${encodedMessage}`;
+      console.log('Opening WhatsApp native app on mobile for multiple photos');
+      window.location.href = whatsappURL;
       
-      try {
-        // Add delay between shares (except for first photo)
-        if (i > 0) {
-          console.log(`Waiting ${shareDelay}ms before sharing photo ${i + 1}`);
-          await delay(shareDelay);
-        }
-        
-        // Use individual message with price or custom message
-        const message = customMessage || formatIndividualPhotoMessage(photo);
-        
-        // Validate that message contains meaningful content
-        if (!message || message.trim().length === 0) {
-          console.warn(`Empty message for photo ${photo.title}, skipping`);
-          continue;
-        }
-        
-        const fullMessage = `${message}\n\n${photo.imageUrl}`;
-        const encodedMessage = encodeURIComponent(fullMessage);
-        
-        let whatsappURL: string;
-        
-        if (isMobile) {
-          whatsappURL = `whatsapp://send?text=${encodedMessage}`;
-          console.log(`Opening WhatsApp native app for photo ${i + 1}: ${photo.title} - ${message}`);
-          
-          // Use location.href for better app detection on mobile
-          window.location.href = whatsappURL;
-          
-          // Short delay to allow app to open
-          if (appOpenDelay > 0) {
-            await delay(appOpenDelay);
-          }
-        } else {
-          whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
-          console.log(`Opening WhatsApp Web for photo ${i + 1}: ${photo.title} - ${message}`);
-          
-          // Open in new tab for desktop
-          window.open(whatsappURL, '_blank');
-        }
-        
-        successCount++;
-        console.log(`Successfully initiated share ${i + 1}/${photos.length}: ${photo.title}`);
-        
-      } catch (error) {
-        console.error(`Failed to share ${photo.title} via WhatsApp URL:`, error);
-        // Continue with next photo instead of stopping
-      }
+      setTimeout(() => {
+        console.log('Fallback to WhatsApp Web for multiple photos');
+        window.open(`https://web.whatsapp.com/send?text=${encodedMessage}`, '_blank');
+      }, 2000);
+    } else {
+      whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+      console.log('Opening WhatsApp Web on desktop for multiple photos');
+      window.open(whatsappURL, '_blank');
     }
     
-    console.log(`Successfully initiated sharing for ${successCount} of ${photos.length} photos individually`);
-    
-    // Consider success if at least one photo was shared
-    const isSuccess = successCount > 0;
-    
-    if (isSuccess && successCount < photos.length) {
-      console.warn(`Partial success: ${successCount}/${photos.length} photos shared`);
-    }
-    
-    return isSuccess;
-    
+    return true;
   } catch (error) {
-    console.error('WhatsApp URL individual sharing error:', error);
+    console.error('WhatsApp URL sharing error for multiple photos:', error);
     return false;
   }
 };
 
-// Enhanced single photo WhatsApp URL sharing with better error handling
+// Enhanced WhatsApp URL sharing with better app detection
 export const shareViaWhatsAppURL = (photo: ShareablePhoto): boolean => {
   try {
     const message = formatWhatsAppMessage(photo);
-    
-    // Validate message content
-    if (!message || message.trim().length === 0) {
-      console.error('Empty message generated for photo:', photo.title);
-      return false;
-    }
-    
     const fullMessage = `${message}\n\n${photo.imageUrl}`;
     const encodedMessage = encodeURIComponent(fullMessage);
     
@@ -108,18 +50,19 @@ export const shareViaWhatsAppURL = (photo: ShareablePhoto): boolean => {
       // For mobile, prioritize native app
       whatsappURL = `whatsapp://send?text=${encodedMessage}`;
       
-      console.log('Opening WhatsApp native app on mobile with message:', message);
+      // Use location.href for better app detection on mobile
+      console.log('Opening WhatsApp native app on mobile');
       window.location.href = whatsappURL;
       
-      // Optimized fallback timing - reduced from 2000ms to 1500ms
+      // Fallback to WhatsApp Web if native app doesn't open (after delay)
       setTimeout(() => {
         console.log('Fallback to WhatsApp Web');
         window.open(`https://web.whatsapp.com/send?text=${encodedMessage}`, '_blank');
-      }, 1500);
+      }, 2000);
     } else {
       // For desktop, go directly to WhatsApp Web
       whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
-      console.log('Opening WhatsApp Web on desktop with message:', message);
+      console.log('Opening WhatsApp Web on desktop');
       window.open(whatsappURL, '_blank');
     }
     
