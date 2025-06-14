@@ -1,56 +1,27 @@
 
-import { useState, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
-const SearchBar = ({ value, onChange, placeholder = "Search photos..." }: SearchBarProps) => {
-  const [localValue, setLocalValue] = useState(value);
-  const inputId = 'search-input';
-
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      onChange(localValue);
-    }, 300);
-
-    return () => clearTimeout(debounceTimer);
-  }, [localValue, onChange]);
-
+const SearchBar = ({ value, onChange, placeholder = "Search...", disabled = false }: SearchBarProps) => {
   return (
     <div className="relative">
-      <label htmlFor={inputId} className="sr-only">
-        Search photos
-      </label>
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-      <Input
-        id={inputId}
+      <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${disabled ? 'text-gray-400' : 'text-gray-500'}`} />
+      <input
         type="text"
-        value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-10 pr-10"
+        disabled={disabled}
+        className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent ${
+          disabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'
+        }`}
       />
-      {localValue && (
-        <button
-          onClick={() => {
-            setLocalValue('');
-            onChange('');
-          }}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          aria-label="Clear search"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      )}
     </div>
   );
 };
