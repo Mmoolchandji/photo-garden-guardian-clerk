@@ -1,5 +1,6 @@
 
 import PhotoCard from '@/components/PhotoCard';
+import { transformPhotoToCardData } from '@/utils/photoTransform';
 
 const DemoGallery = () => {
   const demoPhotos = [
@@ -11,7 +12,8 @@ const DemoGallery = () => {
       price: 4500,
       stock_status: 'In Stock',
       image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=600&fit=crop',
-      created_at: '2024-01-15'
+      created_at: '2024-01-15',
+      user_id: 'demo'
     },
     {
       id: '2',
@@ -21,7 +23,8 @@ const DemoGallery = () => {
       price: 2800,
       stock_status: 'Low Stock',
       image_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&h=600&fit=crop',
-      created_at: '2024-01-14'
+      created_at: '2024-01-14',
+      user_id: 'demo'
     },
     {
       id: '3',
@@ -31,7 +34,8 @@ const DemoGallery = () => {
       price: 3200,
       stock_status: 'In Stock',
       image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=600&fit=crop',
-      created_at: '2024-01-13'
+      created_at: '2024-01-13',
+      user_id: 'demo'
     },
     {
       id: '4',
@@ -41,7 +45,8 @@ const DemoGallery = () => {
       price: 5200,
       stock_status: 'In Stock',
       image_url: 'https://images.unsplash.com/photo-1617627423056-892c6f81bf6e?w=400&h=600&fit=crop',
-      created_at: '2024-01-12'
+      created_at: '2024-01-12',
+      user_id: 'demo'
     }
   ];
 
@@ -61,7 +66,7 @@ const DemoGallery = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {demoPhotos.map((photo) => (
             <div key={photo.id} className="relative">
-              <PhotoCard photo={photo} onClick={() => {}} />
+              <PhotoCard photo={transformPhotoToCardData(photo)} onClick={() => {}} />
               <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                 <div className="text-center p-4">
                   <p className="text-sm text-gray-700 mb-2">Demo Preview</p>
