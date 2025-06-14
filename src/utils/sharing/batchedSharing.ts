@@ -2,7 +2,6 @@
 import { ShareablePhoto } from './types';
 import { shareMultipleViaWebShareAPI } from './webShareAPI';
 import { shareMultipleViaWhatsAppURL } from './whatsappURL';
-import { formatIndividualPhotoMessage } from './messageFormatting';
 import { toast } from '@/hooks/use-toast';
 
 export interface BatchShareOptions {
@@ -14,7 +13,7 @@ export interface BatchShareOptions {
 const DEFAULT_BATCH_OPTIONS: BatchShareOptions = {
   batchSize: 10,
   delayBetweenBatches: 2000, // 2 seconds between batches
-  includePartLabels: false, // Changed to false for individual messaging
+  includePartLabels: true,
 };
 
 // Split photos into batches for sharing
@@ -26,15 +25,8 @@ export const createPhotoBatches = (photos: ShareablePhoto[], batchSize: number):
   return batches;
 };
 
-// Enhanced message formatting for batched sharing (now individual)
+// Enhanced message formatting for batched sharing
 export const formatBatchedMessage = (photos: ShareablePhoto[], batchIndex: number, totalBatches: number): string => {
-  // For individual messaging, we don't need the batch format
-  // This function is kept for compatibility but returns individual messages
-  if (photos.length === 1) {
-    return formatIndividualPhotoMessage(photos[0]);
-  }
-  
-  // Fallback for legacy use
   let message = `✨ Saree Collection - Part ${batchIndex + 1} of ${totalBatches}\n\n`;
   
   photos.forEach((photo, index) => {
@@ -68,10 +60,10 @@ const createBatchConfirmationDialog = (batchNumber: number, totalBatches: number
           <h3 class="text-lg font-semibold text-gray-900">Ready for Batch ${batchNumber}</h3>
         </div>
         <p class="text-gray-600 mb-2">
-          Each photo will be sent individually with its own price.
+          WhatsApp limits sharing to 10 files at a time.
         </p>
         <p class="text-sm text-gray-500 mb-6">
-          Sharing batch ${batchNumber} of ${totalBatches} (${batchSize} photos with individual messages)
+          Sharing batch ${batchNumber} of ${totalBatches} (${batchSize} photos as files)
         </p>
         <div class="flex gap-3">
           <button id="batch-continue" class="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
@@ -113,7 +105,7 @@ const createBatchConfirmationDialog = (batchNumber: number, totalBatches: number
   });
 };
 
-// Improved batched sharing function with individual photo messaging
+// Improved batched sharing function with proper user prompting
 export const shareBatchedToWhatsApp = async (
   photos: ShareablePhoto[], 
   shareAsFiles: boolean = true,
@@ -122,7 +114,7 @@ export const shareBatchedToWhatsApp = async (
   const config = { ...DEFAULT_BATCH_OPTIONS, ...options };
   const batches = createPhotoBatches(photos, config.batchSize);
   
-  console.log(`Starting batched share with individual messages: ${batches.length} batches of up to ${config.batchSize} photos each`);
+  console.log(`Starting batched share: ${batches.length} batches of up to ${config.batchSize} photos each`);
   
   // Check if Web Share API supports files
   const supportsFileSharing = shareAsFiles && navigator.canShare && (() => {
@@ -137,11 +129,11 @@ export const shareBatchedToWhatsApp = async (
   if (!supportsFileSharing && shareAsFiles) {
     toast({
       title: "File sharing not supported",
-      description: "Your device doesn't support file sharing. Using individual link sharing instead.",
+      description: "Your device doesn't support file sharing. Using link sharing instead.",
       variant: "destructive",
     });
     
-    // Fallback to individual URL sharing
+    // Fallback to URL sharing for all batches
     return shareMultipleViaWhatsAppURL(photos);
   }
   
@@ -171,28 +163,32 @@ export const shareBatchedToWhatsApp = async (
         // Show initial notification for first batch
         toast({
           title: `Starting batch sharing`,
-          description: `Sharing ${batches.length} batches with individual messages for each photo`,
+          description: `Sharing ${batches.length} batches of up to ${config.batchSize} photos each`,
         });
       }
       
       let batchSuccess = false;
       
-      // Always try Web Share API first for file sharing (now with individual messages)
+      // Always try Web Share API first for file sharing
       if (shareAsFiles && supportsFileSharing) {
-        console.log(`Attempting Web Share API for batch ${batchNumber} with individual messages`);
+        console.log(`Attempting Web Share API for batch ${batchNumber}`);
         batchSuccess = await shareMultipleViaWebShareAPI(batch);
         
         if (batchSuccess) {
-          console.log(`Batch ${batchNumber} shared successfully via Web Share API with individual messages`);
+          console.log(`Batch ${batchNumber} shared successfully via Web Share API`);
         } else {
-          console.log(`Web Share API failed for batch ${batchNumber}, trying individual URL sharing`);
+          console.log(`Web Share API failed for batch ${batchNumber}, trying URL fallback`);
         }
       }
       
-      // If Web Share API failed, try individual URL sharing as fallback
+      // If Web Share API failed, try URL sharing as fallback
       if (!batchSuccess) {
-        console.log(`Using individual URL sharing for batch ${batchNumber}`);
-        batchSuccess = await shareMultipleViaWhatsAppURL(batch); // No custom message for individual sharing
+        console.log(`Using URL sharing for batch ${batchNumber}`);
+        const batchMessage = config.includePartLabels 
+          ? formatBatchedMessage(batch, i, batches.length)
+          : undefined;
+        
+        batchSuccess = shareMultipleViaWhatsAppURL(batch, batchMessage);
       }
       
       if (batchSuccess) {
@@ -201,7 +197,7 @@ export const shareBatchedToWhatsApp = async (
         // Show success for this batch
         toast({
           title: `Batch ${batchNumber} shared! 🎉`,
-          description: `${batch.length} photos shared individually to WhatsApp${i < batches.length - 1 ? '. Ready for next batch?' : ''}`,
+          description: `${batch.length} photos shared to WhatsApp${i < batches.length - 1 ? '. Ready for next batch?' : ''}`,
         });
       } else {
         toast({
@@ -217,7 +213,7 @@ export const shareBatchedToWhatsApp = async (
     if (successCount === batches.length) {
       toast({
         title: "All batches completed! 🎉",
-        description: `Successfully shared all ${photos.length} photos individually in ${batches.length} batches to WhatsApp`,
+        description: `Successfully shared all ${photos.length} photos in ${batches.length} batches to WhatsApp`,
       });
       return true;
     } else {
