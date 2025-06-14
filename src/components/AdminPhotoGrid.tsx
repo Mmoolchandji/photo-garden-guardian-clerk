@@ -6,14 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
-
-interface Photo {
-  id: string;
-  title: string;
-  description: string | null;
-  image_url: string;
-  created_at: string;
-}
+import { Photo } from '@/types/photo';
 
 interface AdminPhotoGridProps {
   photos: Photo[];
