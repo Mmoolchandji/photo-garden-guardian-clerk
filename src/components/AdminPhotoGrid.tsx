@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
 import { Photo } from '@/types/photo';
+import BulkActionToolbar from './BulkActionToolbar';
 
 interface AdminPhotoGridProps {
   photos: Photo[];
@@ -215,6 +216,9 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
           );
         })}
       </div>
+
+      {/* Bulk Action Toolbar */}
+      <BulkActionToolbar onPhotosDeleted={onPhotoDeleted} />
     </div>
   );
 };
