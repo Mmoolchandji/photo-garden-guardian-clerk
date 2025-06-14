@@ -51,6 +51,36 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_galleries: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          include_business_info: boolean
+          photos: Json
+          title: string
+          watermark: boolean
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id: string
+          include_business_info?: boolean
+          photos: Json
+          title: string
+          watermark?: boolean
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          include_business_info?: boolean
+          photos?: Json
+          title?: string
+          watermark?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

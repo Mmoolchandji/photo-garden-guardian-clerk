@@ -40,18 +40,22 @@ export const createShareableGallery = async (
     expiresAt.setHours(expiresAt.getHours() + config.expirationHours);
     
     // Store gallery data in Supabase
-    const galleryData = {
-      id: galleryId,
-      title: config.title,
-      photos: photos,
-      created_at: new Date().toISOString(),
-      expires_at: expiresAt.toISOString(),
-      include_business_info: config.includeBusinessInfo,
-      watermark: config.watermark,
-    };
+    const { error } = await supabase
+      .from('shared_galleries')
+      .insert({
+        id: galleryId,
+        title: config.title,
+        photos: photos,
+        expires_at: expiresAt.toISOString(),
+        include_business_info: config.includeBusinessInfo,
+        watermark: config.watermark,
+      });
+
+    if (error) {
+      console.error('Database error creating gallery:', error);
+      throw error;
+    }
     
-    // For now, we'll create a simple gallery URL
-    // In a real implementation, you'd want to store this in Supabase
     const galleryUrl = `${window.location.origin}/gallery/${galleryId}`;
     
     toast({
