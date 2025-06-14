@@ -1,3 +1,4 @@
+
 interface CompressionOptions {
   maxWidth?: number;
   maxHeight?: number;
@@ -20,6 +21,17 @@ interface CompressionResult {
   totalOriginalSize: number;
   totalCompressedSize: number;
   totalCompressionRatio: number;
+}
+
+// Export types that the hook expects
+export interface ImageCompressionOptions extends CompressionOptions {}
+
+export interface CompressedImageResult {
+  compressedFile: File;
+  originalSize: number;
+  compressedSize: number;
+  compressionRatio: number;
+  variants?: ImageVariant[];
 }
 
 export class ImageCompressor {
@@ -247,5 +259,20 @@ export class ImageCompressor {
     return !!(canvas.getContext && canvas.getContext('2d'));
   }
 }
+
+// Export the main compression function that the hook expects
+export const compressImage = async (
+  file: File, 
+  options: Partial<ImageCompressionOptions> = {}
+): Promise<CompressedImageResult> => {
+  const compressedFile = await ImageCompressor.compressImage(file, options);
+  
+  return {
+    compressedFile,
+    originalSize: file.size,
+    compressedSize: compressedFile.size,
+    compressionRatio: ((file.size - compressedFile.size) / file.size) * 100
+  };
+};
 
 export type { CompressionOptions, ImageVariant, CompressionResult };
