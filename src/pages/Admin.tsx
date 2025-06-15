@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Camera, ArrowLeft, User, Plus, Settings, Grid, RefreshCw } from 'lucide-react';
@@ -89,8 +88,9 @@ const Admin = () => {
   };
 
   const handlePhotoUploaded = () => {
+    // setShowUpload(false) and then refresh photos immediately.
     setShowUpload(false);
-    fetchPhotos();
+    fetchPhotos(); // new or refreshed photos appear right away
   };
 
   const handlePhotoUpdated = () => {

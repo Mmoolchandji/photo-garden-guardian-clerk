@@ -8,7 +8,7 @@ const BulkUploadResults = ({ uploadResults }: BulkUploadResultsProps) => {
 
   return (
     <div className="p-4 bg-gray-50 rounded-lg">
-      <p className="text-sm">
+      <p className="text-sm flex items-center justify-center gap-2">
         <span className="font-medium text-green-600">
           {uploadResults.success} successful
         </span>
@@ -18,6 +18,13 @@ const BulkUploadResults = ({ uploadResults }: BulkUploadResultsProps) => {
           </span>
         )}
       </p>
+      {uploadResults.failed.length > 0 && (
+        <div className="mt-2 text-xs text-gray-700">
+          Failed files: {uploadResults.failed.join(', ')}
+          <br />
+          You may retry or exit to see successful uploads.
+        </div>
+      )}
     </div>
   );
 };
