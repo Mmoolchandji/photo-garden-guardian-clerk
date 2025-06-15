@@ -58,34 +58,63 @@ const BulkUploadModal = ({
     onCancel();
   };
 
+  // Start upload and handle completion logic.
   const handleUploadComplete = async () => {
     if (uploading) return; // Avoid double triggers
     await handleUploadAll();
     // handled in effect below
   };
 
-  // --- Step 2: Further simplifying the auto-close logic and side-effects ---
+  // --- Step 3: Improved error handling and edge cases ---
   useEffect(() => {
-    // Only trigger once per upload session; never retrigger if already handled
+    // Only handle once per session
     if (!hasHandledCompletion && uploadResults && !uploading) {
       setHasHandledCompletion(true);
 
-      // On full success, cleanup and exit immediately
       if (uploadResults.failed.length === 0) {
         cleanupPreviewURLs();
         onUploadComplete?.();
       }
-      // On failure(s), remain on summary screen for manual exit (user will click "Done")
-      // No timers, no intervals. All preview URLs will still be cleaned up on manual close.
+      // No auto-exit for failures (partial or full): modal stays; user must click "Done"
     }
-    // No cleanup function needed unless you add timers/intervals
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadResults, uploading, hasHandledCompletion]); // onUploadComplete and cleanupPreviewURLs are stable
+  }, [uploadResults, uploading, hasHandledCompletion]);
 
   // Manual exit for failed upload summary
   const handleManualExit = () => {
     cleanupPreviewURLs();
     onUploadComplete?.();
+  };
+
+  // Helper: determine type of failure (all, some, none)
+  const allFailed = uploadResults && 
+    uploadResults.success === 0 &&
+    uploadResults.failed.length === files.length;
+
+  // Helper: render error/success summary messaging
+  const renderSummaryMessage = () => {
+    if (!uploadResults) return null;
+    if (allFailed) {
+      return (
+        <div className="text-center mt-4 text-red-600 text-sm font-semibold">
+          All uploads failed.<br />
+          Please check your connection and try again.<br />
+        </div>
+      );
+    }
+    if (uploadResults.failed.length > 0) {
+      return (
+        <div className="text-center mt-4 text-gray-700 text-sm">
+          Some uploads failed.<br />
+          Please review the failed files below, then retry or exit.<br />
+        </div>
+      );
+    }
+    return (
+      <div className="text-center mt-4 text-gray-700 text-sm font-semibold">
+        Upload complete! Redirecting…
+      </div>
+    );
   };
 
   return (
@@ -100,24 +129,17 @@ const BulkUploadModal = ({
         {uploadResults && hasHandledCompletion ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8">
             <BulkUploadResults uploadResults={uploadResults} />
-            {uploadResults.failed.length > 0 ? (
-              <>
-                <div className="text-center mt-4 text-gray-700 text-sm">
-                  Some uploads failed.<br />
-                  Please review the failed files and try again or exit.
-                </div>
-                <button
-                  className="mt-4 px-4 py-2 rounded bg-emerald-600 text-white shadow transition hover:bg-emerald-700 text-sm"
-                  type="button"
-                  onClick={handleManualExit}
-                >
-                  Done
-                </button>
-              </>
-            ) : (
-              <div className="text-center mt-4 text-gray-700 text-sm font-semibold">
-                Upload complete! Redirecting…
-              </div>
+            {renderSummaryMessage()}
+            {/* Always show "Done" except for full (no-fail) success */}
+            {(uploadResults.failed.length > 0 || allFailed) && (
+              <button
+                className="mt-6 px-4 py-2 rounded bg-emerald-600 text-white shadow transition hover:bg-emerald-700 text-sm"
+                type="button"
+                onClick={handleManualExit}
+                data-testid="bulk-upload-modal-done"
+              >
+                Done
+              </button>
             )}
           </div>
         ) : (
