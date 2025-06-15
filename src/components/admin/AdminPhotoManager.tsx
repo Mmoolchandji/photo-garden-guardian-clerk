@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import AdminPhotoGrid from '@/components/AdminPhotoGrid';
@@ -32,8 +31,14 @@ const AdminPhotoManager = ({
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
   const { photos, loading: loadingPhotos } = usePhotoData(filters);
 
-  const handlePhotoUploaded = () => setShowUpload(false);
-  const handlePhotoUpdated = () => setEditingPhoto(null);
+  const handlePhotoUploaded = () => {
+    setShowUpload(false);
+    onDataRefresh();
+  };
+  const handlePhotoUpdated = () => {
+    setEditingPhoto(null);
+    onDataRefresh();
+  };
 
   // Modal logic moved here for reusability
   if (showUpload) {
@@ -104,4 +109,3 @@ const AdminPhotoManager = ({
 };
 
 export default AdminPhotoManager;
-
