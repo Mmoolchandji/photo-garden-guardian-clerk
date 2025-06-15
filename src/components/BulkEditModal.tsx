@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import PhotoEditForm from './PhotoEditForm';
@@ -12,7 +11,7 @@ import BulkEditDone from './BulkEditModalParts/BulkEditDone';
 interface BulkEditModalProps {
   open: boolean;
   photos: Photo[];
-  onClose: (reloadAll?: boolean) => void;
+  onClose: (reloadAll?: boolean) => void; // True = refresh/reload needed
 }
 
 type EditState = {
@@ -99,11 +98,11 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
     if (!force && (formDirty || anyDirty)) {
       escBlockedRef.current = true;
       if (confirm("You have unsaved changes. Are you sure you want to exit?")) {
-        onClose(true);
+        onClose(anyEdited() ? true : false);
       }
       escBlockedRef.current = false;
     } else {
-      onClose(anyEdited());
+      onClose(anyEdited() ? true : false);
     }
   }
 

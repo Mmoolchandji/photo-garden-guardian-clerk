@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,15 +8,18 @@ import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
 import { useLongPress } from '@/hooks/useLongPress';
 import { Photo } from '@/types/photo';
 import BulkActionToolbar from './BulkActionToolbar';
+import BulkEditModal from './BulkEditModal';
 
 interface AdminPhotoGridProps {
   photos: Photo[];
   onPhotoEdit: (photo: Photo) => void;
   onPhotoDeleted: () => void;
+  onPhotosUpdated?: () => void; // Optional, to refresh after bulk action
 }
 
-const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridProps) => {
+const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted, onPhotosUpdated }: AdminPhotoGridProps) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
   const { toast } = useToast();
   const {
     isSelectionMode,
@@ -79,6 +81,18 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     } finally {
       setDeletingId(null);
     }
+  };
+
+  // Get selected photos for bulk editing
+  const selectedPhotos = photos.filter(p => selectedPhotoIds.has(p.id));
+
+  // Handle Bulk Edit Completion
+  const handleBulkEditDone = (reloadAll?: boolean) => {
+    setShowBulkEdit(false);
+    if (reloadAll && onPhotosUpdated) {
+      onPhotosUpdated();
+    }
+    // Optionally: Could clear selection here
   };
 
   const handleSelectAll = () => {
@@ -240,6 +254,28 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
 
       {/* Bulk Action Toolbar */}
       <BulkActionToolbar onPhotosDeleted={onPhotoDeleted} />
+
+      {/* Bulk Edit Modal */}
+      {isSelectionMode && showBulkEdit && selectedPhotos.length > 0 && (
+        <BulkEditModal
+          open={showBulkEdit}
+          photos={selectedPhotos}
+          onClose={handleBulkEditDone}
+        />
+      )}
+
+      {/* Show "Edit Selected" button */}
+      {isSelectionMode && getSelectedCount() > 0 && (
+        <div className="flex justify-end pt-2">
+          <Button
+            variant="default"
+            className="bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => setShowBulkEdit(true)}
+          >
+            Bulk Edit Selected
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

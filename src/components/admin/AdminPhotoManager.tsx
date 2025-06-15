@@ -7,7 +7,6 @@ import PhotoEdit from '@/components/PhotoEdit';
 import SearchAndFilters, { FilterState } from '@/components/SearchAndFilters';
 import AdminPhotoEmptyState from '@/components/AdminPhotoEmptyState';
 import useURLFilters from '@/hooks/useURLFilters';
-import { usePhotoData } from '@/hooks/usePhotoData';
 
 interface AdminPhotoManagerProps {
   onPhotoEdit: (photo: any) => void;
@@ -16,6 +15,10 @@ interface AdminPhotoManagerProps {
   setShowUpload: (show: boolean) => void;
   editingPhoto: any;
   setEditingPhoto: (photo: any) => void;
+  onPhotoUpdated: () => void;
+  onPhotosUpdated: () => void;
+  photos: any[];
+  loadingPhotos: boolean;
 }
 
 const AdminPhotoManager = ({
@@ -25,13 +28,17 @@ const AdminPhotoManager = ({
   setShowUpload,
   editingPhoto,
   setEditingPhoto,
+  onPhotoUpdated,
+  onPhotosUpdated,
+  photos,
+  loadingPhotos,
 }: AdminPhotoManagerProps) => {
   // Filter state for admin panel (persisted in URL)
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
-  const { photos, loading: loadingPhotos } = usePhotoData(filters);
 
   const handlePhotoUploaded = () => setShowUpload(false);
-  const handlePhotoUpdated = () => setEditingPhoto(null);
+  const handlePhotoEditDone = () => onPhotoUpdated();
+  const handleBulkEditDone = () => onPhotosUpdated();
 
   // Modal logic moved here for reusability
   if (showUpload) {
@@ -50,7 +57,7 @@ const AdminPhotoManager = ({
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <PhotoEdit 
           photo={editingPhoto}
-          onPhotoUpdated={handlePhotoUpdated}
+          onPhotoUpdated={handlePhotoEditDone}
           onCancel={() => setEditingPhoto(null)}
         />
       </div>
@@ -87,10 +94,12 @@ const AdminPhotoManager = ({
               {photos.length === 0 ? (
                 <AdminPhotoEmptyState />
               ) : (
+                // Forward onPhotoEdit/onPhotoDeleted/onPhotosUpdated to AdminPhotoGrid
                 <AdminPhotoGrid
                   photos={photos}
                   onPhotoEdit={onPhotoEdit}
                   onPhotoDeleted={onPhotoDeleted}
+                  onPhotosUpdated={handleBulkEditDone}
                 />
               )}
             </>
