@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import AdminPhotoGrid from '@/components/AdminPhotoGrid';
@@ -15,7 +16,6 @@ interface AdminPhotoManagerProps {
   setShowUpload: (show: boolean) => void;
   editingPhoto: any;
   setEditingPhoto: (photo: any) => void;
-  onDataRefresh: () => void;
 }
 
 const AdminPhotoManager = ({
@@ -25,20 +25,13 @@ const AdminPhotoManager = ({
   setShowUpload,
   editingPhoto,
   setEditingPhoto,
-  onDataRefresh,
 }: AdminPhotoManagerProps) => {
   // Filter state for admin panel (persisted in URL)
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
   const { photos, loading: loadingPhotos } = usePhotoData(filters);
 
-  const handlePhotoUploaded = () => {
-    setShowUpload(false);
-    onDataRefresh();
-  };
-  const handlePhotoUpdated = () => {
-    setEditingPhoto(null);
-    onDataRefresh();
-  };
+  const handlePhotoUploaded = () => setShowUpload(false);
+  const handlePhotoUpdated = () => setEditingPhoto(null);
 
   // Modal logic moved here for reusability
   if (showUpload) {
@@ -59,7 +52,6 @@ const AdminPhotoManager = ({
           photo={editingPhoto}
           onPhotoUpdated={handlePhotoUpdated}
           onCancel={() => setEditingPhoto(null)}
-          onDataRefresh={onDataRefresh}
         />
       </div>
     );
@@ -99,7 +91,6 @@ const AdminPhotoManager = ({
                   photos={photos}
                   onPhotoEdit={onPhotoEdit}
                   onPhotoDeleted={onPhotoDeleted}
-                  onDataRefresh={onDataRefresh}
                 />
               )}
             </>

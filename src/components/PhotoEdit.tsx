@@ -14,7 +14,6 @@ interface PhotoEditProps {
   photo: Photo;
   onPhotoUpdated: () => void;
   onCancel: () => void;
-  onDataRefresh?: () => void;
 }
 
 // Map field name to display label for easy code reuse
@@ -27,7 +26,7 @@ const FIELD_LABELS = {
 const getInitial = <T,>(val: T | undefined, fallback: T): T =>
   typeof val === 'undefined' || val === null ? fallback : val;
 
-const PhotoEdit = ({ photo, onPhotoUpdated, onCancel, onDataRefresh }: PhotoEditProps) => {
+const PhotoEdit = ({ photo, onPhotoUpdated, onCancel }: PhotoEditProps) => {
   const [title, setTitle] = useState(photo.title);
   const [description, setDescription] = useState(photo.description || '');
   const [fabric, setFabric] = useState(getInitial(photo.fabric, 'New Fabric'));
@@ -108,7 +107,6 @@ const PhotoEdit = ({ photo, onPhotoUpdated, onCancel, onDataRefresh }: PhotoEdit
       });
 
       onPhotoUpdated();
-      if (onDataRefresh) onDataRefresh();
     } catch (error: any) {
       console.error('Update error:', error);
       toast({
