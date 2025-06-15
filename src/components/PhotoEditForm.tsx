@@ -43,6 +43,17 @@ export default function PhotoEditForm({
 
   const initialFieldsRef = useRef(fields);
 
+  // Reset form state when incoming photo changes
+  useEffect(() => {
+    const newFields = getPhotoFields(photo);
+    setFields(newFields);
+    initialFieldsRef.current = newFields;
+    setDirty(false);
+    onDirtyChange?.(false);
+  // We want this to run only when the photo changes (not when fields change)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photo.id]);
+
   // Detect dirtiness
   useEffect(() => {
     const isDirty =

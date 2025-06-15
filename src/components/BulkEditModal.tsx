@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -167,6 +166,7 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
             />
           </div>
           <PhotoEditForm
+            key={currentPhoto.id}
             photo={currentPhoto}
             disabled={saving}
             onSubmit={async (fields) => {
