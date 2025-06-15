@@ -89,6 +89,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     }
   };
 
+  // Long press/tap to start selection mode and select, tap to toggle select/deselect
   const handlePhotoLongPress = (photo: Photo) => {
     if (!isSelectionMode) {
       enterSelectionMode();
@@ -147,13 +148,14 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {photos.map((photo) => {
           const isSelected = isPhotoSelected(photo.id);
-          
+
+          // Use improved long press hook (supports both touch & mouse)
           const longPressHandlers = useLongPress({
             onLongPress: () => handlePhotoLongPress(photo),
             onClick: () => handlePhotoClick(photo),
             delay: 500,
           });
-          
+
           return (
             <div
               key={photo.id}
@@ -163,6 +165,8 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
                   ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50 scale-[1.02]' 
                   : 'border-gray-200 hover:scale-[1.01]'
               }`}
+              // Ensure touch-action is present for good mobile tap/hold/scroll
+              style={{ touchAction: 'manipulation' }}
             >
               <div className="relative">
                 <img
@@ -228,7 +232,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
                       className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="h-3 w-3 mr-1" />
-                      {deletingId === photo.id ? 'Deleting...' : 'Delete'}
+                      {deletingId === photo.id ? "Deleting..." : "Delete"}
                     </Button>
                   </div>
                 )}
