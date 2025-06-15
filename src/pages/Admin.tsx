@@ -25,7 +25,7 @@ const Admin = () => {
   }, [user, loading, navigate]);
 
   const { filters } = useURLFilters();
-  const { photos, loading: loadingPhotos } = usePhotoData(filters);
+  const { photos, loading: loadingPhotos, refetch } = usePhotoData(filters);
 
   const handleSignOut = async () => {
     try {
@@ -50,6 +50,10 @@ const Admin = () => {
 
   const handlePhotoDeleted = () => {
     // PhotoData hook will auto-refresh due to filter dependency
+  };
+
+  const handleDataRefresh = () => {
+    refetch();
   };
 
   if (loading) {
@@ -87,6 +91,7 @@ const Admin = () => {
             setShowUpload={setShowUpload}
             editingPhoto={editingPhoto}
             setEditingPhoto={setEditingPhoto}
+            onDataRefresh={handleDataRefresh}
           />
         </div>
       </div>
