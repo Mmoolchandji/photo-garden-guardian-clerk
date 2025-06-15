@@ -16,6 +16,7 @@ interface AdminPhotoManagerProps {
   setShowUpload: (show: boolean) => void;
   editingPhoto: any;
   setEditingPhoto: (photo: any) => void;
+  onDataRefresh: () => void;
 }
 
 const AdminPhotoManager = ({
@@ -25,6 +26,7 @@ const AdminPhotoManager = ({
   setShowUpload,
   editingPhoto,
   setEditingPhoto,
+  onDataRefresh,
 }: AdminPhotoManagerProps) => {
   // Filter state for admin panel (persisted in URL)
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
@@ -102,3 +104,4 @@ const AdminPhotoManager = ({
 };
 
 export default AdminPhotoManager;
+
