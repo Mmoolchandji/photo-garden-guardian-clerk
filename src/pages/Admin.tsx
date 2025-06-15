@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Camera, ArrowLeft, User, Plus, Settings, Grid, RefreshCw } from 'lucide-react';
@@ -5,70 +6,32 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { AdminPhotoSelectionProvider } from '@/contexts/AdminPhotoSelectionContext';
 import PhotoUpload from '@/components/PhotoUpload';
 import PhotoEdit from '@/components/PhotoEdit';
 import AdminPhotoGrid from '@/components/AdminPhotoGrid';
-
-interface Photo {
-  id: string;
-  title: string;
-  description: string | null;
-  image_url: string;
-  created_at: string;
-  user_id: string;
-  legacy?: boolean;
-}
+import SearchAndFilters, { FilterState } from '@/components/SearchAndFilters';
+import useURLFilters from '@/hooks/useURLFilters';
+import { usePhotoData } from '@/hooks/usePhotoData';
+import AdminPhotoEmptyState from '@/components/AdminPhotoEmptyState';
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [loadingPhotos, setLoadingPhotos] = useState(true);
+
+  // Filters state for admin panel (persisted in URL)
+  const { filters, updateFilters, clearAllFilters } = useURLFilters();
+  const { photos, loading: loadingPhotos } = usePhotoData(filters);
+
   const [showUpload, setShowUpload] = useState(false);
-  const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
+  const [editingPhoto, setEditingPhoto] = useState(null);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      fetchPhotos();
-    }
-  }, [user]);
-
-  const fetchPhotos = async () => {
-    if (!user) return;
-    
-    try {
-      setLoadingPhotos(true);
-      const { data, error } = await supabase
-        .from('photos')
-        .select('*')
-        .eq('user_id', user.id) // Only fetch user's own photos
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      setPhotos(data || []);
-    } catch (error: any) {
-      console.error('Fetch photos error:', error);
-      toast({
-        title: "Error loading photos",
-        description: error.message || "Failed to load photos. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingPhotos(false);
-    }
-  };
 
   const handleSignOut = async () => {
     try {
@@ -78,7 +41,7 @@ const Admin = () => {
         description: "You've been signed out successfully.",
       });
       navigate('/auth');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to sign out. Please try again.",
@@ -88,21 +51,20 @@ const Admin = () => {
   };
 
   const handlePhotoUploaded = () => {
-    // setShowUpload(false) and then refresh photos immediately.
     setShowUpload(false);
-    fetchPhotos(); // new or refreshed photos appear right away
+    // The usePhotoData hook will auto-refresh due to filter dependency
   };
 
   const handlePhotoUpdated = () => {
     setEditingPhoto(null);
-    fetchPhotos();
+    // The usePhotoData hook will auto-refresh due to filter dependency
   };
 
   const handlePhotoDeleted = () => {
-    fetchPhotos();
+    // The usePhotoData hook will auto-refresh due to filter dependency
   };
 
-  const handlePhotoEdit = (photo: Photo) => {
+  const handlePhotoEdit = (photo) => {
     setEditingPhoto(photo);
   };
 
@@ -226,6 +188,15 @@ const Admin = () => {
             </Card>
           </div>
 
+          {/* --- FILTER PANEL: Position between stats and grid as requested --- */}
+          <div className="mb-8">
+            <SearchAndFilters
+              filters={filters}
+              onChange={updateFilters}
+              onClearAll={clearAllFilters}
+            />
+          </div>
+
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-4 mb-8">
             <Button 
@@ -237,7 +208,10 @@ const Admin = () => {
             </Button>
             <Button 
               variant="outline"
-              onClick={fetchPhotos}
+              onClick={() => {
+                // Force refetch by updating filters (idempotent)
+                updateFilters({ ...filters });
+              }}
               disabled={loadingPhotos}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loadingPhotos ? 'animate-spin' : ''}`} />
@@ -260,11 +234,17 @@ const Admin = () => {
                   <p className="text-gray-600">Loading your photos...</p>
                 </div>
               ) : (
-                <AdminPhotoGrid 
-                  photos={photos}
-                  onPhotoEdit={handlePhotoEdit}
-                  onPhotoDeleted={handlePhotoDeleted}
-                />
+                <>
+                  {photos.length === 0 ? (
+                    <AdminPhotoEmptyState />
+                  ) : (
+                    <AdminPhotoGrid 
+                      photos={photos}
+                      onPhotoEdit={handlePhotoEdit}
+                      onPhotoDeleted={handlePhotoDeleted}
+                    />
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -275,3 +255,5 @@ const Admin = () => {
 };
 
 export default Admin;
+
+// NOTE: This file is now over 300 lines. For maintainability, please consider asking to refactor it into smaller focused files.
