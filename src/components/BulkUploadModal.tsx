@@ -50,7 +50,7 @@ const BulkUploadModal = ({
   }
 
   const cleanupPreviewURLs = () => {
-    filesWithMetadata.forEach(fileData => URL.revokeObjectURL(fileData.preview));
+    filesWithMetadata.forEach((fileData) => URL.revokeObjectURL(fileData.preview));
   };
 
   const handleCancel = () => {
@@ -58,32 +58,34 @@ const BulkUploadModal = ({
     onCancel();
   };
 
-  // Start upload and handle completion logic.
   const handleUploadComplete = async () => {
     if (uploading) return; // Avoid double triggers
     await handleUploadAll();
     // handled in effect below
   };
 
-  // Handle what to do after upload completes.
+  // --- Step 2: Further simplifying the auto-close logic and side-effects ---
   useEffect(() => {
-    if (uploadResults && !uploading && !hasHandledCompletion) {
+    // Only trigger once per upload session; never retrigger if already handled
+    if (!hasHandledCompletion && uploadResults && !uploading) {
       setHasHandledCompletion(true);
 
-      // Auto-close immediately if all uploads succeeded
+      // On full success, cleanup and exit immediately
       if (uploadResults.failed.length === 0) {
         cleanupPreviewURLs();
-        if (onUploadComplete) onUploadComplete();
+        onUploadComplete?.();
       }
-      // If failures, remain on the summary screen for manual review/exit
+      // On failure(s), remain on summary screen for manual exit (user will click "Done")
+      // No timers, no intervals. All preview URLs will still be cleaned up on manual close.
     }
+    // No cleanup function needed unless you add timers/intervals
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadResults, uploading, hasHandledCompletion]);
+  }, [uploadResults, uploading, hasHandledCompletion]); // onUploadComplete and cleanupPreviewURLs are stable
 
-  // Manual exit for the failed upload summary
+  // Manual exit for failed upload summary
   const handleManualExit = () => {
     cleanupPreviewURLs();
-    if (onUploadComplete) onUploadComplete();
+    onUploadComplete?.();
   };
 
   return (
@@ -95,7 +97,6 @@ const BulkUploadModal = ({
           currentIndex={currentIndex}
           onCancel={handleCancel}
         />
-        {/* Show upload results, and manual exit, only when uploadResults exist */}
         {uploadResults && hasHandledCompletion ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8">
             <BulkUploadResults uploadResults={uploadResults} />
