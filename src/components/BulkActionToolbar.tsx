@@ -19,9 +19,10 @@ import BulkEditModal from './BulkEditModal';
 
 interface BulkActionToolbarProps {
   onPhotosDeleted: () => void;
+  onPhotosUpdated: () => void;
 }
 
-const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
+const BulkActionToolbar = ({ onPhotosDeleted, onPhotosUpdated }: BulkActionToolbarProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const { toast } = useToast();
@@ -179,9 +180,11 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
               clearSelection();
               exitSelectionMode();
               onPhotosDeleted();
+              onPhotosUpdated();
             }
           }}
           photos={selectedPhotos}
+          onPhotosUpdated={onPhotosUpdated}
         />
       )}
     </>

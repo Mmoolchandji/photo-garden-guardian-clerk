@@ -59,6 +59,7 @@ const AdminPhotoManager = ({
           photo={editingPhoto}
           onPhotoUpdated={handlePhotoUpdated}
           onCancel={() => setEditingPhoto(null)}
+          onDataRefresh={onDataRefresh}
         />
       </div>
     );
@@ -98,6 +99,7 @@ const AdminPhotoManager = ({
                   photos={photos}
                   onPhotoEdit={onPhotoEdit}
                   onPhotoDeleted={onPhotoDeleted}
+                  onDataRefresh={onDataRefresh}
                 />
               )}
             </>

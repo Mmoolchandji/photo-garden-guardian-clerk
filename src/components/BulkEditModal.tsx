@@ -1,5 +1,4 @@
-
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import PhotoEditForm from './PhotoEditForm';
 import { Photo } from '@/types/photo';
@@ -13,6 +12,7 @@ interface BulkEditModalProps {
   open: boolean;
   photos: Photo[];
   onClose: (reloadAll?: boolean) => void;
+  onPhotosUpdated?: () => void;
 }
 
 type EditState = {
@@ -27,7 +27,7 @@ type EditState = {
  * Modal for step-by-step (carousel style) multi-photo editing.
  * Refactored into separate subcomponents for maintainability.
  */
-export default function BulkEditModal({ open, photos, onClose }: BulkEditModalProps) {
+export default function BulkEditModal({ open, photos, onClose, onPhotosUpdated }: BulkEditModalProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [editStates, setEditStates] = useState<EditState>({});
@@ -107,9 +107,28 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
     }
   }
 
+  // Track if any edits were made, and call parent refresh when needed
   function anyEdited() {
     return Object.values(editStates).some(e => e.saved);
   }
+
+  // Update parent gallery after any edit - only once when done
+  // Use a ref to prevent double-calls
+  const didCallPhotosUpdated = useRef(false);
+
+  // Call after finishing the last photo
+  useEffect(() => {
+    if (
+      currentStep === total - 1 &&
+      (editStates[photos[currentStep]?.id]?.saved || !formDirty) &&
+      anyEdited() &&
+      !didCallPhotosUpdated.current
+    ) {
+      didCallPhotosUpdated.current = true;
+      onPhotosUpdated?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, editStates, formDirty]);
 
   // Handle navigation with validation
   async function handleNext() {

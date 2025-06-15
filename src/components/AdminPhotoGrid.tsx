@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,9 +13,10 @@ interface AdminPhotoGridProps {
   photos: Photo[];
   onPhotoEdit: (photo: Photo) => void;
   onPhotoDeleted: () => void;
+  onDataRefresh: () => void;
 }
 
-const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridProps) => {
+const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted, onDataRefresh }: AdminPhotoGridProps) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
   const {
@@ -239,7 +239,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
       </div>
 
       {/* Bulk Action Toolbar */}
-      <BulkActionToolbar onPhotosDeleted={onPhotoDeleted} />
+      <BulkActionToolbar onPhotosDeleted={onPhotoDeleted} onPhotosUpdated={onDataRefresh} />
     </div>
   );
 };
