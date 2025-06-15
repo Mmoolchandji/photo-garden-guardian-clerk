@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,8 +37,6 @@ const BulkUploadModal = ({
   } = useBulkUploadLogic(files);
 
   const [hasHandledCompletion, setHasHandledCompletion] = useState(false);
-  const [countdown, setCountdown] = useState(AUTO_CLOSE_DELAY_SEC);
-  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   // Ensure user is authenticated before proceeding
   if (!user) {
@@ -65,45 +62,28 @@ const BulkUploadModal = ({
   const handleUploadComplete = async () => {
     if (uploading) return; // Avoid double triggers
     await handleUploadAll();
-    // (auto-exit is handled by useEffect below)
+    // handled in effect below
   };
 
-  // Auto-close modal after uploads when all done
+  // Handle what to do after upload completes.
   useEffect(() => {
-    // Only run when uploads are done and results exist, and haven't handled yet
-    if (
-      uploadResults &&
-      !uploading &&
-      !hasHandledCompletion
-    ) {
+    if (uploadResults && !uploading && !hasHandledCompletion) {
       setHasHandledCompletion(true);
-      setCountdown(AUTO_CLOSE_DELAY_SEC);
-      // start countdown
-      countdownRef.current = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 1) {
-            clearInterval(countdownRef.current as NodeJS.Timeout);
-            // Ensure the state reflects up-to-date preview URLs
-            cleanupPreviewURLs();
-            onUploadComplete?.(); // triggers parent to close & refresh
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    // Cleanup timer if modal unmounts/reruns
-    return () => {
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadResults, uploading, hasHandledCompletion]); // omit onUploadComplete cleanupPreviewURLs from deps on purpose
 
-  // Allow early manual close by user during countdown
+      // Auto-close immediately if all uploads succeeded
+      if (uploadResults.failed.length === 0) {
+        cleanupPreviewURLs();
+        if (onUploadComplete) onUploadComplete();
+      }
+      // If failures, remain on the summary screen for manual review/exit
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploadResults, uploading, hasHandledCompletion]);
+
+  // Manual exit for the failed upload summary
   const handleManualExit = () => {
-    if (countdownRef.current) clearInterval(countdownRef.current);
     cleanupPreviewURLs();
-    onUploadComplete?.();
+    if (onUploadComplete) onUploadComplete();
   };
 
   return (
@@ -115,23 +95,29 @@ const BulkUploadModal = ({
           currentIndex={currentIndex}
           onCancel={handleCancel}
         />
-        {/* Show upload results, and exit/auto-close info, when upload is complete */}
+        {/* Show upload results, and manual exit, only when uploadResults exist */}
         {uploadResults && hasHandledCompletion ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8">
             <BulkUploadResults uploadResults={uploadResults} />
-            <div className="text-center mt-4 text-gray-700 text-sm">
-              Upload complete!<br />
-              Returning to dashboard in{' '}
-              <span className="font-bold">{countdown}</span>
-              {countdown === 1 ? ' second' : ' seconds'}...
-            </div>
-            <button
-              className="mt-4 px-4 py-2 rounded bg-emerald-600 text-white shadow transition hover:bg-emerald-700 text-sm"
-              type="button"
-              onClick={handleManualExit}
-            >
-              Done now
-            </button>
+            {uploadResults.failed.length > 0 ? (
+              <>
+                <div className="text-center mt-4 text-gray-700 text-sm">
+                  Some uploads failed.<br />
+                  Please review the failed files and try again or exit.
+                </div>
+                <button
+                  className="mt-4 px-4 py-2 rounded bg-emerald-600 text-white shadow transition hover:bg-emerald-700 text-sm"
+                  type="button"
+                  onClick={handleManualExit}
+                >
+                  Done
+                </button>
+              </>
+            ) : (
+              <div className="text-center mt-4 text-gray-700 text-sm font-semibold">
+                Upload complete! Redirecting…
+              </div>
+            )}
           </div>
         ) : (
           <BulkUploadContent
