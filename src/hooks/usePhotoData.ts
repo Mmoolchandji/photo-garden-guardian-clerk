@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Photo } from '@/types/photo';
 import { FilterState } from '@/components/SearchAndFilters';
@@ -9,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export const usePhotoData = (filters: FilterState) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { toast } = useToast();
   const { user, authReady } = useAuth();
   const lastFiltersRef = useRef<string>('');
@@ -64,17 +64,15 @@ export const usePhotoData = (filters: FilterState) => {
   useEffect(() => {
     const filtersString = JSON.stringify(filters);
     const currentUserId = user?.id || '';
-    
-    // Check if filters, user, OR auth ready state changed
     const hasFiltersChanged = filtersString !== lastFiltersRef.current;
     const hasUserChanged = currentUserId !== lastUserIdRef.current;
     const hasAuthReadyChanged = authReady !== lastAuthReadyRef.current;
-    
-    // Only proceed if something actually changed
-    if (!hasFiltersChanged && !hasUserChanged && !hasAuthReadyChanged) {
+
+    // Add refresh check: always run effect if refreshTrigger changes
+    if (!hasFiltersChanged && !hasUserChanged && !hasAuthReadyChanged && refreshTrigger === 0) {
       return;
     }
-    
+
     console.log('usePhotoData: Dependencies changed', {
       authReady,
       hasFiltersChanged,
@@ -82,26 +80,26 @@ export const usePhotoData = (filters: FilterState) => {
       hasAuthReadyChanged,
       userId: currentUserId
     });
-    
+
     // Update refs
     lastFiltersRef.current = filtersString;
     lastUserIdRef.current = currentUserId;
     lastAuthReadyRef.current = authReady;
-    
+
     // Don't fetch photos until auth is ready (session hydration complete)
     if (!authReady) {
       console.log('usePhotoData: Auth not ready yet, waiting for session hydration...');
       setLoading(true);
       return;
     }
-    
+
     let isMounted = true;
-    
+
     const fetchPhotos = async () => {
       try {
         console.log('usePhotoData: Starting photo fetch for user:', currentUserId || 'no user');
         setLoading(true);
-        
+
         if (!user) {
           // If no user is authenticated, show empty gallery
           console.log('usePhotoData: No authenticated user, setting empty photos');
@@ -144,7 +142,11 @@ export const usePhotoData = (filters: FilterState) => {
     return () => {
       isMounted = false;
     };
-  }, [buildQuery, toast, user, authReady]);
+  }, [buildQuery, toast, user, authReady, refreshTrigger]);
 
-  return { photos, loading };
+  // Refetch function for external consumers
+  const refetch = () => setRefreshTrigger((x) => x + 1);
+
+  // Return refetch alongside photos and loading
+  return { photos, loading, refetch };
 };
