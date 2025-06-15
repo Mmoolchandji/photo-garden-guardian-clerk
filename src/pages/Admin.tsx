@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,7 +25,7 @@ const Admin = () => {
   }, [user, loading, navigate]);
 
   const { filters } = useURLFilters();
-  const { photos, loading: loadingPhotos, refetch } = usePhotoData(filters);
+  const { photos, loading: loadingPhotos } = usePhotoData(filters);
 
   const handleSignOut = async () => {
     try {
@@ -50,19 +49,7 @@ const Admin = () => {
   };
 
   const handlePhotoDeleted = () => {
-    // Refresh photos after deletion
-    refetch();
-  };
-
-  const handlePhotoUpdated = () => {
-    // Close edit modal and refresh photos
-    setEditingPhoto(null);
-    refetch();
-  };
-
-  const handlePhotosUpdated = () => {
-    // Refresh photos after bulk updates
-    refetch();
+    // PhotoData hook will auto-refresh due to filter dependency
   };
 
   if (loading) {
@@ -87,13 +74,15 @@ const Admin = () => {
           <AdminActionButtons
             loadingPhotos={loadingPhotos}
             onUploadPhoto={() => setShowUpload(true)}
-            onRefresh={refetch}
+            onRefresh={() => {
+              // Force refetch by updating filters (idempotent)
+              const { filters, updateFilters } = useURLFilters();
+              updateFilters({ ...filters });
+            }}
           />
           <AdminPhotoManager
             onPhotoEdit={handlePhotoEdit}
             onPhotoDeleted={handlePhotoDeleted}
-            onPhotoUpdated={handlePhotoUpdated}
-            onPhotosUpdated={handlePhotosUpdated}
             showUpload={showUpload}
             setShowUpload={setShowUpload}
             editingPhoto={editingPhoto}

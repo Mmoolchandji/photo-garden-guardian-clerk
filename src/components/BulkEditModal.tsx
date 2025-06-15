@@ -13,7 +13,6 @@ interface BulkEditModalProps {
   open: boolean;
   photos: Photo[];
   onClose: (reloadAll?: boolean) => void;
-  onPhotosUpdated?: () => void;
 }
 
 type EditState = {
@@ -28,7 +27,7 @@ type EditState = {
  * Modal for step-by-step (carousel style) multi-photo editing.
  * Refactored into separate subcomponents for maintainability.
  */
-export default function BulkEditModal({ open, photos, onClose, onPhotosUpdated }: BulkEditModalProps) {
+export default function BulkEditModal({ open, photos, onClose }: BulkEditModalProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [editStates, setEditStates] = useState<EditState>({});
@@ -100,19 +99,11 @@ export default function BulkEditModal({ open, photos, onClose, onPhotosUpdated }
     if (!force && (formDirty || anyDirty)) {
       escBlockedRef.current = true;
       if (confirm("You have unsaved changes. Are you sure you want to exit?")) {
-        const hasEdits = anyEdited();
         onClose(true);
-        if (hasEdits && onPhotosUpdated) {
-          onPhotosUpdated();
-        }
       }
       escBlockedRef.current = false;
     } else {
-      const hasEdits = anyEdited();
-      onClose(hasEdits);
-      if (hasEdits && onPhotosUpdated) {
-        onPhotosUpdated();
-      }
+      onClose(anyEdited());
     }
   }
 
@@ -143,14 +134,6 @@ export default function BulkEditModal({ open, photos, onClose, onPhotosUpdated }
 
   const allFinished = currentStep === total - 1 &&
     (editStates[currentPhoto.id]?.saved || !formDirty);
-
-  function handleDone() {
-    const hasEdits = anyEdited();
-    onClose(hasEdits);
-    if (hasEdits && onPhotosUpdated) {
-      onPhotosUpdated();
-    }
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -187,7 +170,7 @@ export default function BulkEditModal({ open, photos, onClose, onPhotosUpdated }
         {allFinished && (
           <BulkEditDone
             anyEdited={anyEdited()}
-            onDone={handleDone}
+            onDone={() => onClose(anyEdited())}
           />
         )}
       </DialogContent>

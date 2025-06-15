@@ -12,8 +12,6 @@ import { usePhotoData } from '@/hooks/usePhotoData';
 interface AdminPhotoManagerProps {
   onPhotoEdit: (photo: any) => void;
   onPhotoDeleted: () => void;
-  onPhotoUpdated: () => void;
-  onPhotosUpdated: () => void;
   showUpload: boolean;
   setShowUpload: (show: boolean) => void;
   editingPhoto: any;
@@ -23,8 +21,6 @@ interface AdminPhotoManagerProps {
 const AdminPhotoManager = ({
   onPhotoEdit,
   onPhotoDeleted,
-  onPhotoUpdated,
-  onPhotosUpdated,
   showUpload,
   setShowUpload,
   editingPhoto,
@@ -34,14 +30,8 @@ const AdminPhotoManager = ({
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
   const { photos, loading: loadingPhotos } = usePhotoData(filters);
 
-  const handlePhotoUploaded = () => {
-    setShowUpload(false);
-    onPhotosUpdated(); // Refresh after upload
-  };
-
-  const handlePhotoEditUpdated = () => {
-    onPhotoUpdated(); // This will close modal and refresh
-  };
+  const handlePhotoUploaded = () => setShowUpload(false);
+  const handlePhotoUpdated = () => setEditingPhoto(null);
 
   // Modal logic moved here for reusability
   if (showUpload) {
@@ -60,7 +50,7 @@ const AdminPhotoManager = ({
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <PhotoEdit 
           photo={editingPhoto}
-          onPhotoUpdated={handlePhotoEditUpdated}
+          onPhotoUpdated={handlePhotoUpdated}
           onCancel={() => setEditingPhoto(null)}
         />
       </div>
@@ -101,7 +91,6 @@ const AdminPhotoManager = ({
                   photos={photos}
                   onPhotoEdit={onPhotoEdit}
                   onPhotoDeleted={onPhotoDeleted}
-                  onPhotosUpdated={onPhotosUpdated}
                 />
               )}
             </>

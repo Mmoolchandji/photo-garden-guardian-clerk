@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Photo } from '@/types/photo';
 import { FilterState } from '@/components/SearchAndFilters';
 import { supabase } from '@/integrations/supabase/client';
@@ -61,47 +61,6 @@ export const usePhotoData = (filters: FilterState) => {
     };
   }, [filters, user]);
 
-  const fetchPhotos = useCallback(async () => {
-    try {
-      console.log('usePhotoData: Starting photo fetch for user:', user?.id || 'no user');
-      setLoading(true);
-      
-      if (!user) {
-        // If no user is authenticated, show empty gallery
-        console.log('usePhotoData: No authenticated user, setting empty photos');
-        setPhotos([]);
-        return;
-      }
-
-      console.log('usePhotoData: Fetching photos for user:', user.id);
-      const query = buildQuery();
-      const { data, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      console.log('usePhotoData: Photos fetched successfully:', data?.length || 0);
-      setPhotos(data || []);
-    } catch (error: any) {
-      console.error('usePhotoData: Fetch photos error:', error);
-      toast({
-        title: "Error loading photos",
-        description: error.message || "Failed to load photos. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [buildQuery, toast, user]);
-
-  // Force refetch function for manual updates
-  const refetch = useCallback(() => {
-    if (authReady && user) {
-      fetchPhotos();
-    }
-  }, [fetchPhotos, authReady, user]);
-
   useEffect(() => {
     const filtersString = JSON.stringify(filters);
     const currentUserId = user?.id || '';
@@ -136,8 +95,56 @@ export const usePhotoData = (filters: FilterState) => {
       return;
     }
     
-    fetchPhotos();
-  }, [fetchPhotos, authReady]);
+    let isMounted = true;
+    
+    const fetchPhotos = async () => {
+      try {
+        console.log('usePhotoData: Starting photo fetch for user:', currentUserId || 'no user');
+        setLoading(true);
+        
+        if (!user) {
+          // If no user is authenticated, show empty gallery
+          console.log('usePhotoData: No authenticated user, setting empty photos');
+          if (isMounted) {
+            setPhotos([]);
+          }
+          return;
+        }
 
-  return { photos, loading, refetch };
+        console.log('usePhotoData: Fetching photos for user:', user.id);
+        const query = buildQuery();
+        const { data, error } = await query;
+
+        if (error) {
+          throw error;
+        }
+
+        if (isMounted) {
+          console.log('usePhotoData: Photos fetched successfully:', data?.length || 0);
+          setPhotos(data || []);
+        }
+      } catch (error: any) {
+        console.error('usePhotoData: Fetch photos error:', error);
+        if (isMounted) {
+          toast({
+            title: "Error loading photos",
+            description: error.message || "Failed to load photos. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchPhotos();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [buildQuery, toast, user, authReady]);
+
+  return { photos, loading };
 };

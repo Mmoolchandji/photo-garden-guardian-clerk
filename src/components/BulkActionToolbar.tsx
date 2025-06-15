@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Trash2, X, AlertTriangle, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,10 +19,9 @@ import BulkEditModal from './BulkEditModal';
 
 interface BulkActionToolbarProps {
   onPhotosDeleted: () => void;
-  onPhotosUpdated: () => void;
 }
 
-const BulkActionToolbar = ({ onPhotosDeleted, onPhotosUpdated }: BulkActionToolbarProps) => {
+const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const { toast } = useToast();
@@ -180,7 +178,7 @@ const BulkActionToolbar = ({ onPhotosDeleted, onPhotosUpdated }: BulkActionToolb
             if (refresh) {
               clearSelection();
               exitSelectionMode();
-              onPhotosUpdated();
+              onPhotosDeleted();
             }
           }}
           photos={selectedPhotos}
