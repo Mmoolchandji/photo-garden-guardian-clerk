@@ -1,16 +1,18 @@
+
 import { useState, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import PhotoEditForm from './PhotoEditForm';
 import { Photo } from '@/types/photo';
-import { ChevronLeft, ChevronRight, Save, X, SkipForward } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import BulkEditHeader from './BulkEditModalParts/BulkEditHeader';
+import BulkEditImage from './BulkEditModalParts/BulkEditImage';
+import BulkEditNavigation from './BulkEditModalParts/BulkEditNavigation';
+import BulkEditDone from './BulkEditModalParts/BulkEditDone';
 
 interface BulkEditModalProps {
   open: boolean;
   photos: Photo[];
-  onClose: (reloadAll?: boolean) => void; // reloadAll = refetch grid
+  onClose: (reloadAll?: boolean) => void;
 }
 
 type EditState = {
@@ -23,6 +25,7 @@ type EditState = {
 
 /**
  * Modal for step-by-step (carousel style) multi-photo editing.
+ * Refactored into separate subcomponents for maintainability.
  */
 export default function BulkEditModal({ open, photos, onClose }: BulkEditModalProps) {
   const { toast } = useToast();
@@ -52,10 +55,10 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
   async function handleSave(fields: Partial<Photo>) {
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('photos')
-        .update(fields)
-        .eq('id', currentPhoto.id);
+      const { error } = await import('@/integrations/supabase/client').then(m => m.supabase)
+        .then(supabase =>
+          supabase.from('photos').update(fields).eq('id', currentPhoto.id)
+        );
       if (error) throw error;
 
       setEditStates((prev) => ({
@@ -110,7 +113,6 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
 
   // Handle navigation with validation
   async function handleNext() {
-    // Only allow next if saved or skipped for this photo, OR if no changes for this photo
     const state = editStates[currentPhoto.id];
     if (state?.fields && !state.saved) {
       alert("Please save or skip this photo before continuing.");
@@ -125,46 +127,24 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
     if (currentStep > 0) goToStep(currentStep - 1);
   }
 
-  // Key event: block escape while dirty
-  // Could add keydown-esc-block logic if needed
-
   // On modal close, reset state
   function onOpenChange(open: boolean) {
     if (!open) handleClose();
   }
 
-  // Allow closing after last save
   const allFinished = currentStep === total - 1 &&
     (editStates[currentPhoto.id]?.saved || !formDirty);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl p-0">
-        <DialogHeader>
-          <DialogTitle>
-            Bulk Edit Photos
-          </DialogTitle>
-        </DialogHeader>
+        <BulkEditHeader
+          progressStr={progressStr}
+          saving={saving}
+          onClose={handleClose}
+        />
         <div className="p-6">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs text-gray-500">{progressStr}</span>
-            <Button
-              variant="ghost"
-              className="ml-auto text-gray-500"
-              onClick={() => handleClose()}
-              disabled={saving}
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <div>
-            <img
-              src={currentPhoto.image_url}
-              alt={currentPhoto.title}
-              className="w-full h-40 object-cover rounded-lg mb-4"
-            />
-          </div>
+          <BulkEditImage photo={currentPhoto} />
           <PhotoEditForm
             key={currentPhoto.id}
             photo={currentPhoto}
@@ -176,57 +156,22 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
             initialFocus
           />
         </div>
-        <div className="flex justify-between items-center px-6 pb-4 gap-2">
-          <Button
-            variant="outline"
-            onClick={handlePrev}
-            disabled={saving || currentStep === 0}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={handleSkip}
-            disabled={saving}
-          >
-            <SkipForward className="h-4 w-4 mr-1" />
-            Skip
-          </Button>
-          <Button
-            onClick={handleNext}
-            disabled={
-              saving ||
-              !!editStates[currentPhoto.id]?.fields && !editStates[currentPhoto.id]?.saved ||
-              currentStep === total - 1
-            }
-            className="bg-gray-200 text-gray-700"
-          >
-            Next
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-          <Button
-            onClick={() =>
-              document.querySelector("form")?.dispatchEvent(
-                new Event("submit", { cancelable: true, bubbles: true })
-              )
-            }
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-            disabled={saving || !(formDirty)}
-          >
-            <Save className="h-4 w-4 mr-1" />
-            Save & Continue
-          </Button>
-        </div>
+        <BulkEditNavigation
+          currentStep={currentStep}
+          total={total}
+          saving={saving}
+          formDirty={formDirty}
+          editStates={editStates}
+          currentPhoto={currentPhoto}
+          onPrev={handlePrev}
+          onSkip={handleSkip}
+          onNext={handleNext}
+        />
         {allFinished && (
-          <div className="px-6 pb-3">
-            <Button
-              className="w-full mt-2"
-              onClick={() => onClose(anyEdited())}
-            >
-              Done
-            </Button>
-          </div>
+          <BulkEditDone
+            anyEdited={anyEdited()}
+            onDone={() => onClose(anyEdited())}
+          />
         )}
       </DialogContent>
     </Dialog>
