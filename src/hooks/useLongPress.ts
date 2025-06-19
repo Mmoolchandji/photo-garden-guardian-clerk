@@ -29,13 +29,16 @@ export const useLongPress = ({
     startTouchXY.current = { x: touch.clientX, y: touch.clientY };
     isLongPressRef.current = false;
     timeoutRef.current = setTimeout(() => {
+      // Only trigger long press if the touch hasn't moved significantly
+      // (onTouchMove clears the timeout if moved)
       isLongPressRef.current = true;
       onLongPress();
     }, delay);
 
-    // Prevent context menu if requested
-    if (shouldPreventDefault) e.preventDefault();
-  }, [delay, onLongPress, shouldPreventDefault]);
+    // Removed e.preventDefault() from here to avoid issues with passive listeners.
+    // Context menu prevention for desktop is handled by onContextMenu.
+    // For mobile, if context menu on long tap is an issue, CSS or specific prevention in onLongPress might be needed.
+  }, [delay, onLongPress]);
 
   // Track finger movement (for scroll)
   const onTouchMove = useCallback((e: React.TouchEvent) => {
@@ -53,9 +56,17 @@ export const useLongPress = ({
   // End/cancel on touch end/cancel
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    // If it was a tap (not a long press and not a move)
     if (!isLongPressRef.current && !movedRef.current && onClick) {
       onClick();
+      // Prevent "ghost click" or other default browser actions that might follow touchend
+      // This is important if the earlier preventDefault in onTouchStart was removed or ineffective
+      if (e.cancelable) {
+        e.preventDefault();
+      }
     }
+    
     isLongPressRef.current = false;
     movedRef.current = false;
     startTouchXY.current = null;

@@ -68,7 +68,7 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
   return (
     <div
       {...longPressHandlers}
-      className={`group bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer select-none ${
+      className={`group bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer select-none touch-manipulation ${
         selected 
           ? 'border-emerald-500 ring-2 ring-emerald-200' 
           : isSelectionMode 
@@ -80,7 +80,7 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
         <img
           src={photo.imageUrl}
           alt={photo.title}
-          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-48 object-cover transition-transform duration-500"
           draggable={false}
         />
         
