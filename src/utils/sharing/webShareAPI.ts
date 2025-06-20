@@ -86,7 +86,7 @@ export const shareMultipleViaWebShareAPI = async (photos: ShareablePhoto[]): Pro
 
     const shareData = {
       title: `${photos.length} Beautiful Sarees`,
-      text: formatMultiplePhotosMessage(photos),
+      text: '',
       files: files,
     };
 
