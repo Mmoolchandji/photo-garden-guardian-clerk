@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useImageCompression } from './useImageCompression';
 
 type UploadStep = 'file-selection' | 'metadata';
+type UploadMode = 'idle' | 'single' | 'bulk';
 
 export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void) => {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
-  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [uploadMode, setUploadMode] = useState<UploadMode>('idle'); // New state for upload mode
   const [enableCompression, setEnableCompression] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -51,11 +52,12 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
       // If multiple files selected, switch to bulk upload mode
       if (selectedFiles.length > 1) {
         setFiles(selectedFiles);
-        setShowBulkModal(true);
+        setUploadMode('bulk'); // Set new upload mode
       } else {
         // Single file - keep existing behavior
         const selectedFile = selectedFiles[0];
         setFile(selectedFile);
+        setUploadMode('single'); // Set new upload mode
         
         // Create preview URL
         const previewUrl = URL.createObjectURL(selectedFile);
@@ -161,11 +163,15 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
       // Reset form
       resetForm();
       onPhotoUploaded();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('PhotoUpload: Upload error:', error);
+      let errorMessage = "Failed to upload photo. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       toast({
         title: "Upload failed",
-        description: error.message || "Failed to upload photo. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -193,7 +199,7 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
     setFiles([]);
     setImagePreview('');
     resetForm();
-    setShowBulkModal(false);
+    setUploadMode('idle'); // Reset upload mode
     onCancel();
   };
 
@@ -207,13 +213,13 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
   };
 
   const handleBulkUploadComplete = () => {
-    setShowBulkModal(false);
+    setUploadMode('idle'); // Reset upload mode
     setFiles([]);
     onPhotoUploaded();
   };
 
   const handleChooseDifferentFiles = () => {
-    setShowBulkModal(false);
+    setUploadMode('idle'); // Reset upload mode
     setFiles([]);
     // Reset file input
     if (fileInputRef.current) {
@@ -233,7 +239,7 @@ export const usePhotoUpload = (onPhotoUploaded: () => void, onCancel: () => void
     files,
     uploading: uploading || compressing,
     imagePreview,
-    showBulkModal,
+    uploadMode, // Return new upload mode
     fileInputRef,
     user,
     enableCompression,

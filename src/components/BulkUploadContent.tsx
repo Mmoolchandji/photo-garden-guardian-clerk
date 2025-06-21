@@ -26,6 +26,7 @@ interface BulkUploadContentProps {
   onUploadAll: () => void;
   onChooseDifferentFiles: () => void;
   onMetadataChange: (field: 'title' | 'description' | 'fabric' | 'price' | 'stockStatus', value: string) => void;
+  isModal?: boolean; // Optional prop to indicate if this is being used in a modal
 }
 
 const BulkUploadContent = ({
@@ -41,9 +42,11 @@ const BulkUploadContent = ({
   onUploadAll,
   onChooseDifferentFiles,
   onMetadataChange,
+  isModal = true, // Default to true for backward compatibility
 }: BulkUploadContentProps) => {
+  // Different styling based on whether we're in a modal or in-page view
   return (
-    <CardContent className="flex-1 overflow-hidden p-6">
+    <CardContent className={`flex-1 overflow-hidden p-4 md:p-6 ${isModal ? '' : 'max-h-[85vh] md:max-h-none'}`}>
       {step === 'preview' ? (
         <BulkPreviewStep
           filesWithMetadata={filesWithMetadata}

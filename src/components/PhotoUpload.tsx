@@ -1,15 +1,19 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
-import BulkUploadModal from './BulkUploadModal';
 import PhotoUploadContainer from './PhotoUploadContainer';
 
 interface PhotoUploadProps {
   onPhotoUploaded: () => void;
   onCancel: () => void;
+  onBulkUploadInitiated?: (files: File[]) => void; // New callback for parent to handle bulk uploads
 }
 
-const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
+const PhotoUpload = ({ 
+  onPhotoUploaded, 
+  onCancel,
+  onBulkUploadInitiated 
+}: PhotoUploadProps) => {
   const {
     // State
     step,
@@ -22,7 +26,7 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
     files,
     uploading,
     imagePreview,
-    showBulkModal,
+    uploadMode, // Using uploadMode instead of showBulkModal
     user,
     enableCompression,
     
@@ -56,18 +60,14 @@ const PhotoUpload = ({ onPhotoUploaded, onCancel }: PhotoUploadProps) => {
     );
   }
 
-  // Show bulk upload modal if multiple files are selected
-  if (showBulkModal) {
-    return (
-      <BulkUploadModal
-        files={files}
-        onUploadComplete={handleBulkUploadComplete}
-        onCancel={handleCancel}
-        onChooseDifferentFiles={handleChooseDifferentFiles}
-      />
-    );
+  // If in bulk mode, notify the parent to handle bulk uploads
+  if (uploadMode === 'bulk' && onBulkUploadInitiated) {
+    // Call the callback with the selected files
+    onBulkUploadInitiated(files);
   }
 
+  // Only render the single upload UI when in single mode or idle
+  // The bulk upload UI will be handled by the parent component
   return (
     <PhotoUploadContainer
       step={step}

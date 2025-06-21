@@ -4,18 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import AdminPhotoGrid from '@/components/AdminPhotoGrid';
 import PhotoUpload from '@/components/PhotoUpload';
 import PhotoEdit from '@/components/PhotoEdit';
+import InPageBulkUploadView from '@/components/InPageBulkUploadView';
 import SearchAndFilters, { FilterState } from '@/components/SearchAndFilters';
 import AdminPhotoEmptyState from '@/components/AdminPhotoEmptyState';
 import useURLFilters from '@/hooks/useURLFilters';
 import { usePhotoData } from '@/hooks/usePhotoData';
+import { Photo } from '@/types/photo';
 
 interface AdminPhotoManagerProps {
-  onPhotoEdit: (photo: any) => void;
+  onPhotoEdit: (photo: Photo) => void;
   onPhotoDeleted: () => void;
   showUpload: boolean;
   setShowUpload: (show: boolean) => void;
-  editingPhoto: any;
-  setEditingPhoto: (photo: any) => void;
+  editingPhoto: Photo | null;
+  setEditingPhoto: (photo: Photo | null) => void;
 }
 
 const AdminPhotoManager = ({
@@ -26,20 +28,69 @@ const AdminPhotoManager = ({
   editingPhoto,
   setEditingPhoto,
 }: AdminPhotoManagerProps) => {
+  // State for bulk upload mode
+  const [bulkUploadFiles, setBulkUploadFiles] = useState<File[]>([]);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
+
   // Filter state for admin panel (persisted in URL)
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
   const { photos, loading: loadingPhotos } = usePhotoData(filters);
 
-  const handlePhotoUploaded = () => setShowUpload(false);
+  const handlePhotoUploaded = () => {
+    setShowUpload(false);
+    // Reset bulk upload state
+    setBulkUploadFiles([]);
+    setShowBulkUpload(false);
+  };
+
   const handlePhotoUpdated = () => setEditingPhoto(null);
 
-  // Modal logic moved here for reusability
+  // Handle bulk upload initiation from PhotoUpload component
+  const handleBulkUploadInitiated = (files: File[]) => {
+    setBulkUploadFiles(files);
+    setShowBulkUpload(true);
+    setShowUpload(false); // Hide the single upload UI
+  };
+
+  // Handlers for bulk upload actions
+  const handleBulkUploadComplete = () => {
+    setShowBulkUpload(false);
+    setBulkUploadFiles([]);
+  };
+
+  const handleBulkUploadCancel = () => {
+    setShowBulkUpload(false);
+    setBulkUploadFiles([]);
+  };
+
+  const handleChooseDifferentFiles = () => {
+    setShowBulkUpload(false);
+    setBulkUploadFiles([]);
+    setShowUpload(true); // Go back to file selection
+  };
+
+  // Display bulk upload view
+  if (showBulkUpload && bulkUploadFiles.length > 0) {
+    return (
+      <div className="container mx-auto py-4">
+        <InPageBulkUploadView
+          files={bulkUploadFiles}
+          onUploadComplete={handleBulkUploadComplete}
+          onCancel={handleBulkUploadCancel}
+          onChooseDifferentFiles={handleChooseDifferentFiles}
+        />
+      </div>
+    );
+  }
+
+  // Display single upload view
   if (showUpload) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="container mx-auto py-4 flex items-center justify-center">
         <PhotoUpload 
           onPhotoUploaded={handlePhotoUploaded}
           onCancel={() => setShowUpload(false)}
+          onBulkUploadInitiated={handleBulkUploadInitiated}
         />
       </div>
     );
