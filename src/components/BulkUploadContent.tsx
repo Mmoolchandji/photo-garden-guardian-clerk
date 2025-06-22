@@ -46,7 +46,7 @@ const BulkUploadContent = ({
 }: BulkUploadContentProps) => {
   // Different styling based on whether we're in a modal or in-page view
   return (
-    <CardContent className={`flex-1 overflow-hidden p-4 md:p-6 ${isModal ? '' : 'max-h-[85vh] md:max-h-none'}`}>
+    <CardContent className={`flex-1 overflow-hidden p-4 md:p-6 ${isModal ? '' : ' md:max-h-none'}`}>
       {step === 'preview' ? (
         <BulkPreviewStep
           filesWithMetadata={filesWithMetadata}
