@@ -19,18 +19,18 @@ const Index = () => {
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-sm border-b border-emerald-100 sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-emerald-100 rounded-lg">
                   <Camera className="h-6 w-6 text-emerald-600" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Photo Garden</h1>
+                  <h1 className="text-xl md:text-2xl font-bold text-gray-900">Photo Garden</h1>
                   <p className="text-sm text-emerald-600">Keeper</p>
                 </div>
               </div>
               
-              <nav className="flex items-center space-x-4">
+              <nav className="flex items-center space-x-2">
                 {user && (
                   <Button 
                     variant={viewMode === 'grid' ? 'default' : 'ghost'} 
@@ -38,15 +38,15 @@ const Index = () => {
                     onClick={() => setViewMode('grid')}
                     className="bg-emerald-600 hover:bg-emerald-700"
                   >
-                    <Grid className="h-4 w-4 mr-2" />
-                    Grid
+                    <Grid className="h-4 w-4 md:mr-2" />
+                    <span className="hidden md:inline">Grid</span>
                   </Button>
                 )}
                 
                 <Link to={user ? "/admin" : "/auth"}>
                   <Button variant="outline" size="sm" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
-                    <User className="h-4 w-4 mr-2" />
-                    {user ? 'Admin' : 'Sign In'}
+                    <User className="h-4 w-4 md:mr-2" />
+                    <span className="hidden md:inline">{user ? 'Admin' : 'Sign In'}</span>
                   </Button>
                 </Link>
               </nav>
