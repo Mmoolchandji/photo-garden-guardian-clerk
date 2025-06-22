@@ -66,7 +66,7 @@ const Index = () => {
         ) : (
           <>
             {/* Hero Section - only for authenticated users */}
-            <section className="py-16 px-4">
+            {/* <section className="py-16 px-4">
               <div className="container mx-auto text-center">
                 <h2 className="text-5xl font-bold text-gray-900 mb-6">
                   Curated Garden
@@ -91,7 +91,7 @@ const Index = () => {
                   </span>
                 </div>
               </div>
-            </section>
+            </section> */}
 
             {/* Photo Gallery with Search & Filters */}
             <section className="py-8 px-4">
