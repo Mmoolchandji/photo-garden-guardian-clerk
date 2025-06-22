@@ -95,7 +95,7 @@ const Index = () => {
 
             {/* Photo Gallery with Search & Filters */}
             <section className="py-8 px-4">
-              <div className="container mx-auto">
+              <div className="container mx-auto px-0 py-0 md:px-4 md:py-8">
                 <PhotoGrid viewMode={viewMode} />
               </div>
             </section>
@@ -104,10 +104,10 @@ const Index = () => {
 
         {/* Enhanced Footer */}
         <footer className="bg-gray-900 text-white py-12 px-4 mt-16">
-          <div className="container mx-auto">
+          <div className="container mx-auto text-center md:text-left">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
               <div className="col-span-1 md:col-span-2">
-                <div className="flex items-center space-x-3 mb-4">
+                <div className="flex items-center justify-center md:justify-start space-x-3 mb-4">
                   <div className="p-2 bg-emerald-600 rounded-lg">
                     <Camera className="h-6 w-6 text-white" />
                   </div>
@@ -142,15 +142,13 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="border-t border-gray-800 pt-6 text-center">
+            <div className="border-t border-gray-800 pt-6">
               <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
                 <span>© 2024 Photo Garden Keeper • All rights reserved</span>
-                <div className="flex space-x-6 mt-4 md:mt-0">
-                  <span>Privacy Policy</span>
-                  <span>•</span>
-                  <span>Terms of Service</span>
-                  <span>•</span>
-                  <span>Contact Us</span>
+                <div className="flex space-x-4 mt-4 md:mt-0">
+                  <a href="#" className="hover:text-white">Privacy Policy</a>
+                  <a href="#" className="hover:text-white">Terms of Service</a>
+                  <a href="#" className="hover:text-white">Contact Us</a>
                 </div>
               </div>
             </div>

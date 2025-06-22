@@ -68,76 +68,54 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
   return (
     <div
       {...longPressHandlers}
-      className={`group bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer select-none touch-manipulation ${
+      className={`group bg-white rounded-lg overflow-hidden border-2 transition-all duration-300 cursor-pointer select-none touch-manipulation ${
         selected 
-          ? 'border-emerald-500 ring-2 ring-emerald-200' 
+          ? 'border-emerald-500' 
           : isSelectionMode 
             ? 'border-gray-300' 
-            : 'border-gray-200'
+            : 'border-transparent'
       }`}
     >
       <div className="relative overflow-hidden">
         <img
           src={photo.imageUrl}
           alt={photo.title}
-          className="w-full h-48 object-cover transition-transform duration-500"
+          className="w-full h-auto aspect-[3/4] object-cover"
           draggable={false}
         />
         
-        {/* Selection overlay */}
         {isSelectionMode && (
           <div className={`absolute inset-0 ${selected ? 'bg-emerald-500/20' : 'bg-black/10'} transition-all duration-200`} />
         )}
         
-        {/* Selection checkbox */}
         {isSelectionMode && (
-          <div className="absolute top-3 left-3">
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+          <div className="absolute top-2 left-2">
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
               selected 
                 ? 'bg-emerald-500 border-emerald-500' 
                 : 'bg-white/90 border-gray-400'
             }`}>
-              {selected && <Check className="h-4 w-4 text-white" />}
+              {selected && <Check className="h-3 w-3 text-white" />}
             </div>
           </div>
         )}
-        
-        {/* Action buttons (only show when not in selection mode) */}
-        {!isSelectionMode && (
-          <div className="absolute top-3 right-3 flex space-x-2">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <Eye className="h-4 w-4 text-gray-700" />
-            </div>
-            <WhatsAppShareButton
-              photo={{
-                id: photo.id,
-                title: photo.title,
-                imageUrl: photo.imageUrl,
-                price: photo.price,
-              }}
-              variant="icon"
-            />
-          </div>
-        )}
-        
-        {/* Selection mode indicator */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       
-      <div className="p-4">
-        <h3 className={`font-semibold mb-2 transition-colors ${
-          selected 
-            ? 'text-emerald-600' 
-            : 'text-gray-900 group-hover:text-emerald-600'
-        }`}>
+      <div className="p-2">
+        <h3 className="font-bold text-sm text-gray-800 truncate">
           {photo.title}
         </h3>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+        <p className="text-xs text-gray-500 truncate">
           {photo.description}
         </p>
-        <div className="flex items-center text-xs text-gray-400">
-          <Calendar className="h-3 w-3 mr-1" />
-          {photo.createdAt}
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-sm font-semibold text-gray-900">
+            ₹{photo.price}
+          </p>
+          <div className="flex items-center text-xs text-gray-400">
+            <Calendar className="h-3 w-3 mr-1" />
+            {photo.createdAt}
+          </div>
         </div>
       </div>
     </div>

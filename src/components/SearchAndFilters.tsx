@@ -37,7 +37,7 @@ const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersPro
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const updateFilter = (key: keyof FilterState, value: any) => {
+  const updateFilter = (key: keyof FilterState, value: string | string[]) => {
     if (!user) return; // Prevent filter changes for unauthenticated users
     onChange({ ...filters, [key]: value });
   };
@@ -48,7 +48,7 @@ const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersPro
                           filters.priceRange;
 
   const FiltersContent = () => (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       <div className={!user ? 'opacity-50 pointer-events-none' : ''}>
         <FabricFilter
           selectedFabrics={filters.fabrics}
@@ -102,21 +102,35 @@ const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersPro
       )}
 
       {/* Filters Section */}
-      {isMobile ? (
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="w-full justify-between" disabled={!user}>
-              <span>Filters</span>
-              {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-4">
+      <div className="flex items-center gap-4">
+        <div className="flex-grow">
+          {isMobile ? (
+            <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between" disabled={!user}>
+                  <span>Filters</span>
+                  {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <FiltersContent />
+              </CollapsibleContent>
+            </Collapsible>
+          ) : (
             <FiltersContent />
-          </CollapsibleContent>
-        </Collapsible>
-      ) : (
-        <FiltersContent />
-      )}
+          )}
+        </div>
+        {isMobile && hasActiveFilters && user && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClearAll}
+            className="flex-shrink-0"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
 
       {/* Active Filters Indicator */}
       {hasActiveFilters && user && (

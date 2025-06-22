@@ -28,14 +28,14 @@ const ValueProposition = () => {
   ];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
+    <section className="py-16 md:py-20 px-4 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
       <div className="container mx-auto text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Perfect for Saree
             <span className="text-emerald-600 block">Business Owners</span>
           </h2>
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
             Transform your saree business with professional photo management. 
             Upload, organize, tag, and share your beautiful collection with ease. 
             Built specifically for fashion retailers who want to showcase their inventory professionally.

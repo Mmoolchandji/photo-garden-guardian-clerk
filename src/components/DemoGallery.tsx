@@ -51,29 +51,21 @@ const DemoGallery = () => {
   ];
 
   return (
-    <section className="py-16 px-4">
+    <section className="py-8 px-2 sm:px-4">
       <div className="container mx-auto">
-        <div className="text-center mb-12">
-          <h3 className="text-3xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
             See How It Works
           </h3>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600 max-w-2xl mx-auto px-2 sm:px-0">
             Here's how your saree collection would look in Photo Garden Keeper. 
             Each photo can be tagged with fabric type, pricing, and stock status for easy inventory management.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 sm:gap-4">
           {demoPhotos.map((photo) => (
-            <div key={photo.id} className="relative">
-              <PhotoCard photo={transformPhotoToCardData(photo)} onClick={() => {}} />
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <div className="text-center p-4">
-                  <p className="text-sm text-gray-700 mb-2">Demo Preview</p>
-                  <p className="text-xs text-gray-500">Sign in to upload your own photos</p>
-                </div>
-              </div>
-            </div>
+            <PhotoCard key={photo.id} photo={transformPhotoToCardData(photo)} onClick={() => {}} />
           ))}
         </div>
       </div>

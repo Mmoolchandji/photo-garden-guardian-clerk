@@ -69,7 +69,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
       });
 
       onPhotoDeleted();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Delete error:', error);
       toast({
         title: "Delete failed",
@@ -145,105 +145,118 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
       </div>
 
       {/* Photo Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {photos.map((photo) => {
-          const isSelected = isPhotoSelected(photo.id);
-
-          // Use improved long press hook (supports both touch & mouse)
-          const longPressHandlers = useLongPress({
-            onLongPress: () => handlePhotoLongPress(photo),
-            onClick: () => handlePhotoClick(photo),
-            delay: 500,
-          });
-
-          return (
-            <div
-              key={photo.id}
-              {...longPressHandlers}
-              className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer select-none ${
-                isSelected 
-                  ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50 scale-[1.02]' 
-                  : 'border-gray-200 hover:scale-[1.01]'
-              }`}
-              // Ensure touch-action is present for good mobile tap/hold/scroll
-              style={{ touchAction: 'manipulation' }}
-            >
-              <div className="relative">
-                <img
-                  src={photo.image_url}
-                  alt={photo.title}
-                  className="w-full h-48 object-cover"
-                  draggable={false}
-                />
-                
-                {/* Selection Overlay */}
-                {isSelected && (
-                  <div className="absolute inset-0 bg-emerald-500/20 animate-fade-in" />
-                )}
-
-                {/* Long press hint for first photo when not in selection mode */}
-                {!isSelectionMode && photos.indexOf(photo) === 0 && (
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <div className="bg-black/60 text-white text-xs px-2 py-1 rounded text-center animate-pulse">
-                      Hold to select
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-4">
-                <h3 className={`font-semibold mb-1 truncate transition-colors ${
-                  isSelected ? 'text-emerald-600' : 'text-gray-900'
-                }`}>
-                  {photo.title}
-                </h3>
-                {photo.description && (
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {photo.description}
-                  </p>
-                )}
-                <div className="text-xs text-gray-400 mb-3">
-                  {new Date(photo.created_at).toLocaleDateString()}
-                </div>
-                
-                {/* Action Buttons - Hidden during selection mode */}
-                {!isSelectionMode && (
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onPhotoEdit(photo);
-                      }}
-                      className="flex-1"
-                    >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(photo);
-                      }}
-                      disabled={deletingId === photo.id}
-                      className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      {deletingId === photo.id ? "Deleting..." : "Delete"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {photos.map((photo) => (
+          <AdminPhotoCard
+            key={photo.id}
+            photo={photo}
+            onPhotoEdit={onPhotoEdit}
+            onPhotoDeleted={onPhotoDeleted}
+            deletingId={deletingId}
+            handleDelete={handleDelete}
+            handlePhotoLongPress={handlePhotoLongPress}
+            handlePhotoClick={handlePhotoClick}
+          />
+        ))}
       </div>
+    </div>
+  );
+};
 
-      {/* Bulk Action Toolbar */}
-      <BulkActionToolbar onPhotosDeleted={onPhotoDeleted} />
+interface AdminPhotoCardProps {
+  photo: Photo;
+  onPhotoEdit: (photo: Photo) => void;
+  onPhotoDeleted: () => void;
+  deletingId: string | null;
+  handleDelete: (photo: Photo) => void;
+  handlePhotoLongPress: (photo: Photo) => void;
+  handlePhotoClick: (photo: Photo) => void;
+}
+
+const AdminPhotoCard = ({
+  photo,
+  onPhotoEdit,
+  deletingId,
+  handleDelete,
+  handlePhotoLongPress,
+  handlePhotoClick,
+}: AdminPhotoCardProps) => {
+  const { isPhotoSelected, isSelectionMode } = useAdminPhotoSelection();
+  const isSelected = isPhotoSelected(photo.id);
+
+  const longPressHandlers = useLongPress({
+    onLongPress: () => handlePhotoLongPress(photo),
+    onClick: () => handlePhotoClick(photo),
+    delay: 500,
+  });
+
+  return (
+    <div
+      {...longPressHandlers}
+      className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer select-none ${
+        isSelected
+          ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50 scale-[1.02]'
+          : 'border-gray-200 hover:scale-[1.01]'
+      }`}
+      style={{ touchAction: 'manipulation' }}
+    >
+      <div className="relative">
+        <img
+          src={photo.image_url}
+          alt={photo.title}
+          className="w-full h-48 object-cover"
+          draggable={false}
+        />
+        {isSelected && (
+          <div className="absolute inset-0 bg-emerald-500/20 animate-fade-in" />
+        )}
+      </div>
+      <div className="p-4">
+        <h3
+          className={`font-semibold mb-1 truncate transition-colors ${
+            isSelected ? 'text-emerald-600' : 'text-gray-900'
+          }`}
+        >
+          {photo.title}
+        </h3>
+        {photo.description && (
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+            {photo.description}
+          </p>
+        )}
+        <div className="text-xs text-gray-400 mb-3">
+          {new Date(photo.created_at).toLocaleDateString()}
+        </div>
+        {!isSelectionMode && (
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPhotoEdit(photo);
+              }}
+              className="flex-1"
+            >
+              <Edit className="h-3 w-3 mr-1" />
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(photo);
+              }}
+              disabled={deletingId === photo.id}
+              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-3 w-3 mr-1" />
+              {deletingId === photo.id ? 'Deleting...' : 'Delete'}
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
