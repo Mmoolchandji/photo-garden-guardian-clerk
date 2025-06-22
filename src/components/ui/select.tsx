@@ -66,17 +66,35 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
 
+// Custom hook to detect mobile viewport
+function useIsMobile(breakpointPx = 640) {
+  const [isMobile, setIsMobile] = React.useState(false);
+  React.useEffect(() => {
+    function check() {
+      setIsMobile(window.innerWidth < breakpointPx);
+    }
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [breakpointPx]);
+  return isMobile;
+}
+
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = "popper", ...props }, ref) => (
-  <SelectPrimitive.Portal>
+>(({ className, children, position = "popper", ...props }, ref) => {
+  const isMobile = useIsMobile();
+  const content = (
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
+        // Default styles
         "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-white text-gray-900 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        // Mobile-specific overrides
+        isMobile && "!fixed left-0 right-0 mx-auto w-[95vw] min-w-0 max-w-[95vw] rounded-b-md top-[var(--radix-select-trigger-top,_0px)] mt-2 shadow-lg border border-gray-200",
         className
       )}
       position={position}
@@ -87,16 +105,23 @@ const SelectContent = React.forwardRef<
         className={cn(
           "p-1",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+          isMobile && "w-full min-w-0"
         )}
       >
         {children}
       </SelectPrimitive.Viewport>
       <SelectScrollDownButton />
     </SelectPrimitive.Content>
-  </SelectPrimitive.Portal>
-))
-SelectContent.displayName = SelectPrimitive.Content.displayName
+  );
+  // On mobile, render inline (no portal); on desktop, use portal
+  return isMobile ? content : (
+    <SelectPrimitive.Portal>
+      {content}
+    </SelectPrimitive.Portal>
+  );
+});
+SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectLabel = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Label>,

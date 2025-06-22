@@ -52,18 +52,20 @@ const PhotoMetadataForm = ({
   };
 
   return (
-    <>
-      <div className="mb-4">
-        <img
-          src={imagePreview}
-          alt="Preview"
-          className="w-full h-32 object-cover rounded-lg"
-        />
-        <p className="text-sm text-gray-600 mt-2">{file.name}</p>
-      </div>
-      
-      <form onSubmit={(e) => { e.preventDefault(); onUpload(); }} className="space-y-4">
-        <div>
+  <div
+    className="w-full max-w-[95vw] sm:max-w-md mx-auto bg-white rounded-lg shadow-md p-3 sm:p-6 flex flex-col justify-center items-center <md:px-2 <md:py-4 <md:rounded-md <md:shadow-none <md:max-w-full <md:w-full <md:z-50 <md:overflow-visible"
+    style={{ minHeight: '1px' }}
+  >
+    <div className="mb-4 w-full">
+      <img
+        src={imagePreview}
+        alt="Preview"
+        className="w-full h-32 object-cover rounded-lg"
+      />
+      <p className="text-sm text-gray-600 mt-2">{file.name}</p>
+    </div>
+    <form onSubmit={(e) => { e.preventDefault(); onUpload(); }} className="space-y-4 w-full">
+      <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Title (optional)
           </label>
@@ -92,15 +94,15 @@ const PhotoMetadataForm = ({
           />
         </div>
 
-        <div>
-          <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
-            Fabric Type (optional)
-          </label>
-          <FabricSelector
-            value={fabric}
-            onChange={onFabricChange}
-          />
-        </div>
+        <div className="relative">
+  <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
+    Fabric Type (optional)
+  </label>
+  <FabricSelector
+    value={fabric}
+    onChange={onFabricChange}
+  />
+</div>
 
         <div>
           <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
@@ -151,7 +153,7 @@ const PhotoMetadataForm = ({
           </Button>
         </div>
       </form>
-    </>
+    </div>
   );
 };
 
