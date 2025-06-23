@@ -4,11 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { usePhotoData } from '@/hooks/usePhotoData';
 import useURLFilters from '@/hooks/useURLFilters';
-import AdminHeader from '@/components/admin/AdminHeader';
-import AdminStatsCards from '@/components/admin/AdminStatsCards';
-import AdminActionButtons from '@/components/admin/AdminActionButtons';
 import AdminPhotoManager from '@/components/admin/AdminPhotoManager';
 import { AdminPhotoSelectionProvider } from '@/contexts/AdminPhotoSelectionContext';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const Admin = () => {
   const { user, loading, signOut } = useAuth();
@@ -24,7 +22,7 @@ const Admin = () => {
     }
   }, [user, loading, navigate]);
 
-  const { filters } = useURLFilters();
+  const { filters, updateFilters } = useURLFilters();
   const { photos, loading: loadingPhotos } = usePhotoData(filters);
 
   const handleSignOut = async () => {
@@ -68,18 +66,15 @@ const Admin = () => {
   return (
     <AdminPhotoSelectionProvider>
       <div className="min-h-screen bg-gray-50">
-        <AdminHeader userEmail={user.email} onSignOut={handleSignOut} />
+        <AdminPageHeader
+          userEmail={user.email}
+          onSignOut={handleSignOut}
+          photos={photos}
+          loadingPhotos={loadingPhotos}
+          onUploadPhoto={() => setShowUpload(true)}
+          onRefresh={() => updateFilters({ ...filters })}
+        />
         <div className="container mx-auto px-4 py-8">
-          <AdminStatsCards photos={photos} />
-          <AdminActionButtons
-            loadingPhotos={loadingPhotos}
-            onUploadPhoto={() => setShowUpload(true)}
-            onRefresh={() => {
-              // Force refetch by updating filters (idempotent)
-              const { filters, updateFilters } = useURLFilters();
-              updateFilters({ ...filters });
-            }}
-          />
           <AdminPhotoManager
             onPhotoEdit={handlePhotoEdit}
             onPhotoDeleted={handlePhotoDeleted}
