@@ -75,11 +75,12 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
       clearSelection();
       exitSelectionMode();
       onPhotosDeleted();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Bulk delete error:', error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
       toast({
         title: "Delete failed",
-        description: error.message || "Failed to delete photos. Please try again.",
+        description: errorMessage || "Failed to delete photos. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -97,14 +98,14 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
 
   return (
     <>
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-6 py-4 flex items-center space-x-4">
-          <div className="flex items-center space-x-3">
-            <div className="text-sm font-medium text-gray-900">
-              {getSelectedCount()} photo{getSelectedCount() > 1 ? 's' : ''} selected
-            </div>
-            
-            <div className="h-4 w-px bg-gray-300" />
+      <div className="fixed bottom-0 left-0 right-0 sm:bottom-6 sm:left-1/2 sm:transform sm:-translate-x-1/2 z-50">
+        <div className="bg-white border-t sm:border sm:rounded-lg sm:shadow-lg px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between sm:justify-start sm:space-x-4">
+          <div className="text-sm font-medium text-gray-900">
+            {getSelectedCount()} photo{getSelectedCount() > 1 ? 's' : ''} selected
+          </div>
+
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="hidden sm:block h-4 w-px bg-gray-300" />
 
             {/* Edit Selected button */}
             <Button
@@ -114,8 +115,8 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               disabled={isDeleting}
             >
-              <Edit3 className="h-4 w-4 mr-2" />
-              Edit Selected
+              <Edit3 className="h-5 w-5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Edit Selected</span>
             </Button>
 
             {/* Existing Delete code */}
@@ -127,8 +128,8 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
                   disabled={isDeleting}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Selected
+                  <Trash2 className="h-5 w-5 sm:h-4 sm:w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Delete Selected</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -163,8 +164,8 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
               onClick={exitSelectionMode}
               className="text-gray-600 hover:text-gray-800"
             >
-              <X className="h-4 w-4 mr-2" />
-              Cancel
+              <X className="h-5 w-5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Cancel</span>
             </Button>
           </div>
         </div>

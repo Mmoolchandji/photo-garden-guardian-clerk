@@ -145,7 +145,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
       </div>
 
       {/* Photo Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
         {photos.map((photo) => (
           <AdminPhotoCard
             key={photo.id}
@@ -204,58 +204,27 @@ const AdminPhotoCard = ({
         <img
           src={photo.image_url}
           alt={photo.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-56 sm:h-48 object-cover"
           draggable={false}
         />
+        {/* Overlay for selection */}
         {isSelected && (
           <div className="absolute inset-0 bg-emerald-500/20 animate-fade-in" />
         )}
-      </div>
-      <div className="p-4">
-        <h3
-          className={`font-semibold mb-1 truncate transition-colors ${
-            isSelected ? 'text-emerald-600' : 'text-gray-900'
-          }`}
+        {/* Title overlay at bottom of image */}
+        <div
+          className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 py-2"
+          style={{ pointerEvents: 'none' }}
         >
-          {photo.title}
-        </h3>
-        {photo.description && (
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {photo.description}
-          </p>
-        )}
-        <div className="text-xs text-gray-400 mb-3">
-          {new Date(photo.created_at).toLocaleDateString()}
+          <h3
+            className={`font-semibold text-white text-base truncate drop-shadow-sm ${
+              isSelected ? 'text-emerald-100' : ''
+            }`}
+            title={photo.title}
+          >
+            {photo.title}
+          </h3>
         </div>
-        {!isSelectionMode && (
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onPhotoEdit(photo);
-              }}
-              className="flex-1"
-            >
-              <Edit className="h-3 w-3 mr-1" />
-              Edit
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(photo);
-              }}
-              disabled={deletingId === photo.id}
-              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="h-3 w-3 mr-1" />
-              {deletingId === photo.id ? 'Deleting...' : 'Delete'}
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

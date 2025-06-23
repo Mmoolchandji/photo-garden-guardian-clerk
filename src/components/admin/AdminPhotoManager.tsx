@@ -10,6 +10,7 @@ import AdminPhotoEmptyState from '@/components/AdminPhotoEmptyState';
 import useURLFilters from '@/hooks/useURLFilters';
 import { usePhotoData } from '@/hooks/usePhotoData';
 import { Photo } from '@/types/photo';
+import BulkActionToolbar from '../BulkActionToolbar';
 
 interface AdminPhotoManagerProps {
   onPhotoEdit: (photo: Photo) => void;
@@ -138,16 +139,19 @@ const AdminPhotoManager = ({
               {photos.length === 0 ? (
                 <AdminPhotoEmptyState />
               ) : (
-                <AdminPhotoGrid
-                  photos={photos}
-                  onPhotoEdit={onPhotoEdit}
-                  onPhotoDeleted={onPhotoDeleted}
-                />
+                <div className="sm:p-0 -mx-4 sm:mx-0">
+                  <AdminPhotoGrid
+                    photos={photos}
+                    onPhotoEdit={onPhotoEdit}
+                    onPhotoDeleted={onPhotoDeleted}
+                  />
+                </div>
               )}
             </>
           )}
         </CardContent>
       </Card>
+      <BulkActionToolbar onPhotosDeleted={onPhotoDeleted} />
     </>
   );
 };
