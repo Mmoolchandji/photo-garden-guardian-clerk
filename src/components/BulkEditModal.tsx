@@ -69,14 +69,15 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
         title: "Photo updated successfully",
         description: `${progressStr} updated successfully.`,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
       setEditStates((prev) => ({
         ...prev,
-        [currentPhoto.id]: { ...prev[currentPhoto.id], saved: false, error: err?.message }
+        [currentPhoto.id]: { ...prev[currentPhoto.id], saved: false, error: errorMessage }
       }));
       toast({
         title: "Error updating photo",
-        description: err?.message || "Something went wrong.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -137,36 +138,40 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl p-0">
+      <DialogContent className="max-w-4xl w-full h-full max-h-full md:h-auto md:max-h-[90vh] p-0 flex flex-col">
         <BulkEditHeader
           progressStr={progressStr}
           saving={saving}
           onClose={handleClose}
         />
-        <div className="p-6">
+        <div className="flex-grow overflow-y-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="order-last md:order-first">
+            <PhotoEditForm
+              key={currentPhoto.id}
+              photo={currentPhoto}
+              disabled={saving}
+              onSubmit={async (fields) => {
+                await handleSave(fields);
+              }}
+              onDirtyChange={handleDirtyChange}
+              initialFocus
+            />
+          </div>
           <BulkEditImage photo={currentPhoto} />
-          <PhotoEditForm
-            key={currentPhoto.id}
-            photo={currentPhoto}
-            disabled={saving}
-            onSubmit={async (fields) => {
-              await handleSave(fields);
-            }}
-            onDirtyChange={handleDirtyChange}
-            initialFocus
+        </div>
+        <div className="flex-shrink-0">
+          <BulkEditNavigation
+            currentStep={currentStep}
+            total={total}
+            saving={saving}
+            formDirty={formDirty}
+            editStates={editStates}
+            currentPhoto={currentPhoto}
+            onPrev={handlePrev}
+            onSkip={handleSkip}
+            onNext={handleNext}
           />
         </div>
-        <BulkEditNavigation
-          currentStep={currentStep}
-          total={total}
-          saving={saving}
-          formDirty={formDirty}
-          editStates={editStates}
-          currentPhoto={currentPhoto}
-          onPrev={handlePrev}
-          onSkip={handleSkip}
-          onNext={handleNext}
-        />
         {allFinished && (
           <BulkEditDone
             anyEdited={anyEdited()}

@@ -29,7 +29,7 @@ This document outlines the subtasks required to make the entire application full
 
 - [x] **Admin Stats Cards**: Adapt the admin stats cards for mobile.
 - [x] **Admin Photo Manager**: Make the photo manager responsive.
-- [ ] **Bulk Action Toolbar**: Ensure the bulk action toolbar is usable on mobile.
+- [x] **Bulk Action Toolbar**: Ensure the bulk action toolbar is usable on mobile.
 
 ### Phase 3: Modals & Forms
 

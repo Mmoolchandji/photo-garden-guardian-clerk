@@ -139,19 +139,6 @@ export default function PhotoEditForm({
         )}
       </div>
 
-      {/* Description */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Description
-        </label>
-        <Textarea
-          value={fields.description}
-          onChange={e => handleChange('description', e.target.value)}
-          rows={2}
-          disabled={disabled || saving}
-        />
-      </div>
-
       {/* Fabric Type */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
