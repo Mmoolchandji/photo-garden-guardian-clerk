@@ -33,8 +33,8 @@ This document outlines the subtasks required to make the entire application full
 
 ### Phase 3: Modals & Forms
 
-- [ ] **Bulk Edit Modal**: Make the bulk edit modal responsive.
-- [ ] **Photo Edit Form**: Ensure the photo edit form is mobile-friendly.
+- [x] **Bulk Edit Modal**: Make the bulk edit modal responsive.
+- [x] **Photo Edit Form**: Ensure the photo edit form is mobile-friendly.
 - [ ] **Authentication Forms**: Adapt the sign-in and sign-up forms for mobile.
 
 ### Phase 4: Final Review & Testing

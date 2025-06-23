@@ -23,7 +23,7 @@ const AdminStatsCards = ({ photos }: AdminStatsCardsProps) => (
         </p>
       </CardContent>
     </Card>
-    <Card>
+    {/* <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Legacy Photos</CardTitle>
         <Grid className="h-4 w-4 text-emerald-600" />
@@ -32,8 +32,8 @@ const AdminStatsCards = ({ photos }: AdminStatsCardsProps) => (
         <div className="text-2xl font-bold">{photos.filter(p => p.legacy).length}</div>
         <p className="text-xs text-gray-500">Photos from before user accounts</p>
       </CardContent>
-    </Card>
-    <Card>
+    </Card> */}
+    {/* <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
         <Settings className="h-4 w-4 text-emerald-600" />
@@ -42,7 +42,7 @@ const AdminStatsCards = ({ photos }: AdminStatsCardsProps) => (
         <div className="text-2xl font-bold">-</div>
         <p className="text-xs text-gray-500">Storage tracking coming soon</p>
       </CardContent>
-    </Card>
+    </Card> */}
   </div>
 );
 

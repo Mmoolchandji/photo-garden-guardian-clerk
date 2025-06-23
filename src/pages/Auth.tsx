@@ -35,11 +35,12 @@ const Auth = () => {
         });
       }
       navigate('/admin');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Auth error:', error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
       toast({
         title: "Authentication Error",
-        description: error.message || "An error occurred during authentication.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -48,8 +49,8 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-emerald-100 rounded-full">

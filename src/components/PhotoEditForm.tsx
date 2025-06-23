@@ -118,11 +118,11 @@ export default function PhotoEditForm({
   return (
     <form
       onSubmit={handleFormSubmit}
-      className="space-y-4"
+      className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4"
       autoComplete="off"
     >
       {/* Title */}
-      <div>
+      <div className="md:col-span-2">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Title *
         </label>
@@ -173,7 +173,7 @@ export default function PhotoEditForm({
       </div>
 
       {/* Stock Status */}
-      <div>
+      <div className="md:col-span-2">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Stock Status
         </label>
