@@ -9,21 +9,12 @@ type Props = {
   onClose: () => void;
 };
 
-export default function BulkEditHeader({ progressStr, saving, onClose }: Props) {
+export default function BulkEditHeader({ progressStr }: Props) {
   return (
-    <DialogHeader>
-      <DialogTitle>Bulk Edit Photos</DialogTitle>
-      <div className="mb-2 mt-1 flex items-center justify-between">
-        <span className="text-xs text-gray-500">{progressStr}</span>
-        <Button
-          variant="ghost"
-          className="ml-auto text-gray-500"
-          onClick={onClose}
-          disabled={saving}
-          aria-label="Close"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+    <DialogHeader className="flex-row items-center justify-between border-b p-4">
+      <div>
+        <DialogTitle className="text-lg font-semibold">Bulk Edit Photos</DialogTitle>
+        <span className="text-sm text-gray-500">{progressStr}</span>
       </div>
     </DialogHeader>
   );

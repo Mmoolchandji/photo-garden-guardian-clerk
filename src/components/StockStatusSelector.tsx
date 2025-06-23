@@ -18,7 +18,7 @@ const StockStatusSelector = ({ value, onChange }: StockStatusSelectorProps) => {
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select stock status..." />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="max-h-60 overflow-y-auto" position="popper">
         {STOCK_OPTIONS.map((status) => (
           <SelectItem key={status} value={status}>
             {status}

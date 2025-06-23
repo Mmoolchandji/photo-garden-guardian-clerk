@@ -115,7 +115,7 @@ const FabricSelector = ({
           className="text-gray-900"
         />
       </SelectTrigger>
-      <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
+      <SelectContent className="bg-white border border-gray-200 shadow-lg z-50 max-h-60 overflow-y-auto" position="popper">
         {/* Predefined fabrics */}
         {PREDEFINED_FABRICS.map((fabric) => (
           <SelectItem
