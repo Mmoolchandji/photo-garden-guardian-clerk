@@ -82,7 +82,7 @@ const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersPro
   );
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-6 mb-0">
       {/* Search Bar - Always Visible but disabled for unauthenticated users */}
       <div className="mb-4">
         <SearchBar

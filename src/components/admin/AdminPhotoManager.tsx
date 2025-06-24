@@ -112,7 +112,7 @@ const AdminPhotoManager = ({
   return (
     <>
       {/* Filter panel */}
-      <div className="mb-8">
+      <div className="mb-2 md:mb-8">
         <SearchAndFilters
           filters={filters}
           onChange={updateFilters}
@@ -123,9 +123,9 @@ const AdminPhotoManager = ({
       {/* Photos grid & empty state */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Photo Gallery Management</CardTitle>
+          <CardTitle>Photo Gallery Management</CardTitle>
           <CardDescription>
-            Manage your personal photos - edit details, delete, or add new ones
+            edit photo details, delete, or add new ones
           </CardDescription>
         </CardHeader>
         <CardContent>

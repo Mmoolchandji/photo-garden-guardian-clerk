@@ -74,7 +74,7 @@ const Admin = () => {
           onUploadPhoto={() => setShowUpload(true)}
           onRefresh={() => updateFilters({ ...filters })}
         />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-2 py-2 md:px-4 md:py-8">
           <AdminPhotoManager
             onPhotoEdit={handlePhotoEdit}
             onPhotoDeleted={handlePhotoDeleted}

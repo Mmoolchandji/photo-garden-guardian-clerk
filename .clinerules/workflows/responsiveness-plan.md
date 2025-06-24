@@ -35,10 +35,10 @@ This document outlines the subtasks required to make the entire application full
 
 - [x] **Bulk Edit Modal**: Make the bulk edit modal responsive.
 - [x] **Photo Edit Form**: Ensure the photo edit form is mobile-friendly.
-- [ ] **Authentication Forms**: Adapt the sign-in and sign-up forms for mobile.
+- [x] **Authentication Forms**: Adapt the sign-in and sign-up forms for mobile.
 
 ### Phase 4: Final Review & Testing
 
-- [ ] **End-to-End Testing**: Perform thorough testing on various devices and screen sizes.
-- [ ] **Performance Check**: Ensure that the responsive changes do not negatively impact performance.
-- [ ] **Accessibility Audit**: Verify that all interactive elements are accessible on mobile.
+- [x] **End-to-End Testing**: Perform thorough testing on various devices and screen sizes.
+- [x] **Performance Check**: Ensure that the responsive changes do not negatively impact performance.
+- [x] **Accessibility Audit**: Verify that all interactive elements are accessible on mobile.
