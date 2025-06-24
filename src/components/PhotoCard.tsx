@@ -105,17 +105,14 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
         <h3 className="font-bold text-sm text-gray-800 truncate">
           {photo.title}
         </h3>
-        <p className="text-xs text-gray-500 truncate">
-          {photo.description}
-        </p>
         <div className="flex items-center justify-between mt-2">
           <p className="text-sm font-semibold text-gray-900">
             ₹{photo.price}
           </p>
-          <div className="flex items-center text-xs text-gray-400">
+          {/* <div className="flex items-center text-xs text-gray-400">
             <Calendar className="h-3 w-3 mr-1" />
             {photo.createdAt}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

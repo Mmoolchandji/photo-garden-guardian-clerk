@@ -65,37 +65,9 @@ const Index = () => {
           </>
         ) : (
           <>
-            {/* Hero Section - only for authenticated users */}
-            {/* <section className="py-16 px-4">
-              <div className="container mx-auto text-center">
-                <h2 className="text-5xl font-bold text-gray-900 mb-6">
-                  Curated Garden
-                  <span className="text-emerald-600 block">Photography</span>
-                </h2>
-                <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-                  Discover the beauty of nature through carefully curated garden photography. 
-                  Each image tells a story of growth, beauty, and the wonder of the natural world.
-                </p>
-                <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-                  <span className="flex items-center">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                    Fresh Content
-                  </span>
-                  <span className="flex items-center">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                    High Quality
-                  </span>
-                  <span className="flex items-center">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                    Curated Collection
-                  </span>
-                </div>
-              </div>
-            </section> */}
-
             {/* Photo Gallery with Search & Filters */}
-            <section className="py-8 px-4">
-              <div className="container mx-auto px-0 py-0 md:px-4 md:py-8">
+            <section className="py-4 px-4">
+              <div className="container mx-auto px-0 py-0 md:px-4 md:py-4">
                 <PhotoGrid viewMode={viewMode} />
               </div>
             </section>

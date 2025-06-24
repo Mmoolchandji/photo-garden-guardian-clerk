@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, RotateCcw, Lock } from 'lucide-react';
+import { ChevronDown, ChevronUp, RotateCcw, Lock, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import SearchBar from './SearchBar';
@@ -20,9 +20,10 @@ interface SearchAndFiltersProps {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
   onClearAll: () => void;
+  photosCount: number;
 }
 
-const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersProps) => {
+const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount }: SearchAndFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user } = useAuth();
@@ -67,7 +68,7 @@ const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersPro
           onChange={(range) => updateFilter('priceRange', range)}
         />
       </div>
-      <div className="flex items-end">
+      <div className="flex items-end gap-2">
         <Button
           variant="outline"
           onClick={onClearAll}
@@ -77,6 +78,12 @@ const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersPro
           <RotateCcw className="h-4 w-4 mr-2" />
           Clear All
         </Button>
+        <div className="hidden sm:flex">
+          <Button variant="outline" size="sm" className="flex items-center">
+            <Camera className="h-4 w-4 mr-2" />
+            <span>{photosCount}</span>
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -106,13 +113,19 @@ const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersPro
         <div className="flex-grow">
           {isMobile ? (
             <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full justify-between" disabled={!user}>
-                  <span>Filters</span>
-                  {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <div className="flex items-center gap-2">
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" className="flex-grow justify-between" disabled={!user}>
+                    <span>Filters</span>
+                    {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+                <Button variant="outline" size="sm" className="flex items-center">
+                  <Camera className="h-4 w-4 mr-2" />
+                  <span>{photosCount}</span>
                 </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-4">
+              </div>
+              <CollapsibleContent className="mt-2">
                 <FiltersContent />
               </CollapsibleContent>
             </Collapsible>
@@ -120,7 +133,7 @@ const SearchAndFilters = ({ filters, onChange, onClearAll }: SearchAndFiltersPro
             <FiltersContent />
           )}
         </div>
-        {isMobile && hasActiveFilters && user && (
+        {isMobile && hasActiveFilters && user && !isOpen && (
           <Button
             variant="ghost"
             size="icon"
