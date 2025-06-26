@@ -42,3 +42,20 @@ This document outlines the subtasks required to make the entire application full
 - [x] **End-to-End Testing**: Perform thorough testing on various devices and screen sizes.
 - [x] **Performance Check**: Ensure that the responsive changes do not negatively impact performance.
 - [x] **Accessibility Audit**: Verify that all interactive elements are accessible on mobile.
+
+### ✅ **Phase 5: Final Touch-ups & Minor Enhancements**
+
+* [x] Improve the **Photo Modal** UI & responsiveness for both **mobile** and **desktop** layouts. 'src\components\PhotoModal.tsx' (see below for file content) 
+
+* [x] Enhance the **Floating Share Button** UI and responsiveness specifically for **mobile** layout.
+'src\components\FloatingShareButton.tsx' (see below for file content) 
+
+* [ ] Refine the **Photo Upload Container** design and responsiveness for **both mobile and desktop** views.
+'src\components\PhotoUploadContainer.tsx' (see below for file content) 
+
+* [ ] Improve the responsiveness and layout of **`BulkUploadHeader`** and **`BulkUploadContent`** for **mobile** layout.
+'src\components\BulkUploadHeader.tsx' (see below for file content) 
+'src\components\BulkUploadContent.tsx' (see below for file content) 
+
+* [ ] Tweak the UI and responsiveness of the **Delete Card** inside **`BulkActionToolBar`** for better usability on **mobile**.
+'src\components\BulkActionToolbar.tsx' (see below for file content)

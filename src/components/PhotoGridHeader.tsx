@@ -38,18 +38,18 @@ const PhotoGridHeader = ({ photosCount }: PhotoGridHeaderProps) => {
     );
   }
 
-  return (
-    <>
-    <div className="mb-0 p-4">
-      <h3 className="text-2xl font-bold text-gray-900 mb-2">
-        {/* {isSelectionMode ? 'Select Photos' : 'Your Personal Gallery'} */}
-      </h3>
-      <p className="text-gray-600">
-        {/* {isSelectionMode && ` • Long press to start selection mode`} */}
-      </p>
-    </div>
-    </>
-  );
+  // return (
+  //   <>
+  //   <div className="mb-0 p-4">
+  //     <h3 className="text-2xl font-bold text-gray-900 mb-2">
+  //       {/* {isSelectionMode ? 'Select Photos' : 'Your Personal Gallery'} */}
+  //     </h3>
+  //     <p className="text-gray-600">
+  //       {/* {isSelectionMode && ` • Long press to start selection mode`} */}
+  //     </p>
+  //   </div>
+  //   </>
+  // );
 };
 
 export default PhotoGridHeader;
