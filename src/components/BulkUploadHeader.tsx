@@ -12,9 +12,9 @@ interface BulkUploadHeaderProps {
 
 const BulkUploadHeader = ({ step, fileCount, currentIndex, onCancel }: BulkUploadHeaderProps) => {
   return (
-    <CardHeader className="flex-shrink-0">
+    <CardHeader className="flex-shrink-0 p-3 sm:p-4">
       <div className="flex items-center justify-between">
-        <CardTitle>
+        <CardTitle className="px-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
           {step === 'preview' 
             ? `Bulk Photo Upload (${fileCount} photos)` 
             : `Edit Photo Details (${currentIndex + 1} of ${fileCount})`

@@ -35,24 +35,24 @@ const BulkMetadataForm = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Photo Preview */}
-      <div className="mb-4">
+      <div className="mb-3">
         <img
           src={currentFile.preview}
           alt="Preview"
-          className="w-full h-32 object-cover rounded-lg"
+          className="w-full h-28 object-cover rounded-md"
         />
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-xs text-gray-500 mt-1 truncate">
           {currentFile.file.name}
         </p>
       </div>
 
       {/* Metadata Form */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Title (optional)
+          <label htmlFor="title" className="block text-xs font-medium text-gray-600 mb-1">
+            Title
           </label>
           <Input
             id="title"
@@ -64,21 +64,8 @@ const BulkMetadataForm = ({
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Description (optional)
-          </label>
-          <Textarea
-            id="description"
-            value={currentFile.description}
-            onChange={(e) => onMetadataChange('description', e.target.value)}
-            placeholder="Add a description for your photo..."
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="fabric" className="block text-sm font-medium text-gray-700 mb-1">
-            Fabric Type (optional)
+          <label htmlFor="fabric" className="block text-xs font-medium text-gray-600 mb-1">
+            Fabric Type
           </label>
           <FabricSelector
             value={currentFile.fabric}
@@ -89,8 +76,8 @@ const BulkMetadataForm = ({
         </div>
 
         <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-            Price (optional)
+          <label htmlFor="price" className="block text-xs font-medium text-gray-600 mb-1">
+            Price
           </label>
           <Input
             id="price"
@@ -102,8 +89,8 @@ const BulkMetadataForm = ({
         </div>
 
         <div>
-          <label htmlFor="stock-status" className="block text-sm font-medium text-gray-700 mb-1">
-            Stock Status (optional)
+          <label htmlFor="stock-status" className="block text-xs font-medium text-gray-600 mb-1">
+            Stock Status
           </label>
           <StockStatusSelector
             value={currentFile.stockStatus}

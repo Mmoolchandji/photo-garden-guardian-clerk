@@ -73,7 +73,7 @@ const AdminPhotoManager = ({
   // Display bulk upload view
   if (showBulkUpload && bulkUploadFiles.length > 0) {
     return (
-      <div className="container mx-auto py-4">
+      <div className="py-0">
         <InPageBulkUploadView
           files={bulkUploadFiles}
           onUploadComplete={handleBulkUploadComplete}
@@ -117,6 +117,7 @@ const AdminPhotoManager = ({
           filters={filters}
           onChange={updateFilters}
           onClearAll={clearAllFilters}
+          photosCount={photos.length}
         />
       </div>
 

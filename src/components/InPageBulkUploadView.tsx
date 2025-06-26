@@ -115,7 +115,7 @@ const InPageBulkUploadView = ({
   return (
     // Removed modal fixed positioning and backdrop. This Card will be part of the page flow.
     // Added my-8 for some margin when in page. Responsive width with max-w-2xl.
-    <Card className="w-full max-w-2xl mx-auto my-8 flex flex-col shadow-xl dark:bg-gray-800">
+    <Card className="w-full max-w-2xl mx-auto my-0 flex flex-col shadow-xl dark:bg-gray-800">
       <BulkUploadHeader
         step={step}
         fileCount={files.length}

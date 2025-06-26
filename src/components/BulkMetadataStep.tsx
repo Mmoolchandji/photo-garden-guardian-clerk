@@ -52,7 +52,7 @@ const BulkMetadataStep = ({
   return (
     <div className="flex flex-col h-full">
       {/* Upload Progress and Results - Fixed at top */}
-      <div className="flex-shrink-0 space-y-4 mb-4">
+      <div className="flex-shrink-0">
         <BulkUploadProgress uploading={uploading} uploadProgress={uploadProgress} />
         <BulkUploadResults uploadResults={uploadResults} />
       </div>
@@ -60,7 +60,7 @@ const BulkMetadataStep = ({
       {/* Scrollable Content Area */}
       <div className="flex-1 min-h-0 overflow-hidden">
         <ScrollArea className="h-full w-full">
-          <div className="pr-4 pb-6">
+          <div className="px-1 pr-4 pb-6">
             <BulkMetadataForm
               currentFile={currentFile}
               availableCustomFabrics={sessionCustomFabrics}
