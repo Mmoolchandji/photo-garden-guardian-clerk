@@ -60,7 +60,7 @@ const BulkMetadataStep = ({
       {/* Scrollable Content Area */}
       <div className="flex-1 min-h-0 overflow-hidden">
         <ScrollArea className="h-full w-full">
-          <div className="px-1 pr-4 pb-6">
+          <div className="px-1 pb-6">
             <BulkMetadataForm
               currentFile={currentFile}
               availableCustomFabrics={sessionCustomFabrics}

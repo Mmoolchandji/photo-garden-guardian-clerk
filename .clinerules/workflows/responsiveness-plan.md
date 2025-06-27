@@ -59,3 +59,5 @@ This document outlines the subtasks required to make the entire application full
 
 * [x] Tweak the UI and responsiveness of the **Delete Card** inside **`BulkActionToolBar`** for better usability on **mobile**.
 'src\components\BulkActionToolbar.tsx' (see below for file content)
+
+* [ ] Improve the UI for single photo uploade, or use the same component for single upload (& multiple upload) and just implement minor changes when user upload single photo.

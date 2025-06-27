@@ -63,9 +63,9 @@ const PhotoUploadContainer = ({
   if (step === 'file-selection') {
     return (
       <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
+        <CardHeader className="flex-shrink-0 p-3 sm:p-4">
           <div className="flex items-center justify-between">
-            <CardTitle>Add New Photo</CardTitle>
+            <CardTitle className="px-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Add New Photo</CardTitle>
             <Button variant="ghost" size="sm" onClick={onCancel}>
               <X className="h-4 w-4" />
             </Button>
@@ -97,15 +97,15 @@ const PhotoUploadContainer = ({
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
+      <CardHeader className="flex-shrink-0 p-3 sm:p-4">
         <div className="flex items-center justify-between">
-          <CardTitle>Add Photo Details</CardTitle>
+          <CardTitle className="px-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Add Photo Details</CardTitle>
           <Button variant="ghost" size="sm" onClick={onCancel}>
             <X className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className='p-4 pt-0'>
         <PhotoMetadataForm
           file={file!}
           imagePreview={imagePreview}

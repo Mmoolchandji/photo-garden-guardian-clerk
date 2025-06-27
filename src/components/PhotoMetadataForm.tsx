@@ -76,22 +76,6 @@ const PhotoMetadataForm = ({
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder={`e.g., "${generateTitleFromFilename(file.name)}"`}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Leave empty to auto-generate from filename
-          </p>
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Description (optional)
-          </label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => onDescriptionChange(e.target.value)}
-            placeholder="Add a description for your photo..."
-            rows={3}
-          />
         </div>
 
         <div className="relative">

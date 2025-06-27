@@ -64,7 +64,7 @@
 - **WhatsApp Sharing:** Share images directly to WhatsApp, with or without captions. Multiple images can be sent in a single action, with optional compression for mobile compatibility.
 - **Role-Based Access:** Admins have access to management views and controls. Regular users have restricted access, ensuring security and workflow separation.
 - **Selection Mode (Mobile):** Long-press enables selection mode on mobile devices, allowing batch operations like sharing or deletion.
-- **Mobile-Optimized UI:** The app adapts layouts and scroll behaviors for smooth mobile use, including touch gestures and responsive design.
+- **Mobile-Optimized UI:** The app adapts layouts and scroll behaviors for smooth mobile use, including touch gestures and responsive design. This includes significant improvements to `PhotoModal`, `FloatingShareButton`, `BulkMetadataForm`, `BulkMetadataStep`, `BulkUploadHeader`, `FabricSelector` (dropdown overflow), and the Delete Card within `BulkActionToolbar`.
 - **Supabase Integration:** Handles authentication, file storage, and database operations securely and efficiently.
 
 ---
@@ -78,6 +78,7 @@
 | 2025-06-10 | WhatsApp Sharing (URLs)              | Initial basic sharing implemented           |
 | 2025-06-15 | Multiple Image Sharing + Compression | WhatsApp-style compression logic integrated |
 | 2025-06-18 | Fabric Selector UI Fixes             | Desktop vs. mobile styling issues addressed |
+| 2025-06-27 | Mobile Responsiveness Completed      | All components and pages optimized for mobile, including `PhotoModal`, `FloatingShareButton`, `BulkMetadataForm`, `BulkMetadataStep`, `BulkUploadHeader`, `FabricSelector`, and `BulkActionToolbar` Delete Card. |
 | 2025-06-22 | Knowledge Base Started               | First iteration of documentation            |
 
 > 🕓 *Update this table regularly as new features or fixes are added.*

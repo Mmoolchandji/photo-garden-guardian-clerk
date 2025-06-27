@@ -87,7 +87,7 @@ const AdminPhotoManager = ({
   // Display single upload view
   if (showUpload) {
     return (
-      <div className="container mx-auto py-4 flex items-center justify-center">
+      <div className=" py-0 flex items-center justify-center">
         <PhotoUpload 
           onPhotoUploaded={handlePhotoUploaded}
           onCancel={() => setShowUpload(false)}
