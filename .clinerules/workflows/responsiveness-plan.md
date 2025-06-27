@@ -50,7 +50,7 @@ This document outlines the subtasks required to make the entire application full
 * [x] Enhance the **Floating Share Button** UI and responsiveness specifically for **mobile** layout.
 'src\components\FloatingShareButton.tsx' (see below for file content) 
 
-* [ ] Refine the **Photo Upload Container** design and responsiveness for **both mobile and desktop** views.
+* [x] Refine the **Photo Upload Container** design and responsiveness for **both mobile and desktop** views.
 'src\components\PhotoUploadContainer.tsx' (see below for file content) 
 
 * [ ] Improve the responsiveness and layout of **`BulkUploadHeader`** and **`BulkUploadContent`** for **mobile** layout.

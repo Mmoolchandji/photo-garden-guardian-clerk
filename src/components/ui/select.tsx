@@ -94,7 +94,7 @@ const SelectContent = React.forwardRef<
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         // Mobile-specific overrides
-        isMobile && "!fixed left-0 right-0 mx-auto w-[95vw] min-w-0 max-w-[95vw] rounded-b-md top-[var(--radix-select-trigger-top,_0px)] mt-2 shadow-lg border border-gray-200",
+        isMobile && "w-[var(--radix-select-trigger-width)] max-w-full rounded-b-md shadow-lg border border-gray-200",
         className
       )}
       position={position}
