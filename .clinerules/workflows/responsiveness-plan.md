@@ -53,9 +53,9 @@ This document outlines the subtasks required to make the entire application full
 * [x] Refine the **Photo Upload Container** design and responsiveness for **both mobile and desktop** views.
 'src\components\PhotoUploadContainer.tsx' (see below for file content) 
 
-* [ ] Improve the responsiveness and layout of **`BulkUploadHeader`** and **`BulkUploadContent`** for **mobile** layout.
+* [x] Improve the responsiveness and layout of **`BulkUploadHeader`** and **`BulkUploadContent`** for **mobile** layout.
 'src\components\BulkUploadHeader.tsx' (see below for file content) 
 'src\components\BulkUploadContent.tsx' (see below for file content) 
 
-* [ ] Tweak the UI and responsiveness of the **Delete Card** inside **`BulkActionToolBar`** for better usability on **mobile**.
+* [x] Tweak the UI and responsiveness of the **Delete Card** inside **`BulkActionToolBar`** for better usability on **mobile**.
 'src\components\BulkActionToolbar.tsx' (see below for file content)

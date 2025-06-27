@@ -128,7 +128,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
           </label>
         </div>
         
-        {isSelectionMode && (
+        {/* {isSelectionMode && (
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-600">
               {getSelectedCount()} of {photos.length} selected
@@ -141,7 +141,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
               Cancel Selection
             </Button>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Photo Grid */}

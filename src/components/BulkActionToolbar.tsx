@@ -132,19 +132,19 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
                   <span className="hidden sm:inline">Delete Selected</span>
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center space-x-2">
+              <AlertDialogContent className="w-[90vw] max-w-[400px] sm:max-w-lg">
+                <AlertDialogHeader className="p-4 sm:p-6">
+                  <AlertDialogTitle className="flex items-center justify-center space-x-2 text-lg sm:text-xl">
                     <AlertTriangle className="h-5 w-5 text-red-500" />
                     <span>Delete {getSelectedCount()} Photo{getSelectedCount() > 1 ? 's' : ''}?</span>
                   </AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogDescription className="px-4 pb-4 text-sm sm:px-6 sm:pb-6 sm:text-base">
                     This action cannot be undone. This will permanently delete the selected 
                     photo{getSelectedCount() > 1 ? 's' : ''} from your gallery and remove 
                     {getSelectedCount() > 1 ? ' them' : ' it'} from our servers.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
+                <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 p-4 sm:p-6">
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleBulkDelete}
