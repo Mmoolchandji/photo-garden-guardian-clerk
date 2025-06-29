@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Photo } from '@/types/photo';
 import { WEB_SHARE_LIMITS } from '@/utils/sharing/webShareAPI';
 
@@ -35,6 +35,13 @@ const estimateImageSize = (imageUrl: string): number => {
 export const PhotoSelectionProvider = ({ children }: { children: ReactNode }) => {
   const [selectedPhotos, setSelectedPhotos] = useState<Photo[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+
+  // Automatically exit selection mode when the last photo is deselected
+  useEffect(() => {
+    if (isSelectionMode && selectedPhotos.length === 0) {
+      setIsSelectionMode(false);
+    }
+  }, [selectedPhotos, isSelectionMode]);
 
   const totalSelectedSize = selectedPhotos.reduce((total, photo) => {
     return total + estimateImageSize(photo.image_url);
