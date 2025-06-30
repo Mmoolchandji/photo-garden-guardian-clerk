@@ -15,6 +15,8 @@ import BulkActionToolbar from '../BulkActionToolbar';
 interface AdminPhotoManagerProps {
   onPhotoEdit: (photo: Photo) => void;
   onPhotoDeleted: () => void;
+  onPhotoAdded: () => void;
+  onPhotoEdited: () => void;
   showUpload: boolean;
   setShowUpload: (show: boolean) => void;
   editingPhoto: Photo | null;
@@ -24,6 +26,8 @@ interface AdminPhotoManagerProps {
 const AdminPhotoManager = ({
   onPhotoEdit,
   onPhotoDeleted,
+  onPhotoAdded,
+  onPhotoEdited,
   showUpload,
   setShowUpload,
   editingPhoto,
@@ -35,16 +39,21 @@ const AdminPhotoManager = ({
 
   // Filter state for admin panel (persisted in URL)
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
-  const { photos, loading: loadingPhotos } = usePhotoData(filters);
+  const { photos, loading: loadingPhotos, refetch } = usePhotoData(filters);
 
   const handlePhotoUploaded = () => {
     setShowUpload(false);
     // Reset bulk upload state
     setBulkUploadFiles([]);
     setShowBulkUpload(false);
+    onPhotoAdded();
+    refetch();
   };
 
-  const handlePhotoUpdated = () => setEditingPhoto(null);
+  const handlePhotoUpdated = () => {
+    setEditingPhoto(null);
+    onPhotoEdited();
+  };
 
   // Handle bulk upload initiation from PhotoUpload component
   const handleBulkUploadInitiated = (files: File[]) => {
@@ -57,6 +66,8 @@ const AdminPhotoManager = ({
   const handleBulkUploadComplete = () => {
     setShowBulkUpload(false);
     setBulkUploadFiles([]);
+    onPhotoAdded();
+    refetch();
   };
 
   const handleBulkUploadCancel = () => {
@@ -144,7 +155,10 @@ const AdminPhotoManager = ({
                   <AdminPhotoGrid
                     photos={photos}
                     onPhotoEdit={onPhotoEdit}
-                    onPhotoDeleted={onPhotoDeleted}
+                    onPhotoDeleted={() => {
+                      onPhotoDeleted();
+                      refetch();
+                    }}
                   />
                 </div>
               )}
@@ -152,7 +166,10 @@ const AdminPhotoManager = ({
           )}
         </CardContent>
       </Card>
-      <BulkActionToolbar onPhotosDeleted={onPhotoDeleted} />
+      <BulkActionToolbar onPhotosDeleted={() => {
+        onPhotoDeleted();
+        refetch();
+      }} />
     </>
   );
 };

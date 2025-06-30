@@ -69,11 +69,11 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
       });
 
       onPhotoDeleted();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Delete error:', error);
       toast({
         title: "Delete failed",
-        description: error.message || "Failed to delete photo. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to delete photo. Please try again.",
         variant: "destructive",
       });
     } finally {

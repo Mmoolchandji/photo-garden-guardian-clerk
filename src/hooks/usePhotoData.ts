@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Photo } from '@/types/photo';
 import { FilterState } from '@/components/SearchAndFilters';
 import { supabase } from '@/integrations/supabase/client';
@@ -123,12 +123,13 @@ export const usePhotoData = (filters: FilterState) => {
           console.log('usePhotoData: Photos fetched successfully:', data?.length || 0);
           setPhotos(data || []);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('usePhotoData: Fetch photos error:', error);
         if (isMounted) {
+          const errorMessage = error instanceof Error ? error.message : "Failed to load photos. Please try again.";
           toast({
             title: "Error loading photos",
-            description: error.message || "Failed to load photos. Please try again.",
+            description: errorMessage,
             variant: "destructive",
           });
         }
@@ -144,7 +145,72 @@ export const usePhotoData = (filters: FilterState) => {
     return () => {
       isMounted = false;
     };
+    
+    const refetch = () => {
+      // This function will be returned to allow manual refetching
+      // It works by updating a dummy state that the effect depends on
+      // A better way is to wrap fetchPhotos in useCallback and return it
+      fetchPhotos();
+    };
+
+    fetchPhotos();
+
+    return () => {
+      isMounted = false;
+    };
   }, [buildQuery, toast, user, authReady]);
 
-  return { photos, loading };
+  const fetchPhotos = useCallback(async () => {
+    let isMounted = true;
+    try {
+      console.log('usePhotoData: Starting photo fetch for user:', user?.id || 'no user');
+      setLoading(true);
+      
+      if (!user) {
+        console.log('usePhotoData: No authenticated user, setting empty photos');
+        if (isMounted) {
+          setPhotos([]);
+        }
+        return;
+      }
+
+      console.log('usePhotoData: Fetching photos for user:', user.id);
+      const query = buildQuery();
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+        if (isMounted) {
+          console.log('usePhotoData: Photos fetched successfully:', data?.length || 0);
+          setPhotos(data || []);
+        }
+      } catch (error: unknown) {
+        console.error('usePhotoData: Fetch photos error:', error);
+        if (isMounted) {
+          toast({
+            title: "Error loading photos",
+            description: (error as Error).message || "Failed to load photos. Please try again.",
+            variant: "destructive",
+          });
+      }
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [buildQuery, user, toast]);
+
+
+  useEffect(() => {
+    if (authReady) {
+      fetchPhotos();
+    }
+  }, [authReady, fetchPhotos]);
+
+  return { photos, loading, refetch: fetchPhotos };
 };

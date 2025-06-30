@@ -1,8 +1,8 @@
-# Mobile UX master plam
+# UX improvement master plam
 
 [x] In the photo **selection mode**, the user can long-press to enter selection, select/deselect multiple images, and then share them. However, when all photos are deselected, the app does not exit the selection mode, which creates confusion and an unnecessary extra step for the user.
 
-[ ] **Fix Refresh Issue:**
+[x] **Fix Refresh Issue:**
    The Admin page does not automatically refresh after adding, editing, or deleting photos. Enable real-time or on-action state updates to reflect changes instantly.
 
 [ ] **Simplify WhatsApp Sharing Flow:**
