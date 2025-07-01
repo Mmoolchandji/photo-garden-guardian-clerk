@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 
 export const useFabricTypes = () => {
-  const [fabricTypes, setFabricTypes] = useState<string[]>([]);
+  const [fabricTypes, setFabricTypes] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -20,7 +20,7 @@ export const useFabricTypes = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('fabric_types')
-        .select('name')
+        .select('id, name')
         .eq('user_id', user.id)
         .order('name', { ascending: true });
 
@@ -28,7 +28,7 @@ export const useFabricTypes = () => {
         throw error;
       }
 
-      setFabricTypes(data.map((item) => item.name));
+      setFabricTypes(data || []);
     } catch (error: unknown) {
       toast({
         title: 'Error fetching fabric types',
@@ -76,5 +76,47 @@ export const useFabricTypes = () => {
     }
   };
 
-  return { fabricTypes, loading, addFabricType, refetch: fetchFabricTypes };
+  const updateFabricType = async (id: string, newName: string) => {
+    try {
+      const { error } = await supabase
+        .from('fabric_types')
+        .update({ name: newName })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      await fetchFabricTypes();
+    } catch (error: unknown) {
+      toast({
+        title: 'Error updating fabric type',
+        description: (error as Error).message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteFabricType = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('fabric_types')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      setFabricTypes((prev) => prev.filter((ft) => ft.id !== id));
+    } catch (error: unknown) {
+      toast({
+        title: 'Error deleting fabric type',
+        description: (error as Error).message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  return { fabricTypes, loading, addFabricType, updateFabricType, deleteFabricType, refetch: fetchFabricTypes };
 };
