@@ -9,33 +9,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Check } from "lucide-react";
+import { useFabricTypes } from "@/hooks/useFabricTypes";
 
 interface FabricSelectorProps {
   value: string;
   onChange: (value: string) => void;
-  availableCustomFabrics?: string[];
-  onAddCustomFabric?: (fabricName: string) => void;
 }
-
-const PREDEFINED_FABRICS = [
-  "New Fabric",
-  "Fendy Silk",
-  "Cotton",
-  "Chiffon",
-  "Banarasi Silk",
-];
 
 const FabricSelector = ({
   value,
   onChange,
-  availableCustomFabrics = [],
-  onAddCustomFabric,
 }: FabricSelectorProps) => {
+  const { fabricTypes, addFabricType } = useFabricTypes();
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customFabricInput, setCustomFabricInput] = useState("");
-
-  // Combine all available fabrics
-  const allFabrics = [...PREDEFINED_FABRICS, ...availableCustomFabrics];
 
   const handleSelectChange = (selectedValue: string) => {
     if (selectedValue === "__add_custom__") {
@@ -47,12 +34,11 @@ const FabricSelector = ({
     }
   };
 
-  const handleAddCustomFabric = () => {
+  const handleAddCustomFabric = async () => {
     const trimmedFabric = customFabricInput.trim();
 
-    if (trimmedFabric && !allFabrics.includes(trimmedFabric)) {
-      onAddCustomFabric?.(trimmedFabric);
-
+    if (trimmedFabric && !fabricTypes.includes(trimmedFabric)) {
+      await addFabricType(trimmedFabric);
       onChange(trimmedFabric);
     }
     setShowCustomInput(false);
@@ -116,8 +102,7 @@ const FabricSelector = ({
         />
       </SelectTrigger>
       <SelectContent className="bg-white border border-gray-200 shadow-lg z-50 max-h-60 overflow-y-auto" position="popper">
-        {/* Predefined fabrics */}
-        {PREDEFINED_FABRICS.map((fabric) => (
+        {fabricTypes.map((fabric) => (
           <SelectItem
             key={fabric}
             value={fabric}
@@ -126,28 +111,6 @@ const FabricSelector = ({
             {fabric}
           </SelectItem>
         ))}
-
-        {/* Custom fabrics added during session */}
-        {availableCustomFabrics.length > 0 && (
-          <>
-            {availableCustomFabrics.map((fabric) => (
-              <SelectItem
-                key={`custom-${fabric}`}
-                value={fabric}
-                className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
-              >
-                <span className="flex items-center">
-                  <span className="text-gray-900">{fabric}</span>
-                  <span className="ml-2 text-xs text-blue-600 font-medium">
-                    (Custom)
-                  </span>
-                </span>
-              </SelectItem>
-            ))}
-          </>
-        )}
-
-        {/* Add custom fabric option */}
         <SelectItem
           value="__add_custom__"
           className="text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
