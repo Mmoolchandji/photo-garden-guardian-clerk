@@ -7,7 +7,6 @@ import { useToast } from '@/components/ui/use-toast';
 import BulkEditHeader from './BulkEditModalParts/BulkEditHeader';
 import BulkEditImage from './BulkEditModalParts/BulkEditImage';
 import BulkEditNavigation from './BulkEditModalParts/BulkEditNavigation';
-import BulkEditDone from './BulkEditModalParts/BulkEditDone';
 
 interface BulkEditModalProps {
   open: boolean;
@@ -32,7 +31,6 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
   const [currentStep, setCurrentStep] = useState(0);
   const [editStates, setEditStates] = useState<EditState>({});
   const [saving, setSaving] = useState(false);
-  const [anyDirty, setAnyDirty] = useState(false); // For exit warning
   const [formDirty, setFormDirty] = useState(false);
   const escBlockedRef = useRef<boolean>(false);
 
@@ -40,10 +38,8 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
   const currentPhoto = photos[currentStep];
   const progressStr = `Photo ${currentStep + 1} of ${total}`;
 
-  // Per step, track if fields are dirty (for warning)
   function handleDirtyChange(dirty: boolean) {
     setFormDirty(dirty);
-    setAnyDirty(dirty || Object.values(editStates).some(e => !e.saved && !!e.fields));
   }
 
   // Navigation
@@ -61,14 +57,16 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
         );
       if (error) throw error;
 
-      setEditStates((prev) => ({
+      setEditStates(prev => ({
         ...prev,
-        [currentPhoto.id]: { fields, saved: true }
+        [currentPhoto.id]: { fields, saved: true },
       }));
+      setFormDirty(false); // Reset dirty state after successful save
       toast({
-        title: "Photo updated successfully",
+        title: 'Photo updated successfully',
         description: `${progressStr} updated successfully.`,
       });
+      return true; // Indicate success
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
       setEditStates((prev) => ({
@@ -78,33 +76,25 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
       toast({
         title: "Error updating photo",
         description: errorMessage,
-        variant: "destructive"
+        variant: 'destructive',
       });
+      return false; // Indicate failure
     } finally {
       setSaving(false);
     }
   }
 
-  // Skip photo without saving
-  function handleSkip() {
-    setEditStates((prev) => ({
-      ...prev,
-      [currentPhoto.id]: { ...prev[currentPhoto.id], saved: false }
-    }));
-    goToStep(currentStep + 1);
-    setFormDirty(false); // as if user discarded changes
-  }
-
   // Confirm modal close. If there are unsaved changes, warn user
   function handleClose(force = false) {
-    if (!force && (formDirty || anyDirty)) {
+    const isAnyEdited = anyEdited();
+    if (!force && formDirty) {
       escBlockedRef.current = true;
-      if (confirm("You have unsaved changes. Are you sure you want to exit?")) {
-        onClose(true);
+      if (confirm('You have unsaved changes. Are you sure you want to exit?')) {
+        onClose(isAnyEdited);
       }
       escBlockedRef.current = false;
     } else {
-      onClose(anyEdited());
+      onClose(isAnyEdited);
     }
   }
 
@@ -112,29 +102,37 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
     return Object.values(editStates).some(e => e.saved);
   }
 
-  // Handle navigation with validation
-  async function handleNext() {
-    const state = editStates[currentPhoto.id];
-    if (state?.fields && !state.saved) {
-      alert("Please save or skip this photo before continuing.");
-      return;
+  const formRef = useRef<{ submit: () => void }>(null);
+
+  async function handleNavigation(direction: 'next' | 'prev') {
+    if (formDirty) {
+      // Directly call the submit handler of the form
+      const form = document.querySelector('form');
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
     }
-    if (currentStep < total - 1) {
+
+    if (direction === 'next' && currentStep < total - 1) {
       goToStep(currentStep + 1);
+    } else if (direction === 'prev' && currentStep > 0) {
+      goToStep(currentStep - 1);
     }
   }
 
-  function handlePrev() {
-    if (currentStep > 0) goToStep(currentStep - 1);
+  async function handleDone() {
+    if (formDirty) {
+      const form = document.querySelector('form');
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
+    onClose(anyEdited());
   }
 
-  // On modal close, reset state
   function onOpenChange(open: boolean) {
     if (!open) handleClose();
   }
-
-  const allFinished = currentStep === total - 1 &&
-    (editStates[currentPhoto.id]?.saved || !formDirty);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -150,9 +148,7 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
               key={currentPhoto.id}
               photo={currentPhoto}
               disabled={saving}
-              onSubmit={async (fields) => {
-                await handleSave(fields);
-              }}
+              onSubmit={handleSave}
               onDirtyChange={handleDirtyChange}
               initialFocus
             />
@@ -164,20 +160,12 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
             currentStep={currentStep}
             total={total}
             saving={saving}
-            formDirty={formDirty}
-            editStates={editStates}
-            currentPhoto={currentPhoto}
-            onPrev={handlePrev}
-            onSkip={handleSkip}
-            onNext={handleNext}
+            onPrev={() => handleNavigation('prev')}
+            onNext={() => handleNavigation('next')}
+            isLastStep={currentStep === total - 1}
+            onDone={handleDone}
           />
         </div>
-        {allFinished && (
-          <BulkEditDone
-            anyEdited={anyEdited()}
-            onDone={() => onClose(anyEdited())}
-          />
-        )}
       </DialogContent>
     </Dialog>
   );

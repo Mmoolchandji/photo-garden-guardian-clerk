@@ -153,7 +153,7 @@ const FabricSelector = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 text-red-500 hover:text-red-600"
+                  className="h-6 w-6 ml-2 text-red-500 hover:text-red-600"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Trash2 className="h-3 w-3" />

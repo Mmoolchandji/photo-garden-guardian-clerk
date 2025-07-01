@@ -85,12 +85,13 @@ const PhotoEdit = ({ photo, onPhotoUpdated, onCancel }: PhotoEditProps) => {
         stock_status: stockStatus || null,
       };
       // Remove keys with undefined/null for correct patch update except nullables
-      Object.keys(valuesToUpdate).forEach(key => {
+      Object.keys(valuesToUpdate).forEach(keyStr => {
+        const key = keyStr as keyof typeof valuesToUpdate;
         // Allow null intentionally
         if (
-          typeof (valuesToUpdate as any)[key] === 'undefined'
+          typeof valuesToUpdate[key] === 'undefined'
         ) {
-          delete (valuesToUpdate as any)[key];
+          delete valuesToUpdate[key];
         }
       });
 
@@ -107,11 +108,12 @@ const PhotoEdit = ({ photo, onPhotoUpdated, onCancel }: PhotoEditProps) => {
       });
 
       onPhotoUpdated();
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
       console.error('Update error:', error);
       toast({
         title: "Update failed",
-        description: error.message || "Failed to update photo. Please try again.",
+        description: errorMessage || "Failed to update photo. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -223,29 +225,14 @@ const PhotoEdit = ({ photo, onPhotoUpdated, onCancel }: PhotoEditProps) => {
             />
           </div>
 
-          {/* Save/Cancel */}
-          <div className="flex space-x-3 pt-2">
+          {/* Done Button */}
+          <div className="pt-2">
             <Button
               type="submit"
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
               disabled={updating || isReadOnly}
             >
-              {updating ? (
-                'Saving...'
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={updating}
-            >
-              Cancel
+              {updating ? 'Saving...' : '✅ Done'}
             </Button>
           </div>
         </form>

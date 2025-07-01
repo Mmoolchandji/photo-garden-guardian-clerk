@@ -10,7 +10,7 @@ import { Photo } from '@/types/photo';
 interface PhotoEditFormProps {
   photo: Photo;
   disabled?: boolean;
-  onSubmit: (fields: Partial<Photo>) => Promise<void>;
+  onSubmit: (fields: Partial<Photo>) => Promise<boolean | void>;
   onDirtyChange?: (dirty: boolean) => void;
   initialFocus?: boolean;
 }
