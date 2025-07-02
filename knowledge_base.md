@@ -80,7 +80,27 @@
 | 2025-06-18 | Fabric Selector UI Fixes             | Desktop vs. mobile styling issues addressed |
 | 2025-06-27 | Mobile Responsiveness Completed      | All components and pages optimized for mobile, including `PhotoModal`, `FloatingShareButton`, `BulkMetadataForm`, `BulkMetadataStep`, `BulkUploadHeader`, `FabricSelector`, and `BulkActionToolbar` Delete Card. |
 | 2025-06-22 | Knowledge Base Started               | First iteration of documentation            |
+| 2025-06-30 | Admin & Selection UX | Improved admin page with auto-refresh and enhanced selection mode to auto-exit when empty. |
+| 2025-07-01 | Mobile UI & Responsiveness | Major improvements to mobile responsiveness across multiple components, including the share modal and admin page. |
+| 2025-07-02 | Enhanced Photo Editing & Fabrics | Integrated `BulkEditModal`, added full CRUD for fabric types, and improved UX with auto-saving. |
 
 > 🕓 *Update this table regularly as new features or fixes are added.*
+
+
+---
+
+#### 5. **Recent Updates**
+
+*   **Bulk Photo Editing**: A new `BulkEditModal` has been integrated to streamline the editing of multiple photos at once. The modal features auto-saving on navigation for a smoother user experience.
+*   **Fabric Type Management**: Full CRUD (Create, Read, Update, Delete) functionality has been implemented for fabric types, managed through a new `useFabricTypes` custom hook.
+*   **Enhanced Mobile Responsiveness**: Significant improvements have been made to the mobile UI, including a full-width floating share button, a more compact bulk upload form, and responsive layouts for modals and various components.
+*   **Improved User Experience**:
+    *   The share modal has been simplified by removing tabs and highlighting the recommended sharing method.
+    *   The admin page now automatically refreshes after photo operations.
+    *   Selection mode now automatically exits when the last photo is deselected.
+*   **Code Refinements**:
+    *   The `PhotoCard` component has been extracted for reusability.
+    *   The gallery header and search controls have been unified into a single `SearchAndFilters` component.
+    *   The `PhotoModal` and `BulkActionToolbar` have been refactored for cleaner code and better functionality.
 
 ---
