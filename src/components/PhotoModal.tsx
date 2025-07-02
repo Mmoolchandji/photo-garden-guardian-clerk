@@ -1,5 +1,5 @@
 
-import { X, Calendar, Download, Edit3 } from 'lucide-react';
+import { X, Calendar, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PhotoCardData } from '@/types/photo';
 import WhatsAppShareButton from './WhatsAppShareButton';
@@ -9,10 +9,9 @@ interface PhotoModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPhotoUpdated?: () => void;
-  onEdit?: () => void;
 }
 
-const PhotoModal = ({ photo, isOpen, onClose, onEdit }: PhotoModalProps) => {
+const PhotoModal = ({ photo, isOpen, onClose }: PhotoModalProps) => {
   if (!isOpen || !photo) return null;
 
   return (
@@ -64,20 +63,6 @@ const PhotoModal = ({ photo, isOpen, onClose, onEdit }: PhotoModalProps) => {
                   price: photo.price,
                 }}
               />
-              {onEdit && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full sm:w-auto"
-                  onClick={() => {
-                    onEdit();
-                    onClose();
-                  }}
-                >
-                  <Edit3 className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
-              )}
               <Button variant="outline" size="sm" className="w-full sm:w-auto">
                 <Download className="h-4 w-4 mr-2" />
                 Download

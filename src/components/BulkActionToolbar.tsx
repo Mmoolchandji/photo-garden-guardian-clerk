@@ -176,9 +176,9 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
           open={showEditModal}
           onClose={(refresh) => {
             setShowEditModal(false);
+            clearSelection();
+            exitSelectionMode();
             if (refresh) {
-              clearSelection();
-              exitSelectionMode();
               onPhotosDeleted();
             }
           }}

@@ -20,7 +20,6 @@ interface PhotoGridProps {
 
 const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
   const { isSelectionMode } = usePhotoSelection();
   const { photos, loading, refetch } = usePhotoData(filters);
@@ -61,31 +60,10 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
       {/* View Modal */}
       <PhotoModal
         photo={selectedPhoto ? transformPhotoToCardData(selectedPhoto) : null}
-        isOpen={!!selectedPhoto && !isSelectionMode && !showEditModal}
+        isOpen={!!selectedPhoto && !isSelectionMode}
         onClose={() => setSelectedPhoto(null)}
         onPhotoUpdated={refetch}
-        onEdit={() => {
-          if (selectedPhoto) {
-            setShowEditModal(true);
-          }
-        }}
       />
-
-      {/* Edit Modal */}
-      {showEditModal && selectedPhoto && (
-        <BulkEditModal
-          open={showEditModal}
-          photos={[selectedPhoto]}
-          onClose={(reloadNeeded) => {
-            setShowEditModal(false);
-            if (reloadNeeded) {
-              refetch();
-            }
-            setSelectedPhoto(null);
-          }}
-          onPhotoUpdated={refetch}
-        />
-      )}
     </>
   );
 };
