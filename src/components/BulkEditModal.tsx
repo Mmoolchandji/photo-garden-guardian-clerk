@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import PhotoEditForm from './PhotoEditForm';
 import { Photo } from '@/types/photo';
@@ -12,6 +12,7 @@ interface BulkEditModalProps {
   open: boolean;
   photos: Photo[];
   onClose: (reloadAll?: boolean) => void;
+  onPhotoUpdated?: () => void;
 }
 
 type EditState = {
@@ -26,13 +27,18 @@ type EditState = {
  * Modal for step-by-step (carousel style) multi-photo editing.
  * Refactored into separate subcomponents for maintainability.
  */
-export default function BulkEditModal({ open, photos, onClose }: BulkEditModalProps) {
+export default function BulkEditModal({ open, photos: initialPhotos, onClose, onPhotoUpdated }: BulkEditModalProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [editStates, setEditStates] = useState<EditState>({});
   const [saving, setSaving] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
+  const [photos, setPhotos] = useState(initialPhotos);
   const escBlockedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    setPhotos(initialPhotos);
+  }, [initialPhotos]);
 
   const total = photos.length;
   const currentPhoto = photos[currentStep];
@@ -57,11 +63,23 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
         );
       if (error) throw error;
 
+      setPhotos(currentPhotos =>
+        currentPhotos.map(p =>
+          p.id === currentPhoto.id ? { ...p, ...fields } : p
+        )
+      );
+
       setEditStates(prev => ({
         ...prev,
         [currentPhoto.id]: { fields, saved: true },
       }));
       setFormDirty(false); // Reset dirty state after successful save
+      
+      // Call the refetch function to update the UI immediately
+      if (onPhotoUpdated) {
+        onPhotoUpdated();
+      }
+      
       toast({
         title: 'Photo updated successfully',
         description: `${progressStr} updated successfully.`,
@@ -126,6 +144,10 @@ export default function BulkEditModal({ open, photos, onClose }: BulkEditModalPr
       if (form) {
         form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
       }
+    }
+    // Always call onPhotoUpdated when closing to ensure the grid is refreshed
+    if (onPhotoUpdated && anyEdited()) {
+      onPhotoUpdated();
     }
     onClose(anyEdited());
   }

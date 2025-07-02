@@ -183,6 +183,7 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
             }
           }}
           photos={selectedPhotos}
+          onPhotoUpdated={onPhotosDeleted}
         />
       )}
     </>
