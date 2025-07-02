@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBulkUploadLogic } from '@/hooks/useBulkUploadLogic';
@@ -37,14 +37,42 @@ const InPageBulkUploadView = ({
   } = useBulkUploadLogic(files);
   const [hasHandledCompletion, setHasHandledCompletion] = useState(false);
 
+  // Memoize cleanup and exit functions to stabilize them for useEffect dependencies
+  const cleanupPreviewURLs = useCallback(() => {
+    filesWithMetadata.forEach((fileData) => {
+      if (fileData.preview) {
+        URL.revokeObjectURL(fileData.preview);
+      }
+    });
+  }, [filesWithMetadata]);
+
+  const handleExitView = useCallback(() => {
+    cleanupPreviewURLs();
+    onUploadComplete?.(); // Signal completion to parent
+  }, [cleanupPreviewURLs, onUploadComplete]);
+
   useEffect(() => {
     // This effect's logic will only run if uploadResults, uploading, etc. meet conditions.
     // The hook call itself is unconditional.
     if (user && !hasHandledCompletion && uploadResults && !uploading) {
-      setHasHandledCompletion(true);
-      // Logic for post-upload completion
+      const allSuccessful =
+        uploadResults.failed.length === 0 && uploadResults.success > 0;
+
+      if (allSuccessful) {
+        // If all uploads were successful, exit the view immediately.
+        handleExitView();
+      } else {
+        // If there were failures, show the results screen for user review.
+        setHasHandledCompletion(true);
+      }
     }
-  }, [user, uploadResults, uploading, hasHandledCompletion]);
+  }, [
+    user,
+    uploadResults,
+    uploading,
+    hasHandledCompletion,
+    handleExitView,
+  ]);
 
   // Early return for unauthenticated users AFTER all hooks are declared.
   if (!user) {
@@ -58,14 +86,6 @@ const InPageBulkUploadView = ({
   }
 
   // Component logic continues here, assured that 'user' is defined.
-  const cleanupPreviewURLs = () => {
-    filesWithMetadata.forEach((fileData) => {
-      if (fileData.preview) {
-        URL.revokeObjectURL(fileData.preview);
-      }
-    });
-  };
-
   const handleCancelCleanup = () => {
     cleanupPreviewURLs();
     onCancel();
@@ -74,11 +94,6 @@ const InPageBulkUploadView = ({
   const handleUploadAndComplete = async () => {
     if (uploading) return;
     await handleUploadAll();
-  };
-
-  const handleExitView = () => {
-    cleanupPreviewURLs();
-    onUploadComplete?.(); // Signal completion to parent
   };
 
   const allFailed = uploadResults &&

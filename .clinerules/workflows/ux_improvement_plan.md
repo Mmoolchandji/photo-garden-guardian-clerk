@@ -11,11 +11,11 @@
 [x] **Fabric Type Saving Issue:**
    When a new fabric type is added, it should automatically be saved and immediately appear in the fabric type dropdown without requiring a manual refresh.
 
-[ ] **"Save & Next" Behavior in Bulk Photo Editing:**
+[x] **"Save & Next" Behavior in Bulk Photo Editing:**
    After clicking the **Save** button during bulk editing, the user should be automatically redirected to the **next photo** for editing. This will improve workflow speed and eliminate extra clicks.
 
-[ ] **Replace Success Screen with Toast Notification:**
-   Instead of showing a separate success screen after a bulk upload, display a **compact toast message**. This will reduce unnecessary user interaction and streamline the experience.
+[ ] **Remove the Success Screen because there is alreay a Toast Notification:**
+   There is no need of separate success screen after a bulk upload, as there is already a Toast Notification which tells user about the successful photo upload. This will reduce unnecessary user interaction and streamline the experience.
 
 [ ] **Optimize Photo Loading Speed:**
    Improve the speed at which photos load, especially in the gallery view and admin view. Consider lazy loading or image compression if needed.
