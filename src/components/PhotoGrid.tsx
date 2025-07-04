@@ -15,7 +15,7 @@ import { usePhotoData } from '@/hooks/usePhotoData';
 import { transformPhotoToCardData } from '@/utils/photoTransform';
 
 interface PhotoGridProps {
-  viewMode: 'grid' | 'list';
+  viewMode: 'grid' | 'compact';
 }
 
 const PhotoGrid = ({ viewMode }: PhotoGridProps) => {

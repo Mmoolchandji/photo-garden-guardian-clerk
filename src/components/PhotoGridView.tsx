@@ -1,10 +1,11 @@
 
 import { Photo, PhotoCardData } from '@/types/photo';
 import PhotoCard from './PhotoCard';
+import CompactPhotoCard from './CompactPhotoCard';
 
 interface PhotoGridViewProps {
   photos: Photo[];
-  viewMode: 'grid' | 'list';
+  viewMode: 'grid' | 'compact';
   onPhotoClick: (photo: Photo) => void;
 }
 
@@ -20,7 +21,7 @@ const PhotoGridView = ({ photos, viewMode, onPhotoClick }: PhotoGridViewProps) =
 
   if (viewMode === 'grid') {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 sm:gap-4 py-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 sm:gap-4 py-4 transition-all duration-300">
         {photos.map((photo) => (
           <PhotoCard
             key={photo.id}
@@ -32,36 +33,15 @@ const PhotoGridView = ({ photos, viewMode, onPhotoClick }: PhotoGridViewProps) =
     );
   }
 
+  // Compact view - maximum density for mobile
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-1 py-2 transition-all duration-300">
       {photos.map((photo) => (
-        <div
+        <CompactPhotoCard
           key={photo.id}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+          photo={transformPhotoData(photo)}
           onClick={() => onPhotoClick(photo)}
-        >
-          <div className="flex space-x-4">
-            <img
-              src={photo.image_url}
-              alt={photo.title}
-              className="w-24 h-24 object-cover rounded-lg"
-            />
-            <div className="flex-1">
-              <h4 className="font-semibold text-gray-900 mb-1">{photo.title}</h4>
-              <p className="text-gray-600 text-sm mb-2">{photo.description}</p>
-              {photo.fabric && (
-                <p className="text-xs text-emerald-600 mb-1">Fabric: {photo.fabric}</p>
-              )}
-              {photo.price && (
-                <p className="text-xs text-gray-600 mb-1">Price: ₹{photo.price}</p>
-              )}
-              {photo.stock_status && (
-                <p className="text-xs text-blue-600 mb-1">Status: {photo.stock_status}</p>
-              )}
-              <p className="text-xs text-gray-400">Added {new Date(photo.created_at).toLocaleDateString()}</p>
-            </div>
-          </div>
-        </div>
+        />
       ))}
     </div>
   );

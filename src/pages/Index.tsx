@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
 const Index = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid');
   const { user, authReady } = useAuth();
 
   return (
@@ -30,17 +30,28 @@ const Index = () => {
                 </div>
               </div>
               
-              <nav className="flex items-center space-x-2">
+                <nav className="flex items-center space-x-2">
                 {user && (
-                  <Button 
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'} 
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className="bg-emerald-600 hover:bg-emerald-700"
-                  >
-                    <Grid className="h-4 w-4 md:mr-2" />
-                    <span className="hidden md:inline">Grid</span>
-                  </Button>
+                  <>
+                    <Button 
+                      variant={viewMode === 'grid' ? 'default' : 'ghost'} 
+                      size="sm"
+                      onClick={() => setViewMode('grid')}
+                      className={viewMode === 'grid' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                    >
+                      <Grid className="h-4 w-4 md:mr-2" />
+                      <span className="hidden md:inline">Grid</span>
+                    </Button>
+                    <Button 
+                      variant={viewMode === 'compact' ? 'default' : 'ghost'} 
+                      size="sm"
+                      onClick={() => setViewMode('compact')}
+                      className={viewMode === 'compact' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                    >
+                      <Grid className="h-4 w-4 md:mr-2" />
+                      <span className="hidden md:inline">Compact</span>
+                    </Button>
+                  </>
                 )}
                 
                 <Link to={user ? "/admin" : "/auth"}>

@@ -70,8 +70,6 @@ const BulkMetadataForm = ({
           <FabricSelector
             value={currentFile.fabric}
             onChange={(value) => onMetadataChange('fabric', value)}
-            availableCustomFabrics={availableCustomFabrics}
-            onAddCustomFabric={onAddCustomFabric}
           />
         </div>
 
