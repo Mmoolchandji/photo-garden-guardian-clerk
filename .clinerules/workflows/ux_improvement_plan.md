@@ -17,11 +17,8 @@
 [x] **Remove the Success Screen because there is alreay a Toast Notification:**
    There is no need of separate success screen after a bulk upload, as there is already a Toast Notification which tells user about the successful photo upload. This will reduce unnecessary user interaction and streamline the experience.
 
-[ ] **Compact Photo Grid:** Add the 'compact photo grid layout' view option in the app, similar to the attached screenshot. Each photo thumbnail should appear smaller, allowing more images to be displayed on the screen at once. The goal is to enhance usability and scrolling efficiency, especially when browsing large collections of photos. Ensure proper spacing, alignment, and responsive behavior across mobile and desktop devices.
+[x] **Compact Photo Grid:** Add the 'compact photo grid layout' view option in the app, similar to the attached screenshot. Each photo thumbnail should appear smaller, allowing more images to be displayed on the screen at once. The goal is to enhance usability and scrolling efficiency, especially when browsing large collections of photos. Ensure proper spacing, alignment, and responsive behavior across mobile and desktop devices.
 
 [ ] Allow user to sort & set custom order for the photos.
 
 [ ] **What if we forget the password:**
-
-[ ] **Optimize Photo Loading Speed:**
-   Improve the speed at which photos load, especially in the gallery view and admin view. Consider lazy loading or image compression if needed.

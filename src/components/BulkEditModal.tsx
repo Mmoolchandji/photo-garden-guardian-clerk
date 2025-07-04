@@ -1,5 +1,6 @@
 
 import { useState, useRef, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import PhotoEditForm from './PhotoEditForm';
 import { Photo } from '@/types/photo';
@@ -57,10 +58,11 @@ export default function BulkEditModal({ open, photos: initialPhotos, onClose, on
   async function handleSave(fields: Partial<Photo>) {
     setSaving(true);
     try {
-      const { error } = await import('@/integrations/supabase/client').then(m => m.supabase)
-        .then(supabase =>
-          supabase.from('photos').update(fields).eq('id', currentPhoto.id)
-        );
+      const { error } = await supabase
+        .from('photos')
+        .update(fields)
+        .eq('id', currentPhoto.id);
+
       if (error) throw error;
 
       setPhotos(currentPhotos =>
