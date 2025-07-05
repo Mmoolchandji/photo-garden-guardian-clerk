@@ -1,5 +1,5 @@
 
-import { Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import BulkUploadProgress from './BulkUploadProgress';
@@ -26,6 +26,7 @@ interface BulkPreviewStepProps {
   onSetStep: (step: 'metadata') => void;
   onUploadAll: () => void;
   onChooseDifferentFiles: () => void;
+  onRemoveFile: (index: number) => void;
 }
 
 const BulkPreviewStep = ({
@@ -38,7 +39,8 @@ const BulkPreviewStep = ({
   onPrevPhoto,
   onSetStep,
   onUploadAll,
-  onChooseDifferentFiles
+  onChooseDifferentFiles,
+  onRemoveFile
 }: BulkPreviewStepProps) => {
   return (
     <ScrollArea className="h-full">
@@ -68,12 +70,24 @@ const BulkPreviewStep = ({
           </div>
           
           {filesWithMetadata[currentIndex] && (
-            <div className="text-center">
-              <img
-                src={filesWithMetadata[currentIndex].preview}
-                alt="Preview"
-                className="w-full h-64 object-cover rounded-lg mb-3"
-              />
+            <div className="text-center relative group">
+              <div className="relative">
+                <img
+                  src={filesWithMetadata[currentIndex].preview}
+                  alt="Preview"
+                  className="w-full h-64 object-cover rounded-lg mb-3 transition-opacity duration-200"
+                />
+                {filesWithMetadata.length > 1 && (
+                  <button
+                    onClick={() => onRemoveFile(currentIndex)}
+                    disabled={uploading}
+                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 opacity-80 hover:opacity-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                    aria-label="Remove photo"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
               <p className="text-sm text-gray-600 font-medium">
                 {filesWithMetadata[currentIndex].file.name}
               </p>

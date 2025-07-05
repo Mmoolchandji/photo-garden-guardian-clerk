@@ -34,6 +34,7 @@ const BulkUploadModal = ({
     handleMetadataChange,
     nextPhoto,
     prevPhoto,
+    removeFile,
   } = useBulkUploadLogic(files);
 
   const [hasHandledCompletion, setHasHandledCompletion] = useState(false);
@@ -156,6 +157,7 @@ const BulkUploadModal = ({
             onUploadAll={handleUploadComplete}
             onChooseDifferentFiles={onChooseDifferentFiles}
             onMetadataChange={handleMetadataChange}
+            onRemoveFile={removeFile}
           />
         )}
       </Card>

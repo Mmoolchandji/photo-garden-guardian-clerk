@@ -34,6 +34,7 @@ const InPageBulkUploadView = ({
     handleMetadataChange,
     nextPhoto,
     prevPhoto,
+    removeFile,
   } = useBulkUploadLogic(files);
   const [hasHandledCompletion, setHasHandledCompletion] = useState(false);
 
@@ -169,6 +170,7 @@ const InPageBulkUploadView = ({
             onChooseDifferentFiles();
           }}
           onMetadataChange={handleMetadataChange}
+          onRemoveFile={removeFile}
           isModal={false} // Indicate it's not in a modal for potential style adjustments
         />
       )}

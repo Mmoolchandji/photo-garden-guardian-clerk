@@ -26,6 +26,7 @@ interface BulkUploadContentProps {
   onUploadAll: () => void;
   onChooseDifferentFiles: () => void;
   onMetadataChange: (field: 'title' | 'description' | 'fabric' | 'price' | 'stockStatus', value: string) => void;
+  onRemoveFile: (index: number) => void;
   isModal?: boolean; // Optional prop to indicate if this is being used in a modal
 }
 
@@ -42,6 +43,7 @@ const BulkUploadContent = ({
   onUploadAll,
   onChooseDifferentFiles,
   onMetadataChange,
+  onRemoveFile,
   isModal = true, // Default to true for backward compatibility
 }: BulkUploadContentProps) => {
   // Different styling based on whether we're in a modal or in-page view
@@ -59,6 +61,7 @@ const BulkUploadContent = ({
           onSetStep={onSetStep}
           onUploadAll={onUploadAll}
           onChooseDifferentFiles={onChooseDifferentFiles}
+          onRemoveFile={onRemoveFile}
         />
       ) : (
         <BulkMetadataStep

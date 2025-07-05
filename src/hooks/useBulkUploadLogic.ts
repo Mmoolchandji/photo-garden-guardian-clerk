@@ -236,6 +236,31 @@ export const useBulkUploadLogic = (files: File[]) => {
     setCurrentIndex(prev => (prev - 1 + filesWithMetadata.length) % filesWithMetadata.length);
   };
 
+  const removeFile = (indexToRemove: number) => {
+    console.log('useBulkUploadLogic: Removing file at index:', indexToRemove);
+    
+    // Clean up the preview URL for the removed file
+    if (filesWithMetadata[indexToRemove]?.preview) {
+      URL.revokeObjectURL(filesWithMetadata[indexToRemove].preview);
+    }
+
+    // Remove the file from the array
+    setFilesWithMetadata(prev => prev.filter((_, index) => index !== indexToRemove));
+
+    // Adjust current index if necessary
+    setCurrentIndex(prev => {
+      const newLength = filesWithMetadata.length - 1;
+      if (newLength === 0) return 0;
+      if (prev >= indexToRemove && prev > 0) {
+        return prev - 1;
+      }
+      if (prev >= newLength) {
+        return newLength - 1;
+      }
+      return prev;
+    });
+  };
+
   return {
     step,
     setStep,
@@ -252,5 +277,6 @@ export const useBulkUploadLogic = (files: File[]) => {
     addCustomFabric,
     nextPhoto,
     prevPhoto,
+    removeFile,
   };
 };
