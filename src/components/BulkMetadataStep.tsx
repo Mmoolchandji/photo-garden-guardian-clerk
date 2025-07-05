@@ -29,6 +29,7 @@ interface BulkMetadataStepProps {
   onPrevPhoto: () => void;
   onUploadAll: () => void;
   onSetStep: (step: 'preview') => void;
+  onRemoveFile: (index: number) => void;
 }
 
 const BulkMetadataStep = ({
@@ -43,7 +44,8 @@ const BulkMetadataStep = ({
   onNextPhoto,
   onPrevPhoto,
   onUploadAll,
-  onSetStep
+  onSetStep,
+  onRemoveFile
 }: BulkMetadataStepProps) => {
   const currentFile = filesWithMetadata[currentIndex];
 
@@ -63,9 +65,13 @@ const BulkMetadataStep = ({
           <div className="px-1 pb-6">
             <BulkMetadataForm
               currentFile={currentFile}
+              currentIndex={currentIndex}
+              totalFiles={filesWithMetadata.length}
               availableCustomFabrics={sessionCustomFabrics}
               onMetadataChange={onMetadataChange}
               onAddCustomFabric={onAddCustomFabric}
+              onRemoveFile={onRemoveFile}
+              uploading={uploading}
             />
           </div>
         </ScrollArea>

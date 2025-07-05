@@ -75,6 +75,7 @@ const BulkUploadContent = ({
           onPrevPhoto={onPrevPhoto}
           onUploadAll={onUploadAll}
           onSetStep={onSetStep}
+          onRemoveFile={onRemoveFile}
         />
       )}
     </CardContent>
