@@ -39,6 +39,21 @@ const BulkUploadModal = ({
 
   const [hasHandledCompletion, setHasHandledCompletion] = useState(false);
 
+  // --- Step 3: Improved error handling and edge cases ---
+  useEffect(() => {
+    // Only handle once per session
+    if (!hasHandledCompletion && uploadResults && !uploading) {
+      setHasHandledCompletion(true);
+
+      if (uploadResults.failed.length === 0) {
+        cleanupPreviewURLs();
+        onUploadComplete?.();
+      }
+      // No auto-exit for failures (partial or full): modal stays; user must click "Done"
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploadResults, uploading, hasHandledCompletion]);
+
   // Ensure user is authenticated before proceeding
   if (!user) {
     return (
@@ -65,21 +80,6 @@ const BulkUploadModal = ({
     await handleUploadAll();
     // handled in effect below
   };
-
-  // --- Step 3: Improved error handling and edge cases ---
-  useEffect(() => {
-    // Only handle once per session
-    if (!hasHandledCompletion && uploadResults && !uploading) {
-      setHasHandledCompletion(true);
-
-      if (uploadResults.failed.length === 0) {
-        cleanupPreviewURLs();
-        onUploadComplete?.();
-      }
-      // No auto-exit for failures (partial or full): modal stays; user must click "Done"
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadResults, uploading, hasHandledCompletion]);
 
   // Manual exit for failed upload summary
   const handleManualExit = () => {
