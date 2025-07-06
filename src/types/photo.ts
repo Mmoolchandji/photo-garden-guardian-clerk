@@ -10,6 +10,7 @@ export interface Photo {
   stock_status?: string;
   user_id: string;
   legacy?: boolean;
+  sort_order?: number;
 }
 
 export interface PhotoCardData {

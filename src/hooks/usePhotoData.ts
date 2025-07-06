@@ -29,7 +29,8 @@ export const usePhotoData = (filters: FilterState) => {
         .from('photos')
         .select('*')
         .eq('user_id', user.id) // Only fetch photos for the authenticated user
-        .order('created_at', { ascending: false });
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false }); // Fallback for photos without sort_order
 
       if (filters.search) {
         query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);

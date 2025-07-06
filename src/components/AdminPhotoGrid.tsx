@@ -9,6 +9,9 @@ import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
 import { useLongPress } from '@/hooks/useLongPress';
 import { Photo } from '@/types/photo';
 import BulkActionToolbar from './BulkActionToolbar';
+import { usePhotoSorting } from '@/hooks/usePhotoSorting';
+import SortableAdminPhotoCard from './SortableAdminPhotoCard';
+import SortableDragOverlay from './SortableDragOverlay';
 
 interface AdminPhotoGridProps {
   photos: Photo[];
@@ -21,6 +24,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
   const { toast } = useToast();
   const {
     isSelectionMode,
+    isSortingMode,
     selectedPhotoIds,
     isPhotoSelected,
     togglePhoto,
@@ -30,6 +34,21 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     enterSelectionMode,
     exitSelectionMode
   } = useAdminPhotoSelection();
+
+  // Photo sorting functionality
+  const {
+    activePhoto,
+    isUpdating,
+    sensors,
+    handleDragStart,
+    handleDragEnd,
+    handleDragCancel,
+    DndContext,
+    DragOverlay,
+    SortableContext,
+    closestCenter,
+    verticalListSortingStrategy,
+  } = usePhotoSorting(photos, onPhotoDeleted);
 
   const handleDelete = async (photo: Photo) => {
     if (!confirm(`Are you sure you want to delete "${photo.title}"? This action cannot be undone.`)) {
@@ -115,50 +134,81 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
 
   return (
     <div className="space-y-4">
-      {/* Selection Header */}
-      <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
-        <div className="flex items-center space-x-3">
-          <Checkbox
-            checked={photos.length > 0 && selectedPhotoIds.size === photos.length}
-            onCheckedChange={handleSelectAll}
-            className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-          />
-          <label className="text-sm font-medium text-gray-700">
-            Select All ({photos.length} photos)
-          </label>
-        </div>
-        
-        {/* {isSelectionMode && (
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              {getSelectedCount()} of {photos.length} selected
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={exitSelectionMode}
-            >
-              Cancel Selection
-            </Button>
+      {/* Selection Header - only show in selection mode, not sorting mode */}
+      {!isSortingMode && (
+        <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              checked={photos.length > 0 && selectedPhotoIds.size === photos.length}
+              onCheckedChange={handleSelectAll}
+              className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+            />
+            <label className="text-sm font-medium text-gray-700">
+              Select All ({photos.length} photos)
+            </label>
           </div>
-        )} */}
-      </div>
+        </div>
+      )}
+
+      {/* Sorting Mode Instructions */}
+      {isSortingMode && (
+        <div className="bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-lg">
+          <p className="text-sm text-emerald-800">
+            <strong>Reorder Mode:</strong> Drag and drop photos to rearrange them. 
+            {selectedPhotoIds.size > 0 && ` Selected photos (${selectedPhotoIds.size}) will move together.`}
+          </p>
+        </div>
+      )}
 
       {/* Photo Grid */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
-        {photos.map((photo) => (
-          <AdminPhotoCard
-            key={photo.id}
-            photo={photo}
-            onPhotoEdit={onPhotoEdit}
-            onPhotoDeleted={onPhotoDeleted}
-            deletingId={deletingId}
-            handleDelete={handleDelete}
-            handlePhotoLongPress={handlePhotoLongPress}
-            handlePhotoClick={handlePhotoClick}
-          />
-        ))}
-      </div>
+      {isSortingMode ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <SortableContext items={photos.map(p => p.id)} strategy={verticalListSortingStrategy}>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
+              {photos.map((photo) => (
+                <SortableAdminPhotoCard
+                  key={photo.id}
+                  photo={photo}
+                />
+              ))}
+            </div>
+          </SortableContext>
+          <DragOverlay>
+            <SortableDragOverlay photo={activePhoto} />
+          </DragOverlay>
+        </DndContext>
+      ) : (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
+          {photos.map((photo) => (
+            <AdminPhotoCard
+              key={photo.id}
+              photo={photo}
+              onPhotoEdit={onPhotoEdit}
+              onPhotoDeleted={onPhotoDeleted}
+              deletingId={deletingId}
+              handleDelete={handleDelete}
+              handlePhotoLongPress={handlePhotoLongPress}
+              handlePhotoClick={handlePhotoClick}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Loading overlay during sort updates */}
+      {isUpdating && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600" />
+            <span className="text-gray-700">Saving new order...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

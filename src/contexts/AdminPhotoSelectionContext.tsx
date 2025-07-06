@@ -13,6 +13,7 @@ interface Photo {
 interface AdminPhotoSelectionContextType {
   selectedPhotoIds: Set<string>;
   isSelectionMode: boolean;
+  isSortingMode: boolean;
   selectedPhotos: Photo[];
   selectPhoto: (photo: Photo) => void;
   deselectPhoto: (photoId: string) => void;
@@ -21,6 +22,8 @@ interface AdminPhotoSelectionContextType {
   clearSelection: () => void;
   enterSelectionMode: () => void;
   exitSelectionMode: () => void;
+  enterSortingMode: () => void;
+  exitSortingMode: () => void;
   isPhotoSelected: (photoId: string) => boolean;
   getSelectedCount: () => number;
 }
@@ -34,6 +37,7 @@ interface AdminPhotoSelectionProviderProps {
 export const AdminPhotoSelectionProvider = ({ children }: AdminPhotoSelectionProviderProps) => {
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [isSortingMode, setIsSortingMode] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<Photo[]>([]);
 
   const selectPhoto = (photo: Photo) => {
@@ -73,11 +77,22 @@ export const AdminPhotoSelectionProvider = ({ children }: AdminPhotoSelectionPro
 
   const enterSelectionMode = () => {
     setIsSelectionMode(true);
+    setIsSortingMode(false); // Exit sorting mode when entering selection mode
   };
 
   const exitSelectionMode = () => {
     setIsSelectionMode(false);
     clearSelection();
+  };
+
+  const enterSortingMode = () => {
+    setIsSortingMode(true);
+    setIsSelectionMode(false); // Exit selection mode when entering sorting mode
+    clearSelection(); // Clear any selections
+  };
+
+  const exitSortingMode = () => {
+    setIsSortingMode(false);
   };
 
   const isPhotoSelected = (photoId: string) => {
@@ -98,6 +113,7 @@ export const AdminPhotoSelectionProvider = ({ children }: AdminPhotoSelectionPro
   const value: AdminPhotoSelectionContextType = {
     selectedPhotoIds,
     isSelectionMode,
+    isSortingMode,
     selectedPhotos,
     selectPhoto,
     deselectPhoto,
@@ -106,6 +122,8 @@ export const AdminPhotoSelectionProvider = ({ children }: AdminPhotoSelectionPro
     clearSelection,
     enterSelectionMode,
     exitSelectionMode,
+    enterSortingMode,
+    exitSortingMode,
     isPhotoSelected,
     getSelectedCount,
   };

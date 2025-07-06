@@ -39,6 +39,7 @@ export type Database = {
           image_url: string
           legacy: boolean | null
           price: number | null
+          sort_order: number | null
           stock_status: string | null
           title: string
           updated_at: string
@@ -52,6 +53,7 @@ export type Database = {
           image_url: string
           legacy?: boolean | null
           price?: number | null
+          sort_order?: number | null
           stock_status?: string | null
           title: string
           updated_at?: string
@@ -65,6 +67,7 @@ export type Database = {
           image_url?: string
           legacy?: boolean | null
           price?: number | null
+          sort_order?: number | null
           stock_status?: string | null
           title?: string
           updated_at?: string
@@ -107,7 +110,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      initialize_photo_sort_order: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
