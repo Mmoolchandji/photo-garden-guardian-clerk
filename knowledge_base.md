@@ -83,6 +83,9 @@
 | 2025-06-30 | Admin & Selection UX | Improved admin page with auto-refresh and enhanced selection mode to auto-exit when empty. |
 | 2025-07-01 | Mobile UI & Responsiveness | Major improvements to mobile responsiveness across multiple components, including the share modal and admin page. |
 | 2025-07-02 | Enhanced Photo Editing & Fabrics | Integrated `BulkEditModal`, added full CRUD for fabric types, and improved UX with auto-saving. |
+| 2025-07-04 | Supabase Environment Variables | Moved Supabase credentials to environment variables for improved security and configuration flexibility. |
+| 2025-07-05 | Bulk Upload UX | Added a remove button to the bulk upload preview, allowing users to delete individual photos from the selection. |
+| 2025-07-06 | Code Refinements | Reordered hooks in `BulkUploadModal` for better code organization. |
 
 > 🕓 *Update this table regularly as new features or fixes are added.*
 
@@ -102,5 +105,10 @@
     *   The `PhotoCard` component has been extracted for reusability.
     *   The gallery header and search controls have been unified into a single `SearchAndFilters` component.
     *   The `PhotoModal` and `BulkActionToolbar` have been refactored for cleaner code and better functionality.
+*   **Bulk Upload Improvements**:
+    *   A remove button has been added to the bulk upload preview, allowing users to delete individual photos before uploading.
+    *   The success screen is now skipped on successful bulk uploads to streamline the user workflow.
+*   **Configuration**:
+    *   Supabase keys have been moved to environment variables to improve security.
 
 ---

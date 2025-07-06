@@ -19,6 +19,12 @@
 
 [x] **Compact Photo Grid:** Add the 'compact photo grid layout' view option in the app, similar to the attached screenshot. Each photo thumbnail should appear smaller, allowing more images to be displayed on the screen at once. The goal is to enhance usability and scrolling efficiency, especially when browsing large collections of photos. Ensure proper spacing, alignment, and responsive behavior across mobile and desktop devices.
 
+[x] Add remove option in bulk adding/uploading photos. So user can remove a perticular photo that he selected bymistakenly.
+
+[ ] InPageBulkUploadView should be pop-up instead of comes on the same page.
+
+[ ] Improve the UI of gallary that shared using 'share gallery link' option
+
 [ ] Allow user to sort & set custom order for the photos.
 
 [ ] **What if we forget the password:**
