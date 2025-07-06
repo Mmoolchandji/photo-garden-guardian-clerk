@@ -21,9 +21,9 @@
 
 [x] Add remove option in bulk adding/uploading photos. So user can remove a perticular photo that he selected bymistakenly.
 
-[ ] InPageBulkUploadView should be pop-up instead of comes on the same page.
+[x] InPageBulkUploadView should be pop-up instead of comes on the same page.
 
-[ ] Improve the UI of gallary that shared using 'share gallery link' option
+[x] Improve the UI of gallary that shared using 'share gallery link' option
 
 [ ] Allow user to sort & set custom order for the photos.
 

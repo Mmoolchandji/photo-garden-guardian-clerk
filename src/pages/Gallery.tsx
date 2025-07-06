@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, AlertTriangle, ExternalLink, Camera } from 'lucide-react';
 import { ShareablePhoto } from '@/utils/sharing/types';
+import SharedGalleryPhotoCard from '@/components/SharedGalleryPhotoCard';
 
 interface SharedGallery {
   id: string;
@@ -115,82 +116,68 @@ const Gallery = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{gallery.title}</h1>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
+      <header className="bg-white dark:bg-gray-800 shadow-md top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white truncate">
+                {gallery.title}
+              </h1>
+              <div className="flex items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 flex-wrap">
+                <div className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
-                  Shared: {formatDate(gallery.created_at)}
+                  <span>{formatDate(gallery.created_at)}</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
-                  Expires: {formatDate(gallery.expires_at)}
+                  <span>Expires: {formatDate(gallery.expires_at)}</span>
                 </div>
-                <div className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-medium">
-                  {gallery.photos.length} Photos
+                <div className="flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 px-2 py-1 rounded-full font-medium">
+                  <Camera className="h-4 w-4" />
+                  <span>{gallery.photos.length} Photos</span>
                 </div>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={() => window.location.href = '/'}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex-shrink-0"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4 mr-2" />
               Visit Store
             </Button>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Gallery Grid */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {gallery.photos.map((photo, index) => (
-            <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-square relative">
-                <img
-                  src={photo.imageUrl}
-                  alt={photo.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{photo.title}</h3>
-                {photo.price && (
-                  <p className="text-emerald-600 font-bold text-lg">
-                    ₹{photo.price.toLocaleString('en-IN')}
-                  </p>
-                )}
-                {photo.description && (
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">{photo.description}</p>
-                )}
-              </CardContent>
-            </Card>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
+          {gallery.photos.map((photo) => (
+            <SharedGalleryPhotoCard key={photo.id} photo={photo} />
           ))}
         </div>
-      </div>
+      </main>
 
       {/* Business Info Footer */}
       {gallery.include_business_info && (
-        <div className="bg-white border-t mt-12">
-          <div className="max-w-6xl mx-auto px-4 py-8 text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Interested in our collection?</h3>
-            <p className="text-gray-600 mb-4">Contact us for pricing, availability, and custom orders!</p>
-            <Button 
+        <footer className="bg-gray-800 dark:bg-black text-white mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <h3 className="text-xl font-semibold mb-2">Interested in our collection?</h3>
+            <p className="text-gray-300 mb-6">
+              Contact us for pricing, availability, and custom orders!
+            </p>
+            <Button
               onClick={() => window.location.href = '/'}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              size="lg"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               Visit Our Store
             </Button>
           </div>
-        </div>
+        </footer>
       )}
     </div>
   );

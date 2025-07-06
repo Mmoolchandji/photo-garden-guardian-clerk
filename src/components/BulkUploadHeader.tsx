@@ -20,9 +20,6 @@ const BulkUploadHeader = ({ step, fileCount, currentIndex, onCancel }: BulkUploa
             : `Edit Photo Details (${currentIndex + 1} of ${fileCount})`
           }
         </CardTitle>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
-          <X className="h-4 w-4" />
-        </Button>
       </div>
     </CardHeader>
   );
