@@ -96,14 +96,15 @@ const AdminPageHeader = ({
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
-          <div className="mt-4 flex items-center justify-between gap-2">
+          {/* Responsive container for mobile view actions, allowing items to wrap on smaller screens */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
             <Link to="/" className="flex-1">
                 <Button variant="ghost" size="sm" className="w-full justify-start">
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Gallery
+                    Gallery
                 </Button>
             </Link>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline" size="sm" className="flex items-center">
                     <Camera className="h-4 w-4 mr-2" />
                     <span>{photos.length}</span>
