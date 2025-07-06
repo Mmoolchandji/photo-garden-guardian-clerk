@@ -1,5 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBulkUploadLogic } from '@/hooks/useBulkUploadLogic';
 import BulkUploadHeader from './BulkUploadHeader';
@@ -11,15 +19,17 @@ interface BulkUploadModalProps {
   onUploadComplete: () => void;
   onCancel: () => void;
   onChooseDifferentFiles: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
-
-const AUTO_CLOSE_DELAY_SEC = 2;
 
 const BulkUploadModal = ({
   files,
   onUploadComplete,
   onCancel,
   onChooseDifferentFiles,
+  isOpen,
+  onClose,
 }: BulkUploadModalProps) => {
   const { user } = useAuth();
   const {
@@ -39,39 +49,47 @@ const BulkUploadModal = ({
 
   const [hasHandledCompletion, setHasHandledCompletion] = useState(false);
 
-  // --- Step 3: Improved error handling and edge cases ---
-  useEffect(() => {
-    // Only handle once per session
-    if (!hasHandledCompletion && uploadResults && !uploading) {
-      setHasHandledCompletion(true);
-
-      if (uploadResults.failed.length === 0) {
-        cleanupPreviewURLs();
-        onUploadComplete?.();
+  const cleanupPreviewURLs = useCallback(() => {
+    filesWithMetadata.forEach((fileData) => {
+      if (fileData.preview) {
+        URL.revokeObjectURL(fileData.preview);
       }
-      // No auto-exit for failures (partial or full): modal stays; user must click "Done"
+    });
+  }, [filesWithMetadata]);
+
+  const handleExit = useCallback(() => {
+    cleanupPreviewURLs();
+    onUploadComplete?.();
+    onClose();
+  }, [cleanupPreviewURLs, onUploadComplete, onClose]);
+
+  useEffect(() => {
+    if (isOpen && !hasHandledCompletion && uploadResults && !uploading) {
+      const allSuccessful =
+        uploadResults.failed.length === 0 && uploadResults.success > 0;
+
+      if (allSuccessful) {
+        handleExit();
+      } else {
+        setHasHandledCompletion(true);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadResults, uploading, hasHandledCompletion]);
+  }, [
+    isOpen,
+    uploadResults,
+    uploading,
+    hasHandledCompletion,
+    handleExit,
+  ]);
 
-  // Ensure user is authenticated before proceeding
-  if (!user) {
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <div className="p-6 text-center">
-          <p className="text-gray-600">Please sign in to upload photos.</p>
-        </div>
-      </Card>
-    );
+  if (!isOpen) {
+    return null;
   }
-
-  const cleanupPreviewURLs = () => {
-    filesWithMetadata.forEach((fileData) => URL.revokeObjectURL(fileData.preview));
-  };
 
   const handleCancel = () => {
     cleanupPreviewURLs();
     onCancel();
+    onClose();
   };
 
   // Start upload and handle completion logic.
@@ -81,10 +99,8 @@ const BulkUploadModal = ({
     // handled in effect below
   };
 
-  // Manual exit for failed upload summary
   const handleManualExit = () => {
-    cleanupPreviewURLs();
-    onUploadComplete?.();
+    handleExit();
   };
 
   // Helper: determine type of failure (all, some, none)
@@ -119,49 +135,52 @@ const BulkUploadModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-2xl mx-auto max-h-[90vh] flex flex-col">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
+      <DialogContent className="max-w-4xl w-full max-h-[95vh] flex flex-col p-0">
         <BulkUploadHeader
           step={step}
           fileCount={files.length}
           currentIndex={currentIndex}
           onCancel={handleCancel}
         />
-        {uploadResults && hasHandledCompletion ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
-            <BulkUploadResults uploadResults={uploadResults} />
-            {renderSummaryMessage()}
-            {/* Always show "Done" except for full (no-fail) success */}
-            {(uploadResults.failed.length > 0 || allFailed) && (
-              <button
-                className="mt-6 px-4 py-2 rounded bg-emerald-600 text-white shadow transition hover:bg-emerald-700 text-sm"
-                type="button"
+        <div className="flex-1 overflow-y-auto p-6">
+          {uploadResults && hasHandledCompletion ? (
+            <div className="flex flex-col items-center justify-center text-center">
+              <BulkUploadResults uploadResults={uploadResults} />
+              {renderSummaryMessage()}
+              <Button
+                className="mt-6"
+                variant="default"
                 onClick={handleManualExit}
                 data-testid="bulk-upload-modal-done"
               >
                 Done
-              </button>
-            )}
-          </div>
-        ) : (
-          <BulkUploadContent
-            step={step}
-            filesWithMetadata={filesWithMetadata}
-            currentIndex={currentIndex}
-            uploading={uploading}
-            uploadProgress={uploadProgress}
-            uploadResults={uploadResults}
-            onNextPhoto={nextPhoto}
-            onPrevPhoto={prevPhoto}
-            onSetStep={setStep}
-            onUploadAll={handleUploadComplete}
-            onChooseDifferentFiles={onChooseDifferentFiles}
-            onMetadataChange={handleMetadataChange}
-            onRemoveFile={removeFile}
-          />
-        )}
-      </Card>
-    </div>
+              </Button>
+            </div>
+          ) : (
+            <BulkUploadContent
+              step={step}
+              filesWithMetadata={filesWithMetadata}
+              currentIndex={currentIndex}
+              uploading={uploading}
+              uploadProgress={uploadProgress}
+              uploadResults={uploadResults}
+              onNextPhoto={nextPhoto}
+              onPrevPhoto={prevPhoto}
+              onSetStep={setStep}
+              onUploadAll={handleUploadComplete}
+              onChooseDifferentFiles={() => {
+                cleanupPreviewURLs();
+                onChooseDifferentFiles();
+              }}
+              onMetadataChange={handleMetadataChange}
+              onRemoveFile={removeFile}
+              isModal={true}
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

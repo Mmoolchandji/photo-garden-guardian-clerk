@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
-import PhotoUploadContainer from './PhotoUploadContainer';
+import FileSelectionCard from './FileSelectionCard';
 
 interface PhotoUploadProps {
   onPhotoUploaded: () => void;
@@ -9,44 +9,22 @@ interface PhotoUploadProps {
   onBulkUploadInitiated?: (files: File[]) => void; // New callback for parent to handle bulk uploads
 }
 
-const PhotoUpload = ({ 
-  onPhotoUploaded, 
+const PhotoUpload = ({
+  onPhotoUploaded,
   onCancel,
-  onBulkUploadInitiated 
+  onBulkUploadInitiated,
 }: PhotoUploadProps) => {
   const {
     // State
-    step,
-    title,
-    description,
-    fabric,
-    price,
-    stockStatus,
     file,
     files,
-    uploading,
-    imagePreview,
-    uploadMode, // Using uploadMode instead of showBulkModal
+    uploadMode,
     user,
-    enableCompression,
-    
-    // Setters
-    setTitle,
-    setDescription,
-    setFabric,
-    setPrice,
-    setStockStatus,
-    setEnableCompression,
-    
+    fileInputRef,
+
     // Handlers
     handleFileChange,
-    handleUpload,
     handleCancel,
-    handleContinueToMetadata,
-    handleBackToFileSelection,
-    handleBulkUploadComplete,
-    handleChooseDifferentFiles,
-    generateTitleFromFilename,
   } = usePhotoUpload(onPhotoUploaded, onCancel);
 
   // Ensure user is authenticated
@@ -60,47 +38,17 @@ const PhotoUpload = ({
     );
   }
 
-  // If in bulk mode, notify the parent to handle bulk uploads
-  if (uploadMode === 'bulk' && onBulkUploadInitiated) {
+  // If in bulk or single mode, notify the parent to handle the upload
+  if ((uploadMode === 'bulk' || (uploadMode === 'single' && file)) && onBulkUploadInitiated) {
+    const filesToUpload = uploadMode === 'bulk' ? files : [file as File];
     // Call the callback with the selected files
-    onBulkUploadInitiated(files);
+    onBulkUploadInitiated(filesToUpload);
+    return null; // Don't render the single upload UI
   }
 
-  // Only render the single upload UI when in single mode or idle
-  // The bulk upload UI will be handled by the parent component
   return (
-    <PhotoUploadContainer
-      step={step}
-      file={file}
-      imagePreview={imagePreview}
-      uploading={uploading}
-      title={title}
-      description={description}
-      fabric={fabric}
-      price={price}
-      stockStatus={stockStatus}
-      enableCompression={enableCompression}
+    <FileSelectionCard
       onFileChange={handleFileChange}
-      onContinueToMetadata={handleContinueToMetadata}
-      onUploadNow={() => handleUpload(true)}
-      onChooseDifferentFile={() => {
-        // Clean up and reset
-        if (imagePreview) {
-          URL.revokeObjectURL(imagePreview);
-        }
-        // Reset state is handled in the hook
-        handleBackToFileSelection();
-      }}
-      onTitleChange={setTitle}
-      onDescriptionChange={setDescription}
-      onFabricChange={setFabric}
-      onPriceChange={setPrice}
-      onStockStatusChange={setStockStatus}
-      onCompressionToggle={setEnableCompression}
-      onUpload={() => handleUpload()}
-      onBack={handleBackToFileSelection}
-      onCancel={handleCancel}
-      generateTitleFromFilename={generateTitleFromFilename}
     />
   );
 };

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import AdminPhotoGrid from '@/components/AdminPhotoGrid';
 import PhotoUpload from '@/components/PhotoUpload';
 import PhotoEdit from '@/components/PhotoEdit';
-import InPageBulkUploadView from '@/components/InPageBulkUploadView';
+import BulkUploadModal from '@/components/BulkUploadModal';
 import SearchAndFilters, { FilterState } from '@/components/SearchAndFilters';
 import AdminPhotoEmptyState from '@/components/AdminPhotoEmptyState';
 import useURLFilters from '@/hooks/useURLFilters';
@@ -81,19 +81,6 @@ const AdminPhotoManager = ({
     setShowUpload(true); // Go back to file selection
   };
 
-  // Display bulk upload view
-  if (showBulkUpload && bulkUploadFiles.length > 0) {
-    return (
-      <div className="py-0">
-        <InPageBulkUploadView
-          files={bulkUploadFiles}
-          onUploadComplete={handleBulkUploadComplete}
-          onCancel={handleBulkUploadCancel}
-          onChooseDifferentFiles={handleChooseDifferentFiles}
-        />
-      </div>
-    );
-  }
 
   // Display single upload view
   if (showUpload) {
@@ -122,6 +109,17 @@ const AdminPhotoManager = ({
 
   return (
     <>
+      {showBulkUpload && bulkUploadFiles.length > 0 && (
+        <BulkUploadModal
+          files={bulkUploadFiles}
+          isOpen={showBulkUpload}
+          onClose={handleBulkUploadCancel}
+          onCancel={handleBulkUploadCancel}
+          onUploadComplete={handleBulkUploadComplete}
+          onChooseDifferentFiles={handleChooseDifferentFiles}
+        />
+      )}
+
       {/* Filter panel */}
       <div className="mb-2 md:mb-8">
         <SearchAndFilters
