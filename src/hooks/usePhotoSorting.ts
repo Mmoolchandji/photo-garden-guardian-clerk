@@ -10,6 +10,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -17,10 +18,15 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 
-export const usePhotoSorting = (photos: Photo[], onPhotosReordered: () => void) => {
+export const usePhotoSorting = (
+  photos: Photo[], 
+  onPhotosReordered: () => void,
+  selectedPhotoIds: Set<string>,
+  isPhotoSelected: (id: string) => boolean
+) => {
   const [activePhoto, setActivePhoto] = useState<Photo | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
@@ -29,6 +35,14 @@ export const usePhotoSorting = (photos: Photo[], onPhotosReordered: () => void) 
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+        delay: 100,
+        tolerance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -49,6 +63,14 @@ export const usePhotoSorting = (photos: Photo[], onPhotosReordered: () => void) 
       return;
     }
 
+    const activePhoto = photos.find(p => p.id === active.id);
+    if (!activePhoto) return;
+
+    const isActiveSelected = isPhotoSelected(activePhoto.id);
+    const photosToMove = isActiveSelected && selectedPhotoIds.size > 1
+      ? photos.filter(p => isPhotoSelected(p.id))
+      : [activePhoto];
+
     const oldIndex = photos.findIndex(photo => photo.id === active.id);
     const newIndex = photos.findIndex(photo => photo.id === over.id);
 
@@ -56,7 +78,24 @@ export const usePhotoSorting = (photos: Photo[], onPhotosReordered: () => void) 
       return;
     }
 
-    const reorderedPhotos = arrayMove(photos, oldIndex, newIndex);
+    // Handle group movement
+    let reorderedPhotos = [...photos];
+    
+    if (photosToMove.length > 1) {
+      // Remove all selected photos from their current positions
+      const nonSelectedPhotos = photos.filter(p => !isPhotoSelected(p.id));
+      
+      // Insert the group at the new position
+      const insertIndex = Math.min(newIndex, nonSelectedPhotos.length);
+      reorderedPhotos = [
+        ...nonSelectedPhotos.slice(0, insertIndex),
+        ...photosToMove,
+        ...nonSelectedPhotos.slice(insertIndex),
+      ];
+    } else {
+      // Single photo movement
+      reorderedPhotos = arrayMove(photos, oldIndex, newIndex);
+    }
     
     // Update sort orders in database
     setIsUpdating(true);
@@ -76,9 +115,10 @@ export const usePhotoSorting = (photos: Photo[], onPhotosReordered: () => void) 
         if (error) throw error;
       }
 
+      const count = photosToMove.length;
       toast({
         title: "Photos reordered",
-        description: "Your photo order has been saved successfully.",
+        description: `${count} photo${count > 1 ? 's' : ''} reordered successfully.`,
       });
 
       onPhotosReordered();
@@ -92,7 +132,7 @@ export const usePhotoSorting = (photos: Photo[], onPhotosReordered: () => void) 
     } finally {
       setIsUpdating(false);
     }
-  }, [photos, onPhotosReordered, toast]);
+  }, [photos, onPhotosReordered, toast, selectedPhotoIds, isPhotoSelected]);
 
   const handleDragCancel = useCallback(() => {
     setActivePhoto(null);
@@ -109,6 +149,6 @@ export const usePhotoSorting = (photos: Photo[], onPhotosReordered: () => void) 
     DragOverlay,
     SortableContext,
     closestCenter,
-    verticalListSortingStrategy,
+    rectSortingStrategy,
   };
 };

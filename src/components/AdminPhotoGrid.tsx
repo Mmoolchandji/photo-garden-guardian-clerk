@@ -47,8 +47,8 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     DragOverlay,
     SortableContext,
     closestCenter,
-    verticalListSortingStrategy,
-  } = usePhotoSorting(photos, onPhotoDeleted);
+    rectSortingStrategy,
+  } = usePhotoSorting(photos, onPhotoDeleted, selectedPhotoIds, isPhotoSelected);
 
   const handleDelete = async (photo: Photo) => {
     if (!confirm(`Are you sure you want to delete "${photo.title}"? This action cannot be undone.`)) {
@@ -169,7 +169,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
         >
-          <SortableContext items={photos.map(p => p.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={photos.map(p => p.id)} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
               {photos.map((photo) => (
                 <SortableAdminPhotoCard

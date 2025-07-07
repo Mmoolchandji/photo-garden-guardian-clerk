@@ -54,12 +54,13 @@ export const SortableAdminPhotoCard = ({ photo }: SortableAdminPhotoCardProps) =
       {...attributes}
     >
       <div className="relative">
-        {/* Drag Handle */}
+        {/* Drag Handle - Touch-friendly size */}
         <div
           {...listeners}
-          className="absolute top-2 right-2 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm cursor-grab active:cursor-grabbing hover:bg-white transition-colors"
+          className="absolute top-2 right-2 z-10 p-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm cursor-grab active:cursor-grabbing hover:bg-white transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+          style={{ touchAction: 'none' }}
         >
-          <GripVertical className="h-4 w-4 text-gray-600" />
+          <GripVertical className="h-5 w-5 text-gray-600" />
         </div>
 
         <img
