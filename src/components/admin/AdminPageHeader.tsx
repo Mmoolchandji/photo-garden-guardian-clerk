@@ -21,20 +21,7 @@ const AdminPageHeader = ({
   onUploadPhoto,
   onRefresh,
 }: AdminPageHeaderProps) => {
-  const { 
-    isSortingMode, 
-    isSelectionMode, 
-    enterSortingMode, 
-    exitSortingMode 
-  } = useAdminPhotoSelection();
-
-  const handleSortingToggle = () => {
-    if (isSortingMode) {
-      exitSortingMode();
-    } else {
-      enterSortingMode();
-    }
-  };
+  const { isSortingMode } = useAdminPhotoSelection();
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="container mx-auto px-4 py-4">
@@ -54,23 +41,12 @@ const AdminPageHeader = ({
               <Camera className="h-4 w-4 mr-2" />
               <span>{photos.length}</span>
             </Button>
-            <Button 
-              variant={isSortingMode ? "default" : "outline"} 
-              size="sm" 
-              onClick={handleSortingToggle}
-              disabled={isSelectionMode}
-              className={isSortingMode ? "bg-emerald-600 hover:bg-emerald-700" : ""}
-            >
-              <ArrowUpDown className="h-4 w-4 mr-2" />
-              {isSortingMode ? "Done" : "Reorder"}
-            </Button>
-            <Button variant="outline" size="sm" onClick={onRefresh} disabled={loadingPhotos || isSortingMode}>
+            <Button variant="outline" size="sm" onClick={onRefresh} disabled={loadingPhotos}>
               <RefreshCw className={`h-4 w-4 ${loadingPhotos ? 'animate-spin' : ''}`} />
             </Button>
             <Button 
               className="bg-emerald-600 hover:bg-emerald-700" 
               onClick={onUploadPhoto}
-              disabled={isSortingMode}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -109,23 +85,13 @@ const AdminPageHeader = ({
                     <Camera className="h-4 w-4 mr-2" />
                     <span>{photos.length}</span>
                 </Button>
-                <Button 
-                  variant={isSortingMode ? "default" : "outline"} 
-                  size="sm" 
-                  onClick={handleSortingToggle}
-                  disabled={isSelectionMode}
-                  className={isSortingMode ? "bg-emerald-600 hover:bg-emerald-700" : ""}
-                >
-                  <ArrowUpDown className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" onClick={onRefresh} disabled={loadingPhotos || isSortingMode}>
+                <Button variant="outline" size="icon" onClick={onRefresh} disabled={loadingPhotos}>
                     <RefreshCw className={`h-4 w-4 ${loadingPhotos ? 'animate-spin' : ''}`} />
                 </Button>
                 <Button 
                   className="bg-emerald-600 hover:bg-emerald-700" 
                   size="icon" 
                   onClick={onUploadPhoto}
-                  disabled={isSortingMode}
                 >
                     <Plus className="h-4 w-4" />
                 </Button>

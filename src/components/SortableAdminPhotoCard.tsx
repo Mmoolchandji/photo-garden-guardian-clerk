@@ -8,10 +8,24 @@ import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
 
 interface SortableAdminPhotoCardProps {
   photo: Photo;
+  onPhotoEdit: (photo: Photo) => void;
+  onPhotoDeleted: () => void;
+  deletingId: string | null;
+  handleDelete: (photo: Photo) => void;
+  handlePhotoLongPress: (photo: Photo) => void;
+  handlePhotoClick: (photo: Photo) => void;
 }
 
-export const SortableAdminPhotoCard = ({ photo }: SortableAdminPhotoCardProps) => {
-  const { isPhotoSelected, selectedPhotoIds } = useAdminPhotoSelection();
+export const SortableAdminPhotoCard = ({ 
+  photo,
+  onPhotoEdit,
+  onPhotoDeleted,
+  deletingId,
+  handleDelete,
+  handlePhotoLongPress,
+  handlePhotoClick,
+}: SortableAdminPhotoCardProps) => {
+  const { isPhotoSelected, selectedPhotoIds, isSortingMode } = useAdminPhotoSelection();
   const isSelected = isPhotoSelected(photo.id);
   const isPartOfSelection = selectedPhotoIds.size > 0 && isSelected;
 
@@ -28,12 +42,19 @@ export const SortableAdminPhotoCard = ({ photo }: SortableAdminPhotoCardProps) =
       type: 'photo',
       photo,
     },
+    disabled: !isSortingMode,
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const longPressHandlers = useLongPress({
+    onLongPress: () => handlePhotoLongPress(photo),
+    onClick: () => handlePhotoClick(photo),
+    delay: 500,
+  });
 
   // Don't show individual photos that are part of a multi-selection during drag
   if (isDragging && isPartOfSelection && selectedPhotoIds.size > 1) {
@@ -52,16 +73,19 @@ export const SortableAdminPhotoCard = ({ photo }: SortableAdminPhotoCardProps) =
           : 'border-gray-200 hover:scale-[1.01] hover:shadow-lg'
       }`}
       {...attributes}
+      {...(!isSortingMode ? longPressHandlers : {})}
     >
       <div className="relative">
         {/* Drag Handle - Touch-friendly size */}
-        <div
-          {...listeners}
-          className="absolute top-2 right-2 z-10 p-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm cursor-grab active:cursor-grabbing hover:bg-white transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-          style={{ touchAction: 'none' }}
-        >
-          <GripVertical className="h-5 w-5 text-gray-600" />
-        </div>
+        {isSortingMode && (
+          <div
+            {...listeners}
+            className="absolute top-2 right-2 z-10 p-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm cursor-grab active:cursor-grabbing hover:bg-white transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            style={{ touchAction: 'none' }}
+          >
+            <GripVertical className="h-5 w-5 text-gray-600" />
+          </div>
+        )}
 
         <img
           src={photo.image_url}

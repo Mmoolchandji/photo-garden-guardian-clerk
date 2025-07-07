@@ -36,7 +36,6 @@ interface AdminPhotoSelectionProviderProps {
 
 export const AdminPhotoSelectionProvider = ({ children }: AdminPhotoSelectionProviderProps) => {
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(new Set());
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [isSortingMode, setIsSortingMode] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<Photo[]>([]);
 
@@ -76,19 +75,15 @@ export const AdminPhotoSelectionProvider = ({ children }: AdminPhotoSelectionPro
   };
 
   const enterSelectionMode = () => {
-    setIsSelectionMode(true);
-    setIsSortingMode(false); // Exit sorting mode when entering selection mode
+    // This is now implicit. Selection mode is active when items are selected.
   };
 
   const exitSelectionMode = () => {
-    setIsSelectionMode(false);
     clearSelection();
   };
 
   const enterSortingMode = () => {
     setIsSortingMode(true);
-    setIsSelectionMode(false); // Exit selection mode when entering sorting mode
-    clearSelection(); // Clear any selections
   };
 
   const exitSortingMode = () => {
@@ -103,12 +98,7 @@ export const AdminPhotoSelectionProvider = ({ children }: AdminPhotoSelectionPro
     return selectedPhotoIds.size;
   };
 
-  // Auto-exit selection mode when no photos are selected
-  React.useEffect(() => {
-    if (isSelectionMode && selectedPhotoIds.size === 0) {
-      setIsSelectionMode(false);
-    }
-  }, [selectedPhotoIds.size, isSelectionMode]);
+  const isSelectionMode = selectedPhotoIds.size > 0;
 
   const value: AdminPhotoSelectionContextType = {
     selectedPhotoIds,

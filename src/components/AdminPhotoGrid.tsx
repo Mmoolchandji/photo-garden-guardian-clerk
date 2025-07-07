@@ -161,44 +161,33 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
       )}
 
       {/* Photo Grid */}
-      {isSortingMode ? (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-          <SortableContext items={photos.map(p => p.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
-              {photos.map((photo) => (
-                <SortableAdminPhotoCard
-                  key={photo.id}
-                  photo={photo}
-                />
-              ))}
-            </div>
-          </SortableContext>
-          <DragOverlay>
-            <SortableDragOverlay photo={activePhoto} />
-          </DragOverlay>
-        </DndContext>
-      ) : (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
-          {photos.map((photo) => (
-            <AdminPhotoCard
-              key={photo.id}
-              photo={photo}
-              onPhotoEdit={onPhotoEdit}
-              onPhotoDeleted={onPhotoDeleted}
-              deletingId={deletingId}
-              handleDelete={handleDelete}
-              handlePhotoLongPress={handlePhotoLongPress}
-              handlePhotoClick={handlePhotoClick}
-            />
-          ))}
-        </div>
-      )}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <SortableContext items={photos.map(p => p.id)} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
+            {photos.map((photo) => (
+              <SortableAdminPhotoCard
+                key={photo.id}
+                photo={photo}
+                onPhotoEdit={onPhotoEdit}
+                onPhotoDeleted={onPhotoDeleted}
+                deletingId={deletingId}
+                handleDelete={handleDelete}
+                handlePhotoLongPress={handlePhotoLongPress}
+                handlePhotoClick={handlePhotoClick}
+              />
+            ))}
+          </div>
+        </SortableContext>
+        <DragOverlay>
+          {activePhoto && <SortableDragOverlay photo={activePhoto} />}
+        </DragOverlay>
+      </DndContext>
 
       {/* Loading overlay during sort updates */}
       {isUpdating && (
@@ -213,71 +202,5 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
   );
 };
 
-interface AdminPhotoCardProps {
-  photo: Photo;
-  onPhotoEdit: (photo: Photo) => void;
-  onPhotoDeleted: () => void;
-  deletingId: string | null;
-  handleDelete: (photo: Photo) => void;
-  handlePhotoLongPress: (photo: Photo) => void;
-  handlePhotoClick: (photo: Photo) => void;
-}
-
-const AdminPhotoCard = ({
-  photo,
-  onPhotoEdit,
-  deletingId,
-  handleDelete,
-  handlePhotoLongPress,
-  handlePhotoClick,
-}: AdminPhotoCardProps) => {
-  const { isPhotoSelected, isSelectionMode } = useAdminPhotoSelection();
-  const isSelected = isPhotoSelected(photo.id);
-
-  const longPressHandlers = useLongPress({
-    onLongPress: () => handlePhotoLongPress(photo),
-    onClick: () => handlePhotoClick(photo),
-    delay: 500,
-  });
-
-  return (
-    <div
-      {...longPressHandlers}
-      className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer select-none ${
-        isSelected
-          ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50 scale-[1.02]'
-          : 'border-gray-200 hover:scale-[1.01]'
-      }`}
-      style={{ touchAction: 'manipulation' }}
-    >
-      <div className="relative">
-        <img
-          src={photo.image_url}
-          alt={photo.title}
-          className="w-full h-56 sm:h-48 object-cover"
-          draggable={false}
-        />
-        {/* Overlay for selection */}
-        {isSelected && (
-          <div className="absolute inset-0 bg-emerald-500/20 animate-fade-in" />
-        )}
-        {/* Title overlay at bottom of image */}
-        <div
-          className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 py-2"
-          style={{ pointerEvents: 'none' }}
-        >
-          <h3
-            className={`font-semibold text-white text-base truncate drop-shadow-sm ${
-              isSelected ? 'text-emerald-100' : ''
-            }`}
-            title={photo.title}
-          >
-            {photo.title}
-          </h3>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default AdminPhotoGrid;
