@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Check } from 'lucide-react';
 import { Photo } from '@/types/photo';
 import { useLongPress } from '@/hooks/useLongPress';
 import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
@@ -25,7 +25,7 @@ export const SortableAdminPhotoCard = ({
   handlePhotoLongPress,
   handlePhotoClick,
 }: SortableAdminPhotoCardProps) => {
-  const { isPhotoSelected, selectedPhotoIds, isSortingMode } = useAdminPhotoSelection();
+  const { isPhotoSelected, selectedPhotoIds, isSortingMode, isSelectionMode } = useAdminPhotoSelection();
   const isSelected = isPhotoSelected(photo.id);
   const isPartOfSelection = selectedPhotoIds.size > 0 && isSelected;
 
@@ -69,8 +69,8 @@ export const SortableAdminPhotoCard = ({
         isDragging 
           ? 'opacity-50 scale-105 shadow-2xl z-50' 
           : isSelected
-          ? 'border-emerald-500 ring-2 ring-emerald-200 bg-emerald-50 scale-[1.02]'
-          : 'border-gray-200 hover:scale-[1.01] hover:shadow-lg'
+          ? 'border-emerald-500'
+          : 'border-transparent hover:border-gray-300'
       }`}
       {...attributes}
       {...(!isSortingMode ? longPressHandlers : {})}
@@ -90,19 +90,23 @@ export const SortableAdminPhotoCard = ({
         <img
           src={photo.image_url}
           alt={photo.title}
-          className="w-full h-56 sm:h-48 object-cover"
+          className="w-full h-56 sm:h-48 object-cover transition-transform duration-300 group-hover:scale-105"
           draggable={false}
         />
         
         {/* Selection Overlay */}
-        {isSelected && (
-          <div className="absolute inset-0 bg-emerald-500/20 animate-fade-in" />
-        )}
+        <div className={`absolute inset-0 transition-colors duration-300 ${isSelected ? 'bg-emerald-500/20' : 'bg-black/10'}`} />
 
         {/* Multi-selection indicator */}
-        {isPartOfSelection && selectedPhotoIds.size > 1 && (
-          <div className="absolute top-2 left-2 bg-emerald-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
-            {selectedPhotoIds.size}
+        {isSelectionMode && (
+          <div className="absolute top-2 left-2">
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+              isSelected 
+                ? 'bg-emerald-500 border-emerald-500' 
+                : 'bg-white/90 border-gray-400'
+            }`}>
+              {isSelected && <Check className="h-3 w-3 text-white" />}
+            </div>
           </div>
         )}
 
