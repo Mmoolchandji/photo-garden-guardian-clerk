@@ -41,7 +41,6 @@ const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
         onChange={updateFilters}
         onClearAll={clearAllFilters}
         photosCount={photos.length}
-        photos={photos}
       />
 
       <PhotoGridHeader photosCount={photos.length} />

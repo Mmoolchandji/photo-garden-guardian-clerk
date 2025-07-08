@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, RotateCcw, Lock, Camera, Check } from 'lucide-react';
+import { ChevronDown, ChevronUp, RotateCcw, Lock, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import SearchBar from './SearchBar';
@@ -8,8 +8,6 @@ import FabricFilter from './FabricFilter';
 import StockStatusFilter from './StockStatusFilter';
 import PriceRangeFilter from './PriceRangeFilter';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
-import { Photo } from '@/types/photo';
 
 export interface FilterState {
   search: string;
@@ -23,14 +21,12 @@ interface SearchAndFiltersProps {
   onChange: (filters: FilterState) => void;
   onClearAll: () => void;
   photosCount: number;
-  photos: Photo[];
 }
 
-const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount, photos }: SearchAndFiltersProps) => {
+const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount }: SearchAndFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user } = useAuth();
-  const { selectAll, clearSelection, selectedPhotos, isSelectionMode } = usePhotoSelection();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -51,16 +47,6 @@ const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount, photos }
                           filters.fabrics.length > 0 || 
                           filters.stockStatuses.length > 0 || 
                           filters.priceRange;
-
-  const handleSelectAll = () => {
-    if (selectedPhotos.length === photos.length) {
-      clearSelection();
-    } else {
-      selectAll(photos);
-    }
-  };
-
-  const allSelected = selectedPhotos.length === photos.length && photos.length > 0;
 
   const FiltersContent = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -122,25 +108,8 @@ const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount, photos }
         </div>
       )}
 
-      {/* Select All and Filters Section */}
+      {/* Filters Section */}
       <div className="flex items-center gap-4">
-        {/* Select All Button */}
-        {user && photos.length > 0 && (
-          <Button
-            variant={allSelected ? "default" : "outline"}
-            onClick={handleSelectAll}
-            className="flex items-center gap-2 min-w-fit"
-          >
-            <Check className="h-4 w-4" />
-            <span>{allSelected ? 'Deselect All' : 'Select All'}</span>
-            {isSelectionMode && selectedPhotos.length > 0 && (
-              <span className="bg-primary-foreground text-primary px-2 py-0.5 rounded-full text-xs font-medium">
-                {selectedPhotos.length}
-              </span>
-            )}
-          </Button>
-        )}
-        
         <div className="flex-grow">
           {isMobile ? (
             <Collapsible open={isOpen} onOpenChange={setIsOpen}>

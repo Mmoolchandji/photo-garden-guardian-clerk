@@ -127,7 +127,6 @@ const AdminPhotoManager = ({
           onChange={updateFilters}
           onClearAll={clearAllFilters}
           photosCount={photos.length}
-          photos={photos}
         />
       </div>
 
