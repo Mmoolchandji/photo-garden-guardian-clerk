@@ -1,7 +1,8 @@
 
 import { useState } from 'react';
-import { Camera, Grid, User } from 'lucide-react';
+import { Camera, User, LayoutGrid, LayoutList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { IconSwitch } from '@/components/ui/icon-switch';
 import PhotoGrid from '@/components/PhotoGrid';
 import ValueProposition from '@/components/ValueProposition';
 import DemoGallery from '@/components/DemoGallery';
@@ -32,26 +33,13 @@ const Index = () => {
               
                 <nav className="flex items-center space-x-2">
                 {user && (
-                  <>
-                    <Button 
-                      variant={viewMode === 'grid' ? 'default' : 'ghost'} 
-                      size="sm"
-                      onClick={() => setViewMode('grid')}
-                      className={viewMode === 'grid' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                    >
-                      <Grid className="h-4 w-4 md:mr-2" />
-                      <span className="hidden md:inline">Grid</span>
-                    </Button>
-                    <Button 
-                      variant={viewMode === 'compact' ? 'default' : 'ghost'} 
-                      size="sm"
-                      onClick={() => setViewMode('compact')}
-                      className={viewMode === 'compact' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                    >
-                      <Grid className="h-4 w-4 md:mr-2" />
-                      <span className="hidden md:inline">Compact</span>
-                    </Button>
-                  </>
+                  <IconSwitch
+                    checked={viewMode === 'compact'}
+                    onCheckedChange={(checked) => setViewMode(checked ? 'compact' : 'grid')}
+                    iconOn={<LayoutList className="h-4 w-4 text-emerald-600" />}
+                    iconOff={<LayoutGrid className="h-4 w-4 text-gray-600" />}
+                    aria-label="Toggle view mode"
+                  />
                 )}
                 
                 <Link to={user ? "/admin" : "/auth"}>
