@@ -4,6 +4,7 @@ import { Photo } from '@/types/photo';
 import { WEB_SHARE_LIMITS } from '@/utils/sharing/webShareAPI';
 
 interface PhotoSelectionContextType {
+  selectedPhotoIds: Set<string>;
   selectedPhotos: Photo[];
   isSelectionMode: boolean;
   totalSelectedSize: number;
@@ -109,8 +110,11 @@ export const PhotoSelectionProvider = ({ children }: { children: ReactNode }) =>
     return selectedPhotos.length > WEB_SHARE_LIMITS.MAX_FILES;
   };
 
+  const selectedPhotoIds = new Set(selectedPhotos.map(p => p.id));
+
   return (
     <PhotoSelectionContext.Provider value={{
+      selectedPhotoIds,
       selectedPhotos,
       isSelectionMode,
       totalSelectedSize,

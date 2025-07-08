@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, RotateCcw, Lock, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import SearchBar from './SearchBar';
 import FabricFilter from './FabricFilter';
@@ -21,9 +22,20 @@ interface SearchAndFiltersProps {
   onChange: (filters: FilterState) => void;
   onClearAll: () => void;
   photosCount: number;
+  onSelectAll: () => void;
+  isAllSelected: boolean;
+  isSelectionMode: boolean;
 }
 
-const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount }: SearchAndFiltersProps) => {
+const SearchAndFilters = ({ 
+  filters, 
+  onChange, 
+  onClearAll, 
+  photosCount,
+  onSelectAll,
+  isAllSelected,
+  isSelectionMode,
+}: SearchAndFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user } = useAuth();
@@ -91,13 +103,17 @@ const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount }: Search
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-6 mb-0">
       {/* Search Bar - Always Visible but disabled for unauthenticated users */}
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <SearchBar
           value={filters.search}
           onChange={(search) => updateFilter('search', search)}
           placeholder={user ? "Search by title or description..." : "Sign in to search your photos..."}
           disabled={!user}
         />
+        <Button variant="outline" size="sm" className="flex items-center ml-2">
+                  <Camera className="h-4 w-4 mr-2" />
+                  <span>{photosCount}</span>
+                </Button>
       </div>
 
       {/* Unauthenticated User Message */}
@@ -120,10 +136,7 @@ const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount }: Search
                     {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </Button>
                 </CollapsibleTrigger>
-                <Button variant="outline" size="sm" className="flex items-center">
-                  <Camera className="h-4 w-4 mr-2" />
-                  <span>{photosCount}</span>
-                </Button>
+                
               </div>
               <CollapsibleContent className="mt-2">
                 <FiltersContent />
@@ -142,6 +155,18 @@ const SearchAndFilters = ({ filters, onChange, onClearAll, photosCount }: Search
           >
             <RotateCcw className="h-4 w-4" />
           </Button>
+        )}
+        {isSelectionMode && (
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              checked={isAllSelected}
+              onCheckedChange={onSelectAll}
+              className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+            />
+            <label className="text-sm font-medium text-gray-700 sm:block">
+              Select All
+            </label>
+          </div>
         )}
       </div>
 

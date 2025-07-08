@@ -25,11 +25,11 @@
 
 [x] Improve the UI of gallary that shared using 'share gallery link' option
 
-[ ] Allow user to sort & set custom order for the photos.
+[x] Allow user to sort & set custom order for the photos.
 
 [ ] add carousel to the view photo model.
 
-[ ] add select all option to the homepage.
+[x] add select all option to the homepage.
 
 [ ] Improve the toggle button for view mode and then add that toggle button the admin page also.
 
