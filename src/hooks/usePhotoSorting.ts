@@ -25,24 +25,26 @@ export const usePhotoSorting = (
   photos: Photo[], 
   onPhotosReordered: () => void,
   selectedPhotoIds: Set<string>,
-  isPhotoSelected: (id: string) => boolean
+  isPhotoSelected: (id: string) => boolean,
+  viewMode: 'grid' | 'compact' = 'grid'
 ) => {
   const [activePhoto, setActivePhoto] = useState<Photo | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
+  const isCompact = viewMode === 'compact';
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: isCompact ? 4 : 8,
         delay: 100,
         tolerance: 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 200,
-        tolerance: 8,
+        delay: isCompact ? 150 : 200,
+        tolerance: isCompact ? 6 : 8,
       },
     }),
     useSensor(KeyboardSensor, {

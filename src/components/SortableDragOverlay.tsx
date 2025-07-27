@@ -1,6 +1,7 @@
 import React from 'react';
 import { Photo } from '@/types/photo';
 import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
+import { useViewMode } from '@/contexts/ViewModeContext';
 
 interface SortableDragOverlayProps {
   photo: Photo | null;
@@ -8,21 +9,31 @@ interface SortableDragOverlayProps {
 
 export const SortableDragOverlay = ({ photo }: SortableDragOverlayProps) => {
   const { selectedPhotoIds, isPhotoSelected } = useAdminPhotoSelection();
+  const { viewMode } = useViewMode();
+  const isCompact = viewMode === 'compact';
 
   if (!photo) return null;
 
   const isPartOfSelection = selectedPhotoIds.size > 0 && isPhotoSelected(photo.id);
   const multiSelectCount = selectedPhotoIds.size;
 
+  const containerClasses = isCompact
+    ? 'bg-white rounded-md shadow-2xl border-2 border-emerald-500 overflow-hidden rotate-3 scale-110 opacity-95'
+    : 'bg-white rounded-xl shadow-2xl border-2 border-emerald-500 overflow-hidden rotate-6 scale-110 opacity-95';
+
+  const imageClasses = isCompact
+    ? 'w-24 h-auto aspect-[3/4] object-cover'
+    : 'w-48 h-48 object-cover';
+
   return (
     <div className="relative">
       {/* Main drag overlay */}
-      <div className="bg-white rounded-xl shadow-2xl border-2 border-emerald-500 overflow-hidden rotate-6 scale-110 opacity-95 transition-transform duration-200">
+      <div className={containerClasses}>
         <div className="relative">
           <img
             src={photo.image_url}
             alt={photo.title}
-            className="w-48 h-48 object-cover"
+            className={imageClasses}
             draggable={false}
           />
           

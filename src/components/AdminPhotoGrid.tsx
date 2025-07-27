@@ -51,7 +51,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     SortableContext,
     closestCenter,
     rectSortingStrategy,
-  } = usePhotoSorting(photos, onPhotoDeleted, selectedPhotoIds, isPhotoSelected);
+  } = usePhotoSorting(photos, onPhotoDeleted, selectedPhotoIds, isPhotoSelected, viewMode);
 
   const handleDelete = async (photo: Photo) => {
     if (!confirm(`Are you sure you want to delete "${photo.title}"? This action cannot be undone.`)) {
@@ -135,59 +135,41 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     );
   }
 
-  // If not in sorting mode, use the view mode switcher
-  if (!isSortingMode) {
-    return (
+  const gridClasses = viewMode === 'grid'
+    ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 sm:gap-4'
+    : 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-1 py-2';
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
       <div className="space-y-4">
-        {/* Selection Header */}
+        {/* Header for selection or sorting */}
         <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
-          <div className="flex items-center space-x-3">
-            <Checkbox
-              checked={photos.length > 0 && selectedPhotoIds.size === photos.length}
-              onCheckedChange={handleSelectAll}
-              className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-            />
-            <label className="text-sm font-medium text-gray-700">
-              Select All ({photos.length} photos)
-            </label>
-          </div>
+          {isSortingMode ? (
+            <div className="text-sm text-emerald-800">
+              <strong>Reorder Mode:</strong> Drag photos to rearrange.
+            </div>
+          ) : (
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                checked={photos.length > 0 && selectedPhotoIds.size === photos.length}
+                onCheckedChange={handleSelectAll}
+                className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+              />
+              <label className="text-sm font-medium text-gray-700">
+                Select All ({photos.length} photos)
+              </label>
+            </div>
+          )}
         </div>
 
-        <AdminPhotoGridView
-          photos={photos}
-          viewMode={viewMode}
-          onPhotoEdit={onPhotoEdit}
-          onPhotoDeleted={onPhotoDeleted}
-          deletingId={deletingId}
-          handleDelete={handleDelete}
-          handlePhotoLongPress={handlePhotoLongPress}
-          handlePhotoClick={handlePhotoClick}
-        />
-      </div>
-    );
-  }
-
-  // Sorting mode - always use grid layout with drag and drop
-  return (
-    <div className="space-y-4">
-      {/* Sorting Mode Instructions */}
-      <div className="bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-lg">
-        <p className="text-sm text-emerald-800">
-          <strong>Reorder Mode:</strong> Drag and drop photos to rearrange them. 
-          {selectedPhotoIds.size > 0 && ` Selected photos (${selectedPhotoIds.size}) will move together.`}
-        </p>
-      </div>
-
-      {/* Photo Grid */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
         <SortableContext items={photos.map(p => p.id)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
+          <div className={`grid ${gridClasses} transition-all duration-300`}>
             {photos.map((photo) => (
               <SortableAdminPhotoCard
                 key={photo.id}
@@ -198,25 +180,26 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
                 handleDelete={handleDelete}
                 handlePhotoLongPress={handlePhotoLongPress}
                 handlePhotoClick={handlePhotoClick}
+                viewMode={viewMode}
               />
             ))}
           </div>
         </SortableContext>
+
         <DragOverlay>
           {activePhoto && <SortableDragOverlay photo={activePhoto} />}
         </DragOverlay>
-      </DndContext>
 
-      {/* Loading overlay during sort updates */}
-      {isUpdating && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600" />
-            <span className="text-gray-700">Saving new order...</span>
+        {isUpdating && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600" />
+              <span className="text-gray-700">Saving new order...</span>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </DndContext>
   );
 };
 

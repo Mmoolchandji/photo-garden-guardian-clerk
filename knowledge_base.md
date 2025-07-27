@@ -81,6 +81,7 @@
 
 | Date       | Feature/Update                       | Notes or Context                            |
 | ---------- | ------------------------------------ | ------------------------------------------- |
+| 2025-07-27 | Context and View Mode (fa51fce, ec8cd83) | Added ViewModeContext and fixed a missing PhotoSelectionProvider. |
 | 2025-06-01 | Project Initialized                  | Folder setup, Supabase configured           |
 | 2025-06-05 | Photo Upload & Preview Added         | Both desktop and mobile support             |
 | 2025-06-10 | WhatsApp Sharing (URLs)              | Initial basic sharing implemented           |
@@ -108,6 +109,9 @@
 
 #### 5. **Recent Updates**
 
+*   **Context and View Mode**:
+    *   Added a `ViewModeContext` to manage view states across the application.
+    *   Fixed a runtime error caused by a missing `PhotoSelectionProvider` wrapper.
 *   **View Mode Toggling**: Implemented an `IconSwitch` component for easily toggling between different view modes.
 *   **Select All Functionality**: Added a "Select All" checkbox to the photo gallery, allowing users to quickly select or deselect all visible photos when in selection mode.
 *   **Drag and Drop Sorting**: Implemented drag and drop sorting with mobile touch interaction, 2D grid sorting, multi-photo group dragging, enhanced visual feedback, and improved database/state management.
