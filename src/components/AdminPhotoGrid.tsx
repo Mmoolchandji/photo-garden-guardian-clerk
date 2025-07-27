@@ -158,6 +158,10 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
           viewMode={viewMode}
           onPhotoEdit={onPhotoEdit}
           onPhotoDeleted={onPhotoDeleted}
+          deletingId={deletingId}
+          handleDelete={handleDelete}
+          handlePhotoLongPress={handlePhotoLongPress}
+          handlePhotoClick={handlePhotoClick}
         />
       </div>
     );

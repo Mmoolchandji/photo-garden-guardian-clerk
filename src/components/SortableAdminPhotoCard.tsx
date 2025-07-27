@@ -14,6 +14,7 @@ interface SortableAdminPhotoCardProps {
   handleDelete: (photo: Photo) => void;
   handlePhotoLongPress: (photo: Photo) => void;
   handlePhotoClick: (photo: Photo) => void;
+  viewMode?: 'grid' | 'compact';
 }
 
 export const SortableAdminPhotoCard = ({ 
@@ -24,6 +25,7 @@ export const SortableAdminPhotoCard = ({
   handleDelete,
   handlePhotoLongPress,
   handlePhotoClick,
+  viewMode = 'grid',
 }: SortableAdminPhotoCardProps) => {
   const { isPhotoSelected, selectedPhotoIds, isSortingMode, isSelectionMode } = useAdminPhotoSelection();
   const isSelected = isPhotoSelected(photo.id);
@@ -59,6 +61,43 @@ export const SortableAdminPhotoCard = ({
   // Don't show individual photos that are part of a multi-selection during drag
   if (isDragging && isPartOfSelection && selectedPhotoIds.size > 1) {
     return null;
+  }
+
+  const isCompact = viewMode === 'compact';
+
+  if (isCompact) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={`relative group bg-white rounded-md overflow-hidden border-2 transition-all duration-200 cursor-pointer select-none ${
+          isDragging ? 'opacity-50 scale-105 shadow-2xl z-50' :
+          isSelected ? 'border-emerald-500' : 'border-transparent hover:border-gray-300'
+        }`}
+        {...attributes}
+        {...listeners}
+        {...longPressHandlers}
+      >
+        <img
+          src={photo.image_url}
+          alt={photo.title}
+          className="w-full h-auto aspect-[3/4] object-cover transition-transform duration-300 group-hover:scale-105"
+          draggable={false}
+        />
+        <div className={`absolute inset-0 transition-colors duration-300 ${isSelected ? 'bg-emerald-500/20' : 'bg-transparent'}`} />
+        {isSelectionMode && (
+          <div className="absolute top-1 left-1">
+            <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-200 ${
+              isSelected 
+                ? 'bg-emerald-500 border-emerald-500' 
+                : 'bg-white/90 border-gray-400'
+            }`}>
+              {isSelected && <Check className="h-2 w-2 text-white" />}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
