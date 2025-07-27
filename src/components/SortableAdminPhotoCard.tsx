@@ -75,9 +75,17 @@ export const SortableAdminPhotoCard = ({
           isSelected ? 'border-emerald-500' : 'border-transparent hover:border-gray-300'
         }`}
         {...attributes}
-        {...listeners}
         {...longPressHandlers}
       >
+        {isSortingMode && (
+          <div
+            {...listeners}
+            className="absolute top-1 right-1 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm cursor-grab active:cursor-grabbing"
+            style={{ touchAction: 'none' }}
+          >
+            <GripVertical className="h-4 w-4 text-gray-600" />
+          </div>
+        )}
         <img
           src={photo.image_url}
           alt={photo.title}
