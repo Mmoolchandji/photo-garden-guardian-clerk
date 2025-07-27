@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Camera, Plus, RefreshCw, LogOut, ArrowUpDown } from 'lucide-react';
+import { ArrowLeft, Camera, Plus, RefreshCw, LogOut, LayoutGrid, LayoutList } from 'lucide-react';
+import { IconSwitch } from '@/components/ui/icon-switch';
+import { useViewMode } from '@/contexts/ViewModeContext';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
 import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
@@ -22,6 +24,7 @@ const AdminPageHeader = ({
   onRefresh,
 }: AdminPageHeaderProps) => {
   const { isSortingMode } = useAdminPhotoSelection();
+  const { viewMode, setViewMode } = useViewMode();
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="container mx-auto px-4 py-4">
@@ -41,6 +44,13 @@ const AdminPageHeader = ({
               <Camera className="h-4 w-4 mr-2" />
               <span>{photos.length}</span>
             </Button>
+            <IconSwitch
+              checked={viewMode === 'compact'}
+              onCheckedChange={(checked) => setViewMode(checked ? 'compact' : 'grid')}
+              iconOn={<LayoutList className="h-4 w-4 text-emerald-600" />}
+              iconOff={<LayoutGrid className="h-4 w-4 text-gray-600" />}
+              aria-label="Toggle view mode"
+            />
             <Button variant="outline" size="sm" onClick={onRefresh} disabled={loadingPhotos}>
               <RefreshCw className={`h-4 w-4 ${loadingPhotos ? 'animate-spin' : ''}`} />
             </Button>
@@ -85,6 +95,13 @@ const AdminPageHeader = ({
                     <Camera className="h-4 w-4 mr-2" />
                     <span>{photos.length}</span>
                 </Button>
+                <IconSwitch
+                  checked={viewMode === 'compact'}
+                  onCheckedChange={(checked) => setViewMode(checked ? 'compact' : 'grid')}
+                  iconOn={<LayoutList className="h-4 w-4 text-emerald-600" />}
+                  iconOff={<LayoutGrid className="h-4 w-4 text-gray-600" />}
+                  aria-label="Toggle view mode"
+                />
                 <Button variant="outline" size="icon" onClick={onRefresh} disabled={loadingPhotos}>
                     <RefreshCw className={`h-4 w-4 ${loadingPhotos ? 'animate-spin' : ''}`} />
                 </Button>

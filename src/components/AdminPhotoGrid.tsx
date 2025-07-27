@@ -12,6 +12,8 @@ import BulkActionToolbar from './BulkActionToolbar';
 import { usePhotoSorting } from '@/hooks/usePhotoSorting';
 import SortableAdminPhotoCard from './SortableAdminPhotoCard';
 import SortableDragOverlay from './SortableDragOverlay';
+import AdminPhotoGridView from './admin/AdminPhotoGridView';
+import { useViewMode } from '@/contexts/ViewModeContext';
 
 interface AdminPhotoGridProps {
   photos: Photo[];
@@ -22,6 +24,7 @@ interface AdminPhotoGridProps {
 const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridProps) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { viewMode } = useViewMode();
   const {
     isSelectionMode,
     isSortingMode,
@@ -35,7 +38,7 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     exitSelectionMode
   } = useAdminPhotoSelection();
 
-  // Photo sorting functionality
+  // Photo sorting functionality  
   const {
     activePhoto,
     isUpdating,
@@ -132,10 +135,11 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {/* Selection Header - only show in selection mode, not sorting mode */}
-      {!isSortingMode && (
+  // If not in sorting mode, use the view mode switcher
+  if (!isSortingMode) {
+    return (
+      <div className="space-y-4">
+        {/* Selection Header */}
         <div className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
           <div className="flex items-center space-x-3">
             <Checkbox
@@ -148,17 +152,27 @@ const AdminPhotoGrid = ({ photos, onPhotoEdit, onPhotoDeleted }: AdminPhotoGridP
             </label>
           </div>
         </div>
-      )}
 
+        <AdminPhotoGridView
+          photos={photos}
+          viewMode={viewMode}
+          onPhotoEdit={onPhotoEdit}
+          onPhotoDeleted={onPhotoDeleted}
+        />
+      </div>
+    );
+  }
+
+  // Sorting mode - always use grid layout with drag and drop
+  return (
+    <div className="space-y-4">
       {/* Sorting Mode Instructions */}
-      {isSortingMode && (
-        <div className="bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-lg">
-          <p className="text-sm text-emerald-800">
-            <strong>Reorder Mode:</strong> Drag and drop photos to rearrange them. 
-            {selectedPhotoIds.size > 0 && ` Selected photos (${selectedPhotoIds.size}) will move together.`}
-          </p>
-        </div>
-      )}
+      <div className="bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-lg">
+        <p className="text-sm text-emerald-800">
+          <strong>Reorder Mode:</strong> Drag and drop photos to rearrange them. 
+          {selectedPhotoIds.size > 0 && ` Selected photos (${selectedPhotoIds.size}) will move together.`}
+        </p>
+      </div>
 
       {/* Photo Grid */}
       <DndContext

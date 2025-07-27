@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { Camera, User, LayoutGrid, LayoutList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IconSwitch } from '@/components/ui/icon-switch';
@@ -7,12 +6,13 @@ import PhotoGrid from '@/components/PhotoGrid';
 import ValueProposition from '@/components/ValueProposition';
 import DemoGallery from '@/components/DemoGallery';
 import { PhotoSelectionProvider } from '@/contexts/PhotoSelectionContext';
+import { ViewModeProvider, useViewMode } from '@/contexts/ViewModeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
-const Index = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid');
+const IndexContent = () => {
   const { user, authReady } = useAuth();
+  const { viewMode, setViewMode } = useViewMode();
 
   return (
     <PhotoSelectionProvider>
@@ -67,7 +67,7 @@ const Index = () => {
             {/* Photo Gallery with Search & Filters */}
             <section className="py-4 px-4">
               <div className="container mx-auto px-0 py-0 md:px-4 md:py-4">
-                <PhotoGrid viewMode={viewMode} />
+                <PhotoGrid />
               </div>
             </section>
           </>
@@ -127,6 +127,14 @@ const Index = () => {
         </footer>
       </div>
     </PhotoSelectionProvider>
+  );
+};
+
+const Index = () => {
+  return (
+    <ViewModeProvider>
+      <IndexContent />
+    </ViewModeProvider>
   );
 };
 

@@ -6,6 +6,7 @@ import { usePhotoData } from '@/hooks/usePhotoData';
 import useURLFilters from '@/hooks/useURLFilters';
 import AdminPhotoManager from '@/components/admin/AdminPhotoManager';
 import { AdminPhotoSelectionProvider } from '@/contexts/AdminPhotoSelectionContext';
+import { ViewModeProvider } from '@/contexts/ViewModeContext';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const Admin = () => {
@@ -72,8 +73,9 @@ const Admin = () => {
   if (!user) return null; // Will redirect to auth page
 
   return (
-    <AdminPhotoSelectionProvider>
-      <div className="min-h-screen bg-gray-50">
+    <ViewModeProvider>
+      <AdminPhotoSelectionProvider>
+        <div className="min-h-screen bg-gray-50">
         <AdminPageHeader
           userEmail={user.email}
           onSignOut={handleSignOut}
@@ -94,8 +96,9 @@ const Admin = () => {
             setEditingPhoto={setEditingPhoto}
           />
         </div>
-      </div>
-    </AdminPhotoSelectionProvider>
+        </div>
+      </AdminPhotoSelectionProvider>
+    </ViewModeProvider>
   );
 };
 

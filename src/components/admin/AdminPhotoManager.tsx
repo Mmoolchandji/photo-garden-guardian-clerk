@@ -127,6 +127,9 @@ const AdminPhotoManager = ({
           onChange={updateFilters}
           onClearAll={clearAllFilters}
           photosCount={photos.length}
+          onSelectAll={() => {}}
+          isAllSelected={false}
+          isSelectionMode={false}
         />
       </div>
 

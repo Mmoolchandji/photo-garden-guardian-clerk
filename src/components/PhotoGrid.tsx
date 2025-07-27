@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Photo } from '@/types/photo';
 import PhotoModal from './PhotoModal';
@@ -13,12 +12,12 @@ import useURLFilters from '@/hooks/useURLFilters';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
 import { usePhotoData } from '@/hooks/usePhotoData';
 import { transformPhotoToCardData } from '@/utils/photoTransform';
+import { useViewMode } from '@/contexts/ViewModeContext';
 
-interface PhotoGridProps {
-  viewMode: 'grid' | 'compact';
-}
+interface PhotoGridProps {}
 
-const PhotoGrid = ({ viewMode }: PhotoGridProps) => {
+const PhotoGrid = ({}: PhotoGridProps) => {
+  const { viewMode } = useViewMode();
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
   const { 
