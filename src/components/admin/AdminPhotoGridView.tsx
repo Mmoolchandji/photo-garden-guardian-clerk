@@ -1,6 +1,6 @@
 import { Photo } from '@/types/photo';
 import SortableAdminPhotoCard from '@/components/SortableAdminPhotoCard';
-import CompactPhotoCard from '@/components/CompactPhotoCard';
+import AdminCompactPhotoCard from './AdminCompactPhotoCard';
 import { PhotoCardData } from '@/types/photo';
 
 interface AdminPhotoGridViewProps {
@@ -43,7 +43,7 @@ const AdminPhotoGridView = ({ photos, viewMode, onPhotoEdit, onPhotoDeleted }: A
   return (
     <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-1 py-2 transition-all duration-300">
       {photos.map((photo) => (
-        <CompactPhotoCard
+        <AdminCompactPhotoCard
           key={photo.id}
           photo={transformPhotoData(photo)}
           onClick={() => onPhotoEdit(photo)}
