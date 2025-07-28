@@ -80,10 +80,15 @@ export const SortableAdminPhotoCard = ({
         {isSortingMode && (
           <div
             {...listeners}
-            className="absolute top-1 right-1 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm cursor-grab active:cursor-grabbing"
-            style={{ touchAction: 'none' }}
+            className="absolute top-1 right-1 z-20 p-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-md cursor-grab active:cursor-grabbing touch-manipulation min-w-[48px] min-h-[48px] flex items-center justify-center"
+            style={{ 
+              touchAction: 'none',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              WebkitTouchCallout: 'none'
+            }}
           >
-            <GripVertical className="h-4 w-4 text-gray-600" />
+            <GripVertical className="h-5 w-5 text-gray-700" />
           </div>
         )}
         <img
