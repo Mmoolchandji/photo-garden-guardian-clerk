@@ -14,11 +14,9 @@ import { usePhotoData } from '@/hooks/usePhotoData';
 import { transformPhotoToCardData } from '@/utils/photoTransform';
 import { useViewMode } from '@/contexts/ViewModeContext';
 
-interface PhotoGridProps {}
-
-const PhotoGrid = ({}: PhotoGridProps) => {
+const PhotoGrid = () => {
   const { viewMode } = useViewMode();
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const { filters, updateFilters, clearAllFilters } = useURLFilters();
   const { 
     isSelectionMode,
@@ -75,7 +73,10 @@ const PhotoGrid = ({}: PhotoGridProps) => {
         <PhotoGridView
           photos={photos}
           viewMode={viewMode}
-          onPhotoClick={setSelectedPhoto}
+          onPhotoClick={(photo) => {
+            const index = photos.findIndex((p) => p.id === photo.id);
+            setSelectedPhotoIndex(index);
+          }}
         />
       )}
 
@@ -83,9 +84,10 @@ const PhotoGrid = ({}: PhotoGridProps) => {
 
       {/* View Modal */}
       <PhotoModal
-        photo={selectedPhoto ? transformPhotoToCardData(selectedPhoto) : null}
-        isOpen={!!selectedPhoto && !isSelectionMode}
-        onClose={() => setSelectedPhoto(null)}
+        photos={photos.map(transformPhotoToCardData)}
+        currentIndex={selectedPhotoIndex ?? 0}
+        isOpen={selectedPhotoIndex !== null && !isSelectionMode}
+        onClose={() => setSelectedPhotoIndex(null)}
         onPhotoUpdated={refetch}
       />
     </>
