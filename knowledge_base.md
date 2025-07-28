@@ -64,7 +64,7 @@
 * [x] View Mode Toggling
 
 - **Photo Upload:** Users can upload one or more fabric images at a time, with drag-and-drop and file picker support. Bulk upload flows are optimized for textile catalogs.
-- **Image Preview & Details:** Uploaded images can be previewed with metadata such as title, description, and fabric type. Users can edit details before finalizing uploads.
+- **Image Preview & Details:** Uploaded images can be previewed with metadata such as title, description, and fabric type. The photo modal now features a carousel, allowing users to navigate between photos without closing the modal.
 - **WhatsApp Sharing:** Share images directly to WhatsApp, with or without captions. Multiple images can be sent in a single action, with optional compression for mobile compatibility.
 - **Role-Based Access:** Admins have access to management views and controls. Regular users have restricted access, ensuring security and workflow separation.
 - **Selection Mode (Mobile):** Long-press enables selection mode on mobile devices, allowing batch operations like sharing or deletion. This is complemented by the new "Select All" functionality for efficient bulk operations.
@@ -81,6 +81,8 @@
 
 | Date       | Feature/Update                       | Notes or Context                            |
 | ---------- | ------------------------------------ | ------------------------------------------- |
+| 2025-07-28 | Photo Modal Carousel (250a35f)       | Implemented a carousel in the photo modal for easier navigation. |
+| 2025-07-27 | Drag Handle and Grid Refactor (d5f38eb, 40c9167) | Added a drag handle to the compact view and unified the photo grid. |
 | 2025-07-27 | Context and View Mode (fa51fce, ec8cd83) | Added ViewModeContext and fixed a missing PhotoSelectionProvider. |
 | 2025-06-01 | Project Initialized                  | Folder setup, Supabase configured           |
 | 2025-06-05 | Photo Upload & Preview Added         | Both desktop and mobile support             |
@@ -109,6 +111,11 @@
 
 #### 5. **Recent Updates**
 
+*   **Photo Modal Carousel**:
+    *   The `PhotoModal` now features a carousel, allowing users to navigate between photos without closing the modal.
+*   **Drag and Drop Enhancements**:
+    *   A dedicated drag handle has been added to the compact view of the `SortableAdminPhotoCard`.
+    *   The photo grid has been refactored to unify the sorting and selection modes, simplifying the component's logic.
 *   **Context and View Mode**:
     *   Added a `ViewModeContext` to manage view states across the application.
     *   Fixed a runtime error caused by a missing `PhotoSelectionProvider` wrapper.
