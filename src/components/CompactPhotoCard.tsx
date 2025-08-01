@@ -99,11 +99,11 @@ const CompactPhotoCard = ({ photo, onClick }: CompactPhotoCardProps) => {
         )}
 
         {/* Minimal title overlay - only show title */}
-        <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5 bg-gradient-to-t from-black/50 to-transparent">
+        {/* <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5 bg-gradient-to-t from-black/50 to-transparent">
           <p className="text-xs font-medium text-white truncate">
             {photo.title}
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
