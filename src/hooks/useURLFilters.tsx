@@ -17,7 +17,7 @@ const useURLFilters = () => {
   useEffect(() => {
     const search = searchParams.get('search') || '';
     const fabrics = searchParams.get('fabrics')?.split(',').filter(Boolean) || [];
-    const stockStatuses = searchParams.get('stock')?.split(',').filter(Boolean) || [];
+    const stockStatuses = searchParams.get('stock')?.split(',').filter(Boolean) || ['Available'];
     const priceRange = searchParams.get('price') || '';
 
     const urlFilters = {
@@ -37,7 +37,7 @@ const useURLFilters = () => {
       
       return hasChanged ? urlFilters : prevFilters;
     });
-  }, []); // Only run on mount
+  }, [searchParams]);
 
   // Memoize the update function to prevent recreation on every render
   const updateFilters = useCallback((newFilters: FilterState) => {
