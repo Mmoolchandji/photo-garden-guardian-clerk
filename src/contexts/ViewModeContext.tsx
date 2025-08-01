@@ -15,7 +15,7 @@ interface ViewModeProviderProps {
 }
 
 export const ViewModeProvider = ({ children }: ViewModeProviderProps) => {
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>('compact');
 
   const toggleViewMode = () => {
     setViewMode(prev => prev === 'grid' ? 'compact' : 'grid');
