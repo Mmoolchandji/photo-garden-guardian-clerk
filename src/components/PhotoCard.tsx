@@ -104,9 +104,6 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
           <h3 className="font-bold text-sm text-white truncate">
             {photo.title}
           </h3>
-          <p className="text-sm font-semibold text-white">
-            ₹{photo.price}
-          </p>
         </div>
       </div>
     </div>

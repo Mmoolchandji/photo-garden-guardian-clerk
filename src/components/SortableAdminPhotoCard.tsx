@@ -98,6 +98,11 @@ export const SortableAdminPhotoCard = ({
           draggable={false}
         />
         <div className={`absolute inset-0 transition-colors duration-300 ${isSelected ? 'bg-emerald-500/20' : 'bg-transparent'}`} />
+        <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5 bg-gradient-to-t from-black/50 to-transparent">
+          <p className="text-xs font-medium text-white truncate">
+            ₹{photo.price}
+          </p>
+        </div>
         {isSelectionMode && (
           <div className="absolute top-1 left-1">
             <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-200 ${
@@ -172,6 +177,9 @@ export const SortableAdminPhotoCard = ({
           >
             {photo.title}
           </h3>
+          <p className="text-sm font-semibold text-white">
+            ₹{photo.price}
+          </p>
         </div>
       </div>
     </div>

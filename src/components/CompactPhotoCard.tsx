@@ -98,10 +98,10 @@ const CompactPhotoCard = ({ photo, onClick }: CompactPhotoCardProps) => {
           </div>
         )}
 
-        {/* Minimal price overlay - only show price */}
+        {/* Minimal title overlay - only show title */}
         <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5 bg-gradient-to-t from-black/50 to-transparent">
           <p className="text-xs font-medium text-white truncate">
-            ₹{photo.price}
+            {photo.title}
           </p>
         </div>
       </div>
