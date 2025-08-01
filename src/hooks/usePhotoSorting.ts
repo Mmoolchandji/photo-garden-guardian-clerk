@@ -36,16 +36,16 @@ export const usePhotoSorting = (
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: isCompact ? 6 : 8,
-        delay: isCompact ? 50 : 100,
-        tolerance: isCompact ? 3 : 5,
+        distance: isCompact ? (selectedPhotoIds.size > 1 ? 10 : 6) : 8,
+        delay: isCompact ? (selectedPhotoIds.size > 1 ? 150 : 50) : 100,
+        tolerance: isCompact ? (selectedPhotoIds.size > 1 ? 2 : 3) : 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: isCompact ? 100 : 200,
-        tolerance: isCompact ? 4 : 8,
-        distance: isCompact ? 8 : 5,
+        delay: isCompact ? (selectedPhotoIds.size > 1 ? 250 : 100) : 200,
+        tolerance: isCompact ? (selectedPhotoIds.size > 1 ? 2 : 4) : 8,
+        distance: isCompact ? (selectedPhotoIds.size > 1 ? 12 : 8) : 5,
       },
     }),
     useSensor(KeyboardSensor, {

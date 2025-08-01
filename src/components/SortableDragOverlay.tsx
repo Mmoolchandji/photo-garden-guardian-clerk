@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Photo } from '@/types/photo';
 import { useAdminPhotoSelection } from '@/contexts/AdminPhotoSelectionContext';
 import { useViewMode } from '@/contexts/ViewModeContext';
@@ -7,7 +7,7 @@ interface SortableDragOverlayProps {
   photo: Photo | null;
 }
 
-export const SortableDragOverlay = ({ photo }: SortableDragOverlayProps) => {
+const SortableDragOverlay = ({ photo }: SortableDragOverlayProps) => {
   const { selectedPhotoIds, isPhotoSelected } = useAdminPhotoSelection();
   const { viewMode } = useViewMode();
   const isCompact = viewMode === 'compact';
@@ -70,4 +70,6 @@ export const SortableDragOverlay = ({ photo }: SortableDragOverlayProps) => {
   );
 };
 
-export default SortableDragOverlay;
+export default memo(SortableDragOverlay, (prevProps, nextProps) => {
+  return prevProps.photo.id === nextProps.photo.id;
+});
