@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Check } from 'lucide-react';
@@ -58,8 +58,10 @@ export const SortableAdminPhotoCard = ({
     delay: 500,
   });
 
-  // Hide multi-selected photos during drag using CSS to maintain DOM stability
-  const shouldHideForMultiDrag = isDragging && isPartOfSelection && selectedPhotoIds.size > 1;
+  // Don't show individual photos that are part of a multi-selection during drag
+  if (isDragging && isPartOfSelection && selectedPhotoIds.size > 1) {
+    return null;
+  }
 
   const isCompact = viewMode === 'compact';
 
@@ -67,19 +69,13 @@ export const SortableAdminPhotoCard = ({
     return (
       <div
         ref={setNodeRef}
-        style={{
-          ...style,
-          visibility: shouldHideForMultiDrag ? 'hidden' : 'visible',
-          transform: style.transform,
-          willChange: isDragging ? 'transform' : 'auto',
-          contain: 'layout style paint',
-        }}
-        className={`relative group bg-white rounded-md overflow-hidden border-2 cursor-pointer select-none ${
+        style={style}
+        className={`relative group bg-white rounded-md overflow-hidden border-2 transition-all duration-200 cursor-pointer select-none ${
           isDragging ? 'opacity-50 scale-105 shadow-2xl z-50' :
           isSelected ? 'border-emerald-500' : 'border-transparent hover:border-gray-300'
         }`}
         {...attributes}
-        {...(!isSortingMode ? longPressHandlers : {})}
+        {...longPressHandlers}
       >
         {isSortingMode && (
           <div
@@ -98,14 +94,10 @@ export const SortableAdminPhotoCard = ({
         <img
           src={photo.image_url}
           alt={photo.title}
-          className={`w-full h-auto aspect-[3/4] object-cover ${isDragging ? '' : 'transition-transform duration-150 group-hover:scale-105'}`}
+          className="w-full h-auto aspect-[3/4] object-cover transition-transform duration-300 group-hover:scale-105"
           draggable={false}
-          style={{ 
-            transform: isDragging ? 'translateZ(0)' : undefined,
-            willChange: isDragging ? 'transform' : 'auto'
-          }}
         />
-        <div className={`absolute inset-0 ${isDragging ? '' : 'transition-colors duration-150'} ${isSelected ? 'bg-emerald-500/20' : 'bg-transparent'}`} />
+        <div className={`absolute inset-0 transition-colors duration-300 ${isSelected ? 'bg-emerald-500/20' : 'bg-transparent'}`} />
         {isSelectionMode && (
           <div className="absolute top-1 left-1">
             <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-200 ${
@@ -124,19 +116,14 @@ export const SortableAdminPhotoCard = ({
   return (
     <div
       ref={setNodeRef}
-      style={{
-        ...style,
-        visibility: shouldHideForMultiDrag ? 'hidden' : 'visible',
-        willChange: isDragging ? 'transform' : 'auto',
-        contain: 'layout style paint',
-      }}
-      className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden select-none ${
+      style={style}
+      className={`bg-white rounded-xl shadow-sm border-2 overflow-hidden transition-all duration-300 select-none ${
         isDragging 
           ? 'opacity-50 scale-105 shadow-2xl z-50' 
           : isSelected
           ? 'border-emerald-500'
           : 'border-transparent hover:border-gray-300'
-      } ${isDragging ? '' : 'transition-all duration-200'}`}
+      }`}
       {...attributes}
       {...(!isSortingMode ? longPressHandlers : {})}
     >
@@ -155,12 +142,8 @@ export const SortableAdminPhotoCard = ({
         <img
           src={photo.image_url}
           alt={photo.title}
-          className={`w-full h-56 sm:h-48 object-cover ${isDragging ? '' : 'transition-transform duration-150 group-hover:scale-105'}`}
+          className="w-full h-56 sm:h-48 object-cover transition-transform duration-300 group-hover:scale-105"
           draggable={false}
-          style={{ 
-            transform: isDragging ? 'translateZ(0)' : undefined,
-            willChange: isDragging ? 'transform' : 'auto'
-          }}
         />
         
         {/* Selection Overlay */}
@@ -195,11 +178,4 @@ export const SortableAdminPhotoCard = ({
   );
 };
 
-export default memo(SortableAdminPhotoCard, (prevProps, nextProps) => {
-  // Prevent unnecessary re-renders by checking only relevant props
-  return (
-    prevProps.photo.id === nextProps.photo.id &&
-    prevProps.viewMode === nextProps.viewMode &&
-    prevProps.deletingId === nextProps.deletingId
-  );
-});
+export default SortableAdminPhotoCard;
