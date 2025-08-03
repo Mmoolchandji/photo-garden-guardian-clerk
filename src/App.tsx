@@ -10,8 +10,8 @@ import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Gallery from "./pages/Gallery";
 import NotFound from "./pages/NotFound";
-import InstallPrompt from "@/components/PWA/InstallPrompt";
 import OfflineIndicator from "@/components/PWA/OfflineIndicator";
+import CustomInstallBanner from "@/components/PWA/CustomInstallBanner";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +21,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <InstallPrompt />
+        <CustomInstallBanner />
         <OfflineIndicator />
         <BrowserRouter>
           <Routes>
