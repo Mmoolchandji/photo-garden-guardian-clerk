@@ -49,12 +49,12 @@ const PhotoModal = ({ photos, currentIndex, isOpen, onClose }: PhotoModalProps) 
                   <div className="p-4 sm:p-6 flex-1 overflow-y-auto w-full sm:w-1/2">
                     <div className="flex flex-col h-full">
                       <div className="flex-grow">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{photo.title}</h2>
-                        <div className="flex items-center text-sm text-gray-500 my-4">
+                        <h2 className="text-lg sm:text-2xl font-bold text-gray-900">{photo.title}</h2>
+                        <div className="flex items-center text-xs sm:text-sm text-gray-500 my-3 sm:my-4">
                           <Calendar className="h-4 w-4 mr-2" />
                           Added on {photo.createdAt}
                         </div>
-                        <p className="text-gray-700 leading-relaxed mb-4">{photo.description}</p>
+                        <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-4">{photo.description}</p>
                       </div>
                       <div className="flex-shrink-0 flex flex-col sm:flex-row gap-2">
                         <WhatsAppShareButton

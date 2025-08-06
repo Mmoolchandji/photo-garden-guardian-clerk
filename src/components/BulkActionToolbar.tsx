@@ -107,7 +107,7 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
             {getSelectedCount()} photo{getSelectedCount() > 1 ? 's' : ''} selected
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <div className="hidden sm:block h-4 w-px bg-gray-300" />
 
             {isSortingMode ? (
@@ -115,10 +115,10 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
                 variant="default"
                 size="sm"
                 onClick={exitSortingMode}
-                className="bg-emerald-600 hover:bg-emerald-700"
+                className="bg-emerald-600 hover:bg-emerald-700 text-xs sm:text-sm"
               >
-                <X className="h-5 w-5 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Done Sorting</span>
+                <X className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Done</span>
               </Button>
             ) : (
               <>
@@ -127,10 +127,10 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
                   variant="outline"
                   size="sm"
                   onClick={enterSortingMode}
-                  className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                  className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 text-xs sm:text-sm"
                   disabled={isDeleting}
                 >
-                  <ArrowUpDown className="h-5 w-5 sm:h-4 sm:w-4 sm:mr-2" />
+                  <ArrowUpDown className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Reorder</span>
                 </Button>
 
@@ -139,10 +139,10 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
                   variant="outline"
                   size="sm"
                   onClick={handleBulkEditStart}
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm"
                   disabled={isDeleting}
                 >
-                  <Edit3 className="h-5 w-5 sm:h-4 sm:w-4 sm:mr-2" />
+                  <Edit3 className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Edit</span>
                 </Button>
 
@@ -153,9 +153,9 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
                       variant="outline"
                       size="sm"
                       disabled={isDeleting}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs sm:text-sm"
                     >
-                      <Trash2 className="h-5 w-5 sm:h-4 sm:w-4 sm:mr-2" />
+                      <Trash2 className="h-4 w-4 sm:mr-2" />
                       <span className="hidden sm:inline">Delete</span>
                     </Button>
                   </AlertDialogTrigger>
@@ -189,9 +189,9 @@ const BulkActionToolbar = ({ onPhotosDeleted }: BulkActionToolbarProps) => {
                   variant="ghost"
                   size="sm"
                   onClick={exitSelectionMode}
-                  className="text-gray-600 hover:text-gray-800"
+                  className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm"
                 >
-                  <X className="h-5 w-5 sm:h-4 sm:w-4 sm:mr-2" />
+                  <X className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Cancel</span>
                 </Button>
               </>

@@ -118,11 +118,11 @@ export default function PhotoEditForm({
   return (
     <form
       onSubmit={handleFormSubmit}
-      className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4"
+      className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4"
       autoComplete="off"
     >
       {/* Title */}
-      <div className="md:col-span-2">
+      <div className="sm:col-span-2">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Title *
         </label>
@@ -140,7 +140,7 @@ export default function PhotoEditForm({
       </div>
 
       {/* Fabric Type */}
-      <div>
+      <div className="sm:col-span-1">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Fabric Type
         </label>
@@ -151,7 +151,7 @@ export default function PhotoEditForm({
       </div>
 
       {/* Price */}
-      <div>
+      <div className="sm:col-span-1">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Price (₹, optional)
         </label>
@@ -173,7 +173,7 @@ export default function PhotoEditForm({
       </div>
 
       {/* Stock Status */}
-      <div className="md:col-span-2">
+      <div className="sm:col-span-2">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Stock Status
         </label>
