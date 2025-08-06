@@ -75,31 +75,23 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            urlPattern: /^https:\/\/ypzdjqkqwbxeolfrbodk\.supabase\.co\/rest\/v1\/photos.*/,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "photos-api-cache",
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+            urlPattern: ({ request, url }) => {
+              // Only cache GET requests to Supabase API, exclude write operations
+              return url.hostname === 'ypzdjqkqwbxeolfrbodk.supabase.co' && 
+                     url.pathname.startsWith('/rest/v1/') &&
+                     request.method === 'GET';
             },
-          },
-          {
-            urlPattern: /^https:\/\/ypzdjqkqwbxeolfrbodk\.supabase\.co\/rest\/v1\/.*/,
             handler: "NetworkFirst",
             options: {
-              cacheName: "api-cache",
+              cacheName: "supabase-api-cache",
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60, // 1 hour for faster data updates
               },
               cacheableResponse: {
                 statuses: [0, 200],
               },
+              networkTimeoutSeconds: 3, // Quick fallback to cache if network is slow
             },
           },
         ],
