@@ -27,7 +27,7 @@ const AdminPhotoGridView = ({
     : 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-1 py-2';
 
   return (
-    <div className={`grid ${gridClasses} transition-all duration-300`}>
+    <div className={`grid ${gridClasses} transition-[transform,box-shadow] duration-300 content-visibility-auto`}>
       {photos.map((photo) => (
         <SortableAdminPhotoCard
           key={photo.id}
