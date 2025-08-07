@@ -23,9 +23,10 @@ const App = () => (
         <Sonner />
         <CustomInstallBanner />
         <OfflineIndicator />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
+        <main>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gallery/:galleryId" element={<Gallery />} />
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </main>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>

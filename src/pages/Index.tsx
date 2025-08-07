@@ -27,7 +27,7 @@ const IndexContent = () => {
                 </div>
                 <div>
                   <h1 className="text-xl md:text-2xl font-bold text-gray-900">Photo Garden</h1>
-                  <p className="text-sm text-emerald-600">Keeper</p>
+                  <p className="text-sm text-gray-800">Keeper</p>
                 </div>
               </div>
               
@@ -42,8 +42,8 @@ const IndexContent = () => {
                   />
                 )}
                 
-                <Link to={user ? "/admin" : "/auth"}>
-                  <Button variant="outline" size="sm" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                <Link to={user ? "/admin" : "/auth"} aria-label={user ? 'Admin' : 'Sign In'}>
+                  <Button variant="outline" size="sm" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" aria-label={user ? 'Admin' : 'Sign In'}>
                     <User className="h-4 w-4 md:mr-2" />
                     <span className="hidden md:inline">{user ? 'Admin' : 'Sign In'}</span>
                   </Button>
@@ -74,7 +74,7 @@ const IndexContent = () => {
         )}
 
         {/* Enhanced Footer */}
-        <footer className="bg-gray-900 text-white py-12 px-4">
+        <footer className="bg-gray-900 text-white py-12 px-4 min-h-[300px]">
           <div className="container mx-auto text-center md:text-left">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
               <div className="col-span-1 md:col-span-2">
@@ -87,7 +87,7 @@ const IndexContent = () => {
                 <p className="text-gray-400 mb-4">
                   Professional photo management for saree businesses. Upload, organize, tag, and share your beautiful collection with ease.
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-400">
                   Built for fashion retailers who value beautiful presentation and efficient inventory management.
                 </p>
               </div>

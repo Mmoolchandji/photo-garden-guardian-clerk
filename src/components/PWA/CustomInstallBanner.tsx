@@ -64,11 +64,11 @@ const CustomInstallBanner: React.FC = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 bg-blue-500 text-white p-4 text-center z-50">
+      <div className="fixed top-0 left-0 right-0 bg-blue-600 text-white p-4 text-center z-50">
         <p className="mb-2">Install our app for a better experience!</p>
         <button
           onClick={handleInstallClick}
-          className="bg-white text-blue-500 px-4 py-2 rounded-md hover:bg-gray-200 focus:outline-none"
+          className="bg-white text-blue-700 px-4 py-2 rounded-md hover:bg-gray-200 focus:outline-none"
         >
           Install
         </button>
