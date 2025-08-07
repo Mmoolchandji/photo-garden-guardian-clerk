@@ -12,6 +12,8 @@ export default function BulkEditImage({ photo }: Props) {
         src={photo.image_url}
         alt={photo.title}
         className="w-full h-40 object-cover rounded-lg mb-4"
+        width={400}
+        height={160}
       />
     </div>
   );

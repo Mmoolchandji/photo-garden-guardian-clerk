@@ -34,6 +34,8 @@ export const SortableDragOverlay = ({ photo }: SortableDragOverlayProps) => {
             src={photo.image_url}
             alt={photo.title}
             className={imageClasses}
+            width={isCompact ? 96 : 192}
+            height={isCompact ? 128 : 192}
             draggable={false}
           />
           
