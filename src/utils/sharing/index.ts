@@ -1,7 +1,7 @@
 
 import { toast } from '@/hooks/use-toast';
 import { ShareablePhoto } from './types';
-import { isMobileDevice, canShareFiles } from './deviceDetection';
+import { isMobileDevice, canShareFiles, canShareFilesStrict } from './deviceDetection';
 import { shareMultipleViaWebShareAPI, shareViaWebShareAPI } from './webShareAPI';
 import { shareMultipleViaWhatsAppURL, shareViaWhatsAppURL } from './whatsappURL';
 import { shareBatchedToWhatsApp } from './batchedSharing';
@@ -9,7 +9,7 @@ import { shareGalleryToWhatsApp } from './gallerySharing';
 
 // Re-export types and utilities
 export type { ShareablePhoto };
-export { isMobileDevice, isIOSDevice, canShareFiles } from './deviceDetection';
+export { isMobileDevice, isIOSDevice, canShareFiles, canShareFilesStrict } from './deviceDetection';
 export { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
 export { shareBatchedToWhatsApp } from './batchedSharing';
 export { shareGalleryToWhatsApp } from './gallerySharing';
@@ -97,7 +97,7 @@ export const shareToWhatsApp = async (photo: ShareablePhoto): Promise<void> => {
     });
 
     // Progressive fallback strategy
-    if (isMobileDevice() && canShareFiles()) {
+  if (isMobileDevice() && canShareFilesStrict()) {
       console.log('Trying Web Share API on mobile device');
       const webShareSuccess = await shareViaWebShareAPI(photo);
       
