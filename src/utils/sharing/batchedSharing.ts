@@ -3,6 +3,7 @@ import { ShareablePhoto } from './types';
 import { shareMultipleViaWebShareAPI } from './webShareAPI';
 import { shareMultipleViaWhatsAppURL } from './whatsappURL';
 import { toast } from '@/hooks/use-toast';
+import { isIOSDevice, isStandalonePWA } from './deviceDetection';
 
 export interface BatchShareOptions {
   batchSize: number;
@@ -116,15 +117,18 @@ export const shareBatchedToWhatsApp = async (
   
   console.log(`Starting batched share: ${batches.length} batches of up to ${config.batchSize} photos each`);
   
-  // Check if Web Share API supports files
-  const supportsFileSharing = shareAsFiles && navigator.canShare && (() => {
-    try {
-      const testFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      return navigator.canShare({ files: [testFile] });
-    } catch {
-      return false;
-    }
-  })();
+  // Check if Web Share API supports files and avoid iOS PWA file sharing
+  const supportsFileSharing = shareAsFiles &&
+    navigator.canShare &&
+    !(isStandalonePWA() && isIOSDevice()) &&
+    (() => {
+      try {
+        const testFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+        return navigator.canShare({ files: [testFile] });
+      } catch {
+        return false;
+      }
+    })();
   
   if (!supportsFileSharing && shareAsFiles) {
     toast({

@@ -28,9 +28,8 @@ const MAX_SIZE_BYTES = WEB_SHARE_LIMITS.MAX_TOTAL_SIZE; // Use the Web Share API
 
 // Estimate image size (rough calculation based on typical image compression)
 const estimateImageSize = (imageUrl: string): number => {
-  // Rough estimate: assume average compressed image is ~500KB
-  // In a real app, you might want to fetch actual file sizes
-  return 500 * 1024; // 500KB per image
+  // Conservative estimate: assume average compressed image is ~800KB
+  return 800 * 1024; // 800KB per image
 };
 
 export const PhotoSelectionProvider = ({ children }: { children: ReactNode }) => {

@@ -1,7 +1,7 @@
 
 import { toast } from '@/hooks/use-toast';
 import { ShareablePhoto } from './types';
-import { isMobileDevice, canShareFiles, canShareFilesStrict } from './deviceDetection';
+import { isMobileDevice, isIOSDevice, isStandalonePWA, canShareFiles, canShareFilesStrict } from './deviceDetection';
 import { shareMultipleViaWebShareAPI, shareViaWebShareAPI } from './webShareAPI';
 import { shareMultipleViaWhatsAppURL, shareViaWhatsAppURL } from './whatsappURL';
 import { shareBatchedToWhatsApp } from './batchedSharing';
@@ -9,7 +9,7 @@ import { shareGalleryToWhatsApp } from './gallerySharing';
 
 // Re-export types and utilities
 export type { ShareablePhoto };
-export { isMobileDevice, isIOSDevice, canShareFiles, canShareFilesStrict } from './deviceDetection';
+export { isMobileDevice, isIOSDevice, isStandalonePWA, canShareFiles, canShareFilesStrict } from './deviceDetection';
 export { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
 export { shareBatchedToWhatsApp } from './batchedSharing';
 export { shareGalleryToWhatsApp } from './gallerySharing';
@@ -31,8 +31,12 @@ export const shareMultipleToWhatsApp = async (
 
     // Determine the sharing method
     let finalMethod = method;
+    const isiOSPWA = isStandalonePWA() && isIOSDevice();
     if (method === 'auto') {
-      if (photos.length <= 10) {
+      if (isiOSPWA) {
+        // iOS PWA cannot share files reliably; prefer non-file methods
+        finalMethod = photos.length <= 25 ? 'batched' : 'gallery';
+      } else if (photos.length <= 10) {
         finalMethod = 'files';
       } else if (photos.length <= 25) {
         finalMethod = 'batched';
@@ -41,10 +45,20 @@ export const shareMultipleToWhatsApp = async (
       }
     }
 
+    // Force override if caller asked for 'files' but environment is iOS PWA
+    if (finalMethod === 'files' && isiOSPWA) {
+      finalMethod = photos.length <= 25 ? 'batched' : 'gallery';
+    }
+
     // Execute the chosen method
     switch (finalMethod) {
       case 'files':
-        if (photos.length <= 10 && isMobileDevice() && canShareFiles()) {
+        if (
+          photos.length <= 10 &&
+          isMobileDevice() &&
+          canShareFilesStrict() &&
+          !(isStandalonePWA() && isIOSDevice())
+        ) {
           console.log('Using Web Share API for files');
           success = await shareMultipleViaWebShareAPI(photos);
         }
@@ -97,15 +111,20 @@ export const shareToWhatsApp = async (photo: ShareablePhoto): Promise<void> => {
     });
 
     // Progressive fallback strategy
-  if (isMobileDevice() && canShareFilesStrict()) {
-      console.log('Trying Web Share API on mobile device');
-      const webShareSuccess = await shareViaWebShareAPI(photo);
-      
-      if (webShareSuccess) {
-        loadingToast.dismiss();
-        return;
+    const isiOSPWA = isStandalonePWA() && isIOSDevice();
+    if (!isiOSPWA && isMobileDevice() && canShareFilesStrict()) {
+        console.log('Trying Web Share API on mobile device');
+        const webShareSuccess = await shareViaWebShareAPI(photo);
+        
+        if (webShareSuccess) {
+          loadingToast.dismiss();
+          return;
+        }
       }
-    }
+      
+      if (isiOSPWA) {
+        console.log('iOS PWA detected, skipping Web Share API and using URL sharing');
+      }
     
     // Fallback to WhatsApp URL schemes
     console.log('Falling back to WhatsApp URL sharing');

@@ -19,16 +19,22 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif,webp,woff,woff2}"],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/ypzdjqkqwbxeolfrbodk\.supabase\.co\/storage\/.*/,
-            handler: "CacheFirst",
+            urlPattern: ({ request, url }) => {
+              // Only cache Supabase storage image GET requests; avoid caching opaque responses
+              return url.hostname === 'ypzdjqkqwbxeolfrbodk.supabase.co' &&
+                     url.pathname.includes('/storage/') &&
+                     request.method === 'GET' &&
+                     request.destination === 'image';
+            },
+            handler: "StaleWhileRevalidate",
             options: {
-              cacheName: "supabase-storage-cache",
+              cacheName: "supabase-storage-images",
               expiration: {
-                maxEntries: 100,
+                maxEntries: 150,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
               },
               cacheableResponse: {
-                statuses: [0, 200],
+                statuses: [200], // do NOT cache opaque (0)
               },
             },
           },
