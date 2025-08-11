@@ -4,7 +4,7 @@ import { Photo } from '@/types/photo';
 import FloatingShareButton from './FloatingShareButton';
 import EnhancedShareOptionsModal from './EnhancedShareOptionsModal';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
-import { shareMultipleToWhatsApp, shareBatchedToWhatsApp, shareGalleryToWhatsApp } from '@/utils/sharing';
+import { shareMultipleToWhatsApp, shareBatchedToWhatsApp } from '@/utils/sharing';
 import { transformPhotosToShareable } from '@/utils/photoTransform';
 
 const PhotoGridShareActions = () => {
@@ -19,19 +19,13 @@ const PhotoGridShareActions = () => {
   const handleShareAsFiles = async () => {
     const shareablePhotos = transformPhotosToShareable(selectedPhotos);
     setShowShareModal(false);
-    await shareMultipleToWhatsApp(shareablePhotos, 'files');
+    await shareMultipleToWhatsApp(shareablePhotos);
   };
 
   const handleShareBatched = async () => {
     const shareablePhotos = transformPhotosToShareable(selectedPhotos);
     setShowShareModal(false);
     await shareBatchedToWhatsApp(shareablePhotos, true);
-  };
-
-  const handleShareAsGallery = async () => {
-    const shareablePhotos = transformPhotosToShareable(selectedPhotos);
-    setShowShareModal(false);
-    await shareGalleryToWhatsApp(shareablePhotos);
   };
 
   return (
@@ -43,7 +37,6 @@ const PhotoGridShareActions = () => {
         photos={selectedPhotos}
         onShareAsFiles={handleShareAsFiles}
         onShareBatched={handleShareBatched}
-        onShareAsGallery={handleShareAsGallery}
       />
     </>
   );

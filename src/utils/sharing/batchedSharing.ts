@@ -1,9 +1,8 @@
-
 import { ShareablePhoto } from './types';
+import { formatWhatsAppMessage } from './messageFormatting';
 import { shareMultipleViaWebShareAPI } from './webShareAPI';
-import { shareMultipleViaWhatsAppURL } from './whatsappURL';
+import { canShareFilesStrict, isMobileDevice, isIOSDevice, isStandalonePWA } from './deviceDetection';
 import { toast } from '@/hooks/use-toast';
-import { isIOSDevice, isStandalonePWA } from './deviceDetection';
 
 export interface BatchShareOptions {
   batchSize: number;
@@ -106,7 +105,7 @@ const createBatchConfirmationDialog = (batchNumber: number, totalBatches: number
   });
 };
 
-// Improved batched sharing function with proper user prompting
+// File-only batched sharing function
 export const shareBatchedToWhatsApp = async (
   photos: ShareablePhoto[], 
   shareAsFiles: boolean = true,
@@ -117,32 +116,9 @@ export const shareBatchedToWhatsApp = async (
   
   console.log(`Starting batched share: ${batches.length} batches of up to ${config.batchSize} photos each`);
   
-  // Check if Web Share API supports files and avoid iOS PWA file sharing
-  const supportsFileSharing = shareAsFiles &&
-    navigator.canShare &&
-    !(isStandalonePWA() && isIOSDevice()) &&
-    (() => {
-      try {
-        const testFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-        return navigator.canShare({ files: [testFile] });
-      } catch {
-        return false;
-      }
-    })();
-  
-  if (!supportsFileSharing && shareAsFiles) {
-    toast({
-      title: "File sharing not supported",
-      description: "Your device doesn't support file sharing. Using link sharing instead.",
-      variant: "destructive",
-    });
-    
-    // Fallback to URL sharing for all batches
-    return shareMultipleViaWhatsAppURL(photos);
-  }
-  
   try {
     let successCount = 0;
+    let failedBatches = 0;
     
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i];
@@ -171,45 +147,43 @@ export const shareBatchedToWhatsApp = async (
         });
       }
       
-      let batchSuccess = false;
+      // Check device capabilities for file sharing
+      const canShareFiles = canShareFilesStrict();
       
-      // Always try Web Share API first for file sharing
-      if (shareAsFiles && supportsFileSharing) {
-        console.log(`Attempting Web Share API for batch ${batchNumber}`);
-        batchSuccess = await shareMultipleViaWebShareAPI(batch);
-        
-        if (batchSuccess) {
-          console.log(`Batch ${batchNumber} shared successfully via Web Share API`);
-        } else {
-          console.log(`Web Share API failed for batch ${batchNumber}, trying URL fallback`);
-        }
-      }
-      
-      // If Web Share API failed, try URL sharing as fallback
-      if (!batchSuccess) {
-        console.log(`Using URL sharing for batch ${batchNumber}`);
-        const batchMessage = config.includePartLabels 
-          ? formatBatchedMessage(batch, i, batches.length)
-          : undefined;
-        
-        batchSuccess = shareMultipleViaWhatsAppURL(batch, batchMessage);
-      }
-      
-      if (batchSuccess) {
-        successCount++;
-        
-        // Show success for this batch
+      if (!canShareFiles) {
+        console.error('Device cannot share files, batch sharing not supported');
         toast({
-          title: `Batch ${batchNumber} shared! 🎉`,
-          description: `${batch.length} photos shared to WhatsApp${i < batches.length - 1 ? '. Ready for next batch?' : ''}`,
-        });
-      } else {
-        toast({
-          title: `Batch ${batchNumber} failed`,
-          description: `Unable to share batch ${batchNumber}. Please try again.`,
+          title: "Batch sharing not supported",
+          description: "Your device doesn't support file sharing. Please try sharing fewer photos individually.",
           variant: "destructive",
         });
-        break;
+        return false;
+      }
+      
+      if (shareAsFiles) {
+        console.log(`Attempting Web Share API for batch ${batchNumber}`);
+        const success = await shareMultipleViaWebShareAPI(batch);
+        
+        if (success) {
+          console.log(`Batch ${batchNumber} shared successfully via Web Share API`);
+          successCount++;
+          
+          // Show success for this batch
+          toast({
+            title: `Batch ${batchNumber} shared! 🎉`,
+            description: `${batch.length} photos shared to WhatsApp${i < batches.length - 1 ? '. Ready for next batch?' : ''}`,
+          });
+        } else {
+          console.error(`Failed to share batch ${batchNumber} via Web Share API`);
+          failedBatches++;
+          
+          toast({
+            title: `Batch ${batchNumber} failed`,
+            description: `Unable to share batch ${batchNumber}. Please try again.`,
+            variant: "destructive",
+          });
+          break;
+        }
       }
     }
     
