@@ -99,18 +99,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-@layer utilities {
-  .content-visibility-auto {
-    content-visibility: auto;
-  }
-  .contain-content {
-    contain: content;
-  }
-  .contain-layout {
-    contain: layout;
-  }
-  .contain-paint {
-    contain: paint;
-  }
-}

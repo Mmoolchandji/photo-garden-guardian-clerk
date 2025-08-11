@@ -1,104 +1,147 @@
-import { ShareablePhoto } from './types';
-import { isMobileDevice, isIOSDevice, isStandalonePWA, canShareFiles, canShareFilesStrict } from './deviceDetection';
-import { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
-import { shareMultipleViaWebShareAPI, shareViaWebShareAPI } from './webShareAPI';
-import { shareBatchedToWhatsApp } from './batchedSharing';
+
 import { toast } from '@/hooks/use-toast';
+import { ShareablePhoto } from './types';
+import { isMobileDevice, canShareFiles } from './deviceDetection';
+import { shareMultipleViaWebShareAPI, shareViaWebShareAPI } from './webShareAPI';
+import { shareMultipleViaWhatsAppURL, shareViaWhatsAppURL } from './whatsappURL';
+import { shareBatchedToWhatsApp } from './batchedSharing';
+import { shareGalleryToWhatsApp } from './gallerySharing';
 
 // Re-export types and utilities
-export type { ShareablePhoto } from './types';
-export { isMobileDevice, isIOSDevice, isStandalonePWA, canShareFiles, canShareFilesStrict } from './deviceDetection';
+export type { ShareablePhoto };
+export { isMobileDevice, isIOSDevice, canShareFiles } from './deviceDetection';
 export { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
 export { shareBatchedToWhatsApp } from './batchedSharing';
+export { shareGalleryToWhatsApp } from './gallerySharing';
 
+// Enhanced main sharing function for multiple photos with hybrid approach
 export const shareMultipleToWhatsApp = async (
-  photos: ShareablePhoto[]
-): Promise<boolean> => {
-  if (photos.length === 0) return false;
-
-  console.log(`Sharing ${photos.length} photos via WhatsApp using file sharing`);
+  photos: ShareablePhoto[], 
+  method: 'auto' | 'files' | 'batched' | 'gallery' = 'auto'
+): Promise<void> => {
+  console.log(`Starting WhatsApp share for ${photos.length} photos using method: ${method}`);
   
-  toast({
-    title: "Preparing to share...",
-    description: `Getting ${photos.length} photos ready for WhatsApp`,
-  });
-
   try {
-    // Only use Web Share API for actual file sharing
-    if (!canShareFilesStrict()) {
-      toast({
-        title: "File sharing not supported",
-        description: "Your device doesn't support sharing image files. Please save images and share manually.",
-        variant: "destructive",
-      });
-      return false;
+    const loadingToast = toast({
+      title: "Preparing to share...",
+      description: `Setting up ${photos.length} photos for WhatsApp share`,
+    });
+
+    let success = false;
+
+    // Determine the sharing method
+    let finalMethod = method;
+    if (method === 'auto') {
+      if (photos.length <= 10) {
+        finalMethod = 'files';
+      } else if (photos.length <= 25) {
+        finalMethod = 'batched';
+      } else {
+        finalMethod = 'gallery';
+      }
     }
 
-    return await shareMultipleViaWebShareAPI(photos);
+    // Execute the chosen method
+    switch (finalMethod) {
+      case 'files':
+        if (photos.length <= 10 && isMobileDevice() && canShareFiles()) {
+          console.log('Using Web Share API for files');
+          success = await shareMultipleViaWebShareAPI(photos);
+        }
+        if (!success) {
+          console.log('Falling back to WhatsApp URL sharing for files');
+          success = shareMultipleViaWhatsAppURL(photos);
+        }
+        break;
+
+      case 'batched':
+        console.log('Using batched sharing');
+        success = await shareBatchedToWhatsApp(photos, true);
+        break;
+
+      case 'gallery':
+        console.log('Using gallery sharing');
+        success = await shareGalleryToWhatsApp(photos);
+        break;
+
+      default:
+        throw new Error('Invalid sharing method');
+    }
+    
+    loadingToast.dismiss();
+    
+    if (!success) {
+      throw new Error('All sharing methods failed');
+    }
+    
   } catch (error) {
-    console.error('File sharing failed:', error);
+    console.error('Hybrid sharing failed:', error);
     
     toast({
       title: "Sharing failed",
-      description: "Unable to share image files. Please try saving images manually.",
+      description: "Unable to share photos. Please try a different method.",
       variant: "destructive",
     });
-    
-    return false;
   }
 };
 
-export const shareToWhatsApp = async (photo: ShareablePhoto): Promise<boolean> => {
-  console.log('Sharing single photo to WhatsApp');
+// Main sharing function with progressive fallback and loading states
+export const shareToWhatsApp = async (photo: ShareablePhoto): Promise<void> => {
+  console.log('Starting WhatsApp share for:', photo.title);
   
-  toast({
-    title: "Preparing to share...",
-    description: "Getting your photo ready for WhatsApp",
-  });
-
   try {
-    // Only use Web Share API for actual file sharing
-    if (!canShareFiles()) {
-      toast({
-        title: "File sharing not supported",
-        description: "Your device doesn't support sharing image files. Please save the image and share manually.",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    console.log('Attempting Web Share API for file sharing');
-    const webShareResult = await shareViaWebShareAPI(photo);
-    
-    if (webShareResult) {
-      return true;
-    }
-    
-    toast({
-      title: "Sharing failed", 
-      description: "Unable to share image file. Please try saving the image manually.",
-      variant: "destructive",
+    // Show loading toast for better UX
+    const loadingToast = toast({
+      title: "Preparing to share...",
+      description: "Setting up your WhatsApp share",
     });
-    return false;
+
+    // Progressive fallback strategy
+    if (isMobileDevice() && canShareFiles()) {
+      console.log('Trying Web Share API on mobile device');
+      const webShareSuccess = await shareViaWebShareAPI(photo);
+      
+      if (webShareSuccess) {
+        loadingToast.dismiss();
+        return;
+      }
+    }
+    
+    // Fallback to WhatsApp URL schemes
+    console.log('Falling back to WhatsApp URL sharing');
+    const urlShareSuccess = shareViaWhatsAppURL(photo);
+    
+    loadingToast.dismiss();
+    
+    if (urlShareSuccess) {
+      // Show success message for URL sharing
+      toast({
+        title: "Opening WhatsApp",
+        description: "Redirecting to WhatsApp to share your saree",
+      });
+    } else {
+      throw new Error('All sharing methods failed');
+    }
     
   } catch (error) {
-    console.error('Single photo sharing error:', error);
+    console.error('All WhatsApp sharing methods failed:', error);
     
-    // Enhanced error handling
-    let errorMessage = "Unable to share photo file. Please try again.";
+    // Enhanced error handling with specific messages
+    let errorMessage = "Sharing via WhatsApp is not supported on this device or browser.";
+    let errorDescription = "Please try copying the image URL manually.";
     
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      errorMessage = "Network error. Please check your connection and try again.";
-    } else if (error instanceof Error && error.message.includes('CORS')) {
-      errorMessage = "Image access error. Please try refreshing the page.";
+    if (error.message?.includes('network')) {
+      errorMessage = "Network error occurred";
+      errorDescription = "Please check your internet connection and try again.";
+    } else if (error.message?.includes('cors')) {
+      errorMessage = "Image sharing temporarily unavailable";
+      errorDescription = "You can still share the link via WhatsApp Web.";
     }
     
     toast({
-      title: "File sharing failed",
-      description: errorMessage,
+      title: errorMessage,
+      description: errorDescription,
       variant: "destructive",
     });
-    
-    return false;
   }
 };

@@ -137,8 +137,6 @@ const PhotoEdit = ({ photo, onPhotoUpdated, onCancel }: PhotoEditProps) => {
             src={photo.image_url}
             alt={photo.title}
             className="w-full h-40 object-cover rounded-lg"
-            width={400}
-            height={160}
           />
         </div>
         {isReadOnly ? (

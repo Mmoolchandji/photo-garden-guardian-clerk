@@ -81,9 +81,6 @@
 
 | Date       | Feature/Update                       | Notes or Context                            |
 | ---------- | ------------------------------------ | ------------------------------------------- |
-| 2025-08-01 | Search Bar Optimization (b601e8b)    | Optimized the SearchBar component by implementing a short delay in debouncing mechanism to improve performance. |
-| 2025-08-01 | Photo Card UI Refactor (98c24bd)     | Adjusted price and title display on photo cards to better suit their context. |
-| 2025-08-01 | Compact View Default (6882fce)       | Set compact view as the default view. |
 | 2025-07-28 | Photo Modal Carousel (250a35f)       | Implemented a carousel in the photo modal for easier navigation. |
 | 2025-07-27 | Drag Handle and Grid Refactor (d5f38eb, 40c9167) | Added a drag handle to the compact view and unified the photo grid. |
 | 2025-07-27 | Context and View Mode (fa51fce, ec8cd83) | Added ViewModeContext and fixed a missing PhotoSelectionProvider. |
@@ -114,12 +111,6 @@
 
 #### 5. **Recent Updates**
 
-*   **Search Bar Optimization**:
-    *   The `SearchBar` component has been optimized by implementing a short delay in the debouncing mechanism to improve performance.
-*   **Photo Card UI Refactor**:
-    *   The information displayed on the various photo card components has been refactored to better suit their context.
-*   **Compact View Default**:
-    *   The compact view is now the default view.
 *   **Photo Modal Carousel**:
     *   The `PhotoModal` now features a carousel, allowing users to navigate between photos without closing the modal.
 *   **Drag and Drop Enhancements**:

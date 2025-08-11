@@ -41,18 +41,18 @@ const ValueProposition = () => {
             Built specifically for fashion retailers who want to showcase their inventory professionally.
           </p>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {features.map((feature, index) => {
               const IconComponent = feature.icon;
               return (
-                <div key={index} className="text-center p-2">
-                  <div className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-3 md:mb-4">
-                    <IconComponent className="h-7 w-7 md:h-8 md:w-8 text-emerald-600" />
+                <div key={index} className="text-center">
+                  <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                    <IconComponent className="h-8 w-8 text-emerald-600" />
                   </div>
-                  <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 md:mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 text-xs md:text-sm">
+                  <p className="text-gray-600 text-sm">
                     {feature.description}
                   </p>
                 </div>
@@ -62,7 +62,7 @@ const ValueProposition = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/auth">
-              <Button size="lg" className="bg-emerald-700 hover:bg-emerald-800 text-lg px-8 py-3">
+              <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-lg px-8 py-3">
                 Get Started Free
               </Button>
             </Link>

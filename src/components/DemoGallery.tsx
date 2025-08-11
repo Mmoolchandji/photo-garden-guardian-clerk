@@ -11,7 +11,7 @@ const DemoGallery = () => {
       fabric: 'Silk',
       price: 4500,
       stock_status: 'In Stock',
-      image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=600&fit=crop&fm=webp&q=80',
+      image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=600&fit=crop',
       created_at: '2024-01-15',
       user_id: 'demo'
     },
@@ -22,7 +22,7 @@ const DemoGallery = () => {
       fabric: 'Cotton',
       price: 2800,
       stock_status: 'Low Stock',
-      image_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&h=600&fit=crop&fm=webp&q=80',
+      image_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&h=600&fit=crop',
       created_at: '2024-01-14',
       user_id: 'demo'
     },
@@ -33,7 +33,7 @@ const DemoGallery = () => {
       fabric: 'Georgette',
       price: 3200,
       stock_status: 'In Stock',
-      image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=600&fit=crop&fm=webp&q=80',
+      image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=600&fit=crop',
       created_at: '2024-01-13',
       user_id: 'demo'
     },
@@ -44,7 +44,7 @@ const DemoGallery = () => {
       fabric: 'Chiffon',
       price: 5200,
       stock_status: 'In Stock',
-      image_url: 'https://images.unsplash.com/photo-1617627423056-892c6f81bf6e?w=400&h=600&fit=crop&fm=webp&q=80',
+      image_url: 'https://images.unsplash.com/photo-1617627423056-892c6f81bf6e?w=400&h=600&fit=crop',
       created_at: '2024-01-12',
       user_id: 'demo'
     }

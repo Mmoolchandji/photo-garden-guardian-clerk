@@ -94,9 +94,7 @@ export const SortableAdminPhotoCard = ({
         <img
           src={photo.image_url}
           alt={photo.title}
-          className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-          width={96}
-          height={128}
+          className="w-full h-auto aspect-[3/4] object-cover transition-transform duration-300 group-hover:scale-105"
           draggable={false}
         />
         <div className={`absolute inset-0 transition-colors duration-300 ${isSelected ? 'bg-emerald-500/20' : 'bg-transparent'}`} />
@@ -150,8 +148,6 @@ export const SortableAdminPhotoCard = ({
           src={photo.image_url}
           alt={photo.title}
           className="w-full h-56 sm:h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-          width={192}
-          height={192}
           draggable={false}
         />
         

@@ -13,6 +13,7 @@ interface EnhancedShareOptionsModalProps {
   photos: Photo[];
   onShareAsFiles: () => void;
   onShareBatched: () => void;
+  onShareAsGallery: () => void;
 }
 
 const EnhancedShareOptionsModal = ({ 
@@ -20,7 +21,8 @@ const EnhancedShareOptionsModal = ({
   onClose, 
   photos, 
   onShareAsFiles,
-  onShareBatched
+  onShareBatched,
+  onShareAsGallery
 }: EnhancedShareOptionsModalProps) => {
   const photoCount = photos.length;
   const recommendedMethod = getRecommendedMethod(photoCount);
@@ -31,10 +33,15 @@ const EnhancedShareOptionsModal = ({
         title: "Perfect for file sharing",
         description: "Your photos will be shared as high-quality files directly to WhatsApp",
       };
+    } else if (photoCount <= 25) {
+      return {
+        title: "Multiple sharing options available",
+        description: "Choose between batched file sharing or creating a gallery link",
+      };
     } else {
       return {
-        title: "Batch file sharing available", 
-        description: "Large collections will be split into smaller groups for file sharing",
+        title: "Large collection detected",
+        description: "Gallery link recommended for the best experience with many photos",
       };
     }
   };
@@ -101,13 +108,33 @@ const EnhancedShareOptionsModal = ({
               </div>
             </Button>
 
+            <Button
+              onClick={onShareAsGallery}
+              disabled={photoCount < 5}
+              variant="outline"
+              className="w-full justify-start h-auto p-4"
+            >
+              <div className="flex items-start gap-3">
+                <Globe className="h-5 w-5 mt-1 text-gray-600" />
+                <div className="text-left">
+                  <div className="font-medium">🌐 Create Gallery Link</div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    {photoCount < 5
+                      ? "Minimum 5 photos required for gallery"
+                      : "Professional gallery page with all photos"
+                    }
+                  </div>
+                </div>
+              </div>
+            </Button>
           </div>
         </div>
 
         <Separator />
         
         <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded">
-          <strong>💡 Business Tip:</strong> File sharing provides the highest quality images for customers to see fabric details and colors accurately.
+          <strong>💡 Business Tip:</strong> Gallery links work great for showcasing large collections, 
+          while file sharing provides the highest quality for detailed fabric views.
         </div>
       </DialogContent>
     </Dialog>

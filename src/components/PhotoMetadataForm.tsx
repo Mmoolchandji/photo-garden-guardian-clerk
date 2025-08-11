@@ -53,7 +53,8 @@ const PhotoMetadataForm = ({
 
   return (
   <div
-    className="w-full max-w-lg mx-auto bg-white rounded-lg shadow-md p-4 sm:p-6"
+    className="w-full max-w-[95vw] sm:max-w-md mx-auto bg-white rounded-lg shadow-md p-3 sm:p-6 flex flex-col justify-center items-center <md:px-2 <md:py-4 <md:rounded-md <md:shadow-none <md:max-w-full <md:w-full <md:z-50 <md:overflow-visible"
+    style={{ minHeight: '1px' }}
   >
     <div className="mb-4 w-full">
       <img

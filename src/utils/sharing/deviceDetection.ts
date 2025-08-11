@@ -22,24 +22,3 @@ export const canShareFiles = (): boolean => {
          'canShare' in navigator && 
          typeof navigator.canShare === 'function';
 };
-
-// Stricter capability detection: verifies real file payload support
-export const canShareFilesStrict = (): boolean => {
-  try {
-    if (!('share' in navigator) || !('canShare' in navigator) || typeof navigator.canShare !== 'function') {
-      return false;
-    }
-    const blob = new Blob(['x'], { type: 'image/jpeg' });
-    const file = new File([blob], 'probe.jpg', { type: 'image/jpeg' });
-    return navigator.canShare({ files: [file] });
-  } catch {
-    return false;
-  }
-};
-
-// Detect if app is running as an installed PWA (standalone)
-export const isStandalonePWA = (): boolean => {
-  const isStandaloneMedia = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
-  const isStandaloneIOS = (navigator as any).standalone === true; // iOS Safari
-  return !!(isStandaloneMedia || isStandaloneIOS);
-};

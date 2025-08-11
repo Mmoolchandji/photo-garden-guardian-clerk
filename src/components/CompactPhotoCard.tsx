@@ -66,7 +66,7 @@ const CompactPhotoCard = ({ photo, onClick }: CompactPhotoCardProps) => {
   return (
     <div
       {...longPressHandlers}
-      className={`group bg-white rounded-md overflow-hidden border-2 transition-[transform,box-shadow] duration-200 cursor-pointer select-none touch-manipulation contain-paint ${
+      className={`group bg-white rounded-md overflow-hidden border-2 transition-all duration-200 cursor-pointer select-none touch-manipulation ${
         selected 
           ? 'border-primary shadow-sm' 
           : isSelectionMode 
@@ -79,10 +79,6 @@ const CompactPhotoCard = ({ photo, onClick }: CompactPhotoCardProps) => {
           src={photo.imageUrl}
           alt={photo.title}
           className="w-full h-auto aspect-[3/4] object-cover"
-          loading="lazy"
-          decoding="async"
-          width={600}
-          height={800}
           draggable={false}
         />
         

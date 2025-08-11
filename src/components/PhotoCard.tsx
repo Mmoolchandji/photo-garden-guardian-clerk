@@ -68,7 +68,7 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
   return (
     <div
       {...longPressHandlers}
-      className={`group bg-white rounded-lg overflow-hidden border-2 transition-[transform,box-shadow] duration-300 cursor-pointer select-none touch-manipulation contain-paint ${
+      className={`group bg-white rounded-lg overflow-hidden border-2 transition-all duration-300 cursor-pointer select-none touch-manipulation ${
         selected 
           ? 'border-emerald-500' 
           : isSelectionMode 
@@ -81,10 +81,6 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
           src={photo.imageUrl}
           alt={photo.title}
           className="w-full h-auto aspect-[3/4] object-cover"
-          loading="lazy"
-          decoding="async"
-          width={600}
-          height={800}
           draggable={false}
         />
         

@@ -25,6 +25,3 @@ dist-ssr
 
 # .env files
 .env.local
-
-# ui components
-src/components/ui
