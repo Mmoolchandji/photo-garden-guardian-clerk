@@ -40,6 +40,12 @@ const AdminPageHeader = ({
             </div>
           </div>
           <div className="flex items-center justify-end space-x-2">
+            <Link to="/" className="flex-1">
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Gallery
+                </Button>
+            </Link>
             <Button variant="outline" size="sm" className="flex items-center">
               <Camera className="h-4 w-4 mr-2" />
               <span>{photos.length}</span>
