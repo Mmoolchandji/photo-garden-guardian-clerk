@@ -77,11 +77,11 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
             : 'border-transparent'
       }`}
     >
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden aspect-[3/4]">
         <img
           src={getOptimizedImageUrl(photo.imageUrl, { width: 600, quality: 80 })}
           alt={photo.title}
-          className="w-full h-auto aspect-[3/4] object-cover"
+          className="w-full h-full object-contain"
           draggable={false}
           loading="lazy"
           decoding="async"

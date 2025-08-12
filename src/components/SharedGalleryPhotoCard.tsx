@@ -13,7 +13,7 @@ const SharedGalleryPhotoCard = ({ photo }: SharedGalleryPhotoCardProps) => {
         <img
           src={getOptimizedImageUrl(photo.imageUrl, { width: 640, quality: 80 })}
           alt={photo.title}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain object-center group-hover:scale-100 transition-transform duration-300"
           loading="lazy"
           decoding="async"
           sizes="(min-width:1280px) 20vw, (min-width:1024px) 25vw, (min-width:768px) 33vw, 50vw"
