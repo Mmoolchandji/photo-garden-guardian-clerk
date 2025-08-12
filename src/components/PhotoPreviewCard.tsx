@@ -26,6 +26,7 @@ const PhotoPreviewCard = ({
           src={imagePreview}
           alt="Preview"
           className="w-full h-48 object-cover rounded-lg mb-3"
+          decoding="async"
         />
         <p className="text-sm text-gray-600 font-medium">{file.name}</p>
         <p className="text-xs text-gray-400">

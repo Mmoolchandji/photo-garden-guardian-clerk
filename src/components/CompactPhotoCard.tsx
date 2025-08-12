@@ -3,6 +3,7 @@ import { PhotoCardData } from '@/types/photo';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
 import { useLongPress } from '@/hooks/useLongPress';
 import { useAuth } from '@/contexts/AuthContext';
+import { getOptimizedImageUrl } from '@/utils/imageOptimization';
 
 interface CompactPhotoCardProps {
   photo: PhotoCardData;
@@ -76,10 +77,13 @@ const CompactPhotoCard = ({ photo, onClick }: CompactPhotoCardProps) => {
     >
       <div className="relative overflow-hidden">
         <img
-          src={photo.imageUrl}
+          src={getOptimizedImageUrl(photo.imageUrl, { width: 320, quality: 80 })}
           alt={photo.title}
           className="w-full h-auto aspect-[3/4] object-cover"
           draggable={false}
+          loading="lazy"
+          decoding="async"
+          sizes="(min-width:1024px) 20vw, (min-width:768px) 25vw, 33vw"
         />
         
         {isSelectionMode && (

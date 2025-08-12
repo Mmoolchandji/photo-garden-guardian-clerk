@@ -1,5 +1,6 @@
 import { ShareablePhoto } from '@/utils/sharing/types';
 import { Card, CardContent } from '@/components/ui/card';
+import { getOptimizedImageUrl } from '@/utils/imageOptimization';
 
 interface SharedGalleryPhotoCardProps {
   photo: ShareablePhoto;
@@ -10,10 +11,12 @@ const SharedGalleryPhotoCard = ({ photo }: SharedGalleryPhotoCardProps) => {
     <Card className="overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
         <img
-          src={photo.imageUrl}
+          src={getOptimizedImageUrl(photo.imageUrl, { width: 640, quality: 80 })}
           alt={photo.title}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          decoding="async"
+          sizes="(min-width:1280px) 20vw, (min-width:1024px) 25vw, (min-width:768px) 33vw, 50vw"
         />
       </div>
       <CardContent className="p-4">
