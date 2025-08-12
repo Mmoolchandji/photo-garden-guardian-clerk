@@ -5,6 +5,7 @@ import WhatsAppShareButton from './WhatsAppShareButton';
 import { usePhotoSelection } from '@/contexts/PhotoSelectionContext';
 import { useLongPress } from '@/hooks/useLongPress';
 import { useAuth } from '@/contexts/AuthContext';
+import { getOptimizedImageUrl } from '@/utils/imageOptimization';
 
 interface PhotoCardProps {
   photo: PhotoCardData;
@@ -78,10 +79,13 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
     >
       <div className="relative overflow-hidden">
         <img
-          src={photo.imageUrl}
+          src={getOptimizedImageUrl(photo.imageUrl, { width: 600, quality: 80 })}
           alt={photo.title}
           className="w-full h-auto aspect-[3/4] object-cover"
           draggable={false}
+          loading="lazy"
+          decoding="async"
+          sizes="(min-width:1024px) 25vw, (min-width:768px) 33vw, 50vw"
         />
         
         {isSelectionMode && (

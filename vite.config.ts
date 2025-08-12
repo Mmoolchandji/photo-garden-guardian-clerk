@@ -19,4 +19,25 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    target: 'es2018',
+    sourcemap: false,
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          radix: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-toast',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-dropdown-menu'
+          ],
+          dnd: ['@dnd-kit/core','@dnd-kit/sortable','@dnd-kit/utilities']
+        }
+      }
+    }
+  }
 }));

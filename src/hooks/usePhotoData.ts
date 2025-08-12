@@ -11,9 +11,7 @@ export const usePhotoData = (filters: FilterState) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user, authReady } = useAuth();
-  const lastFiltersRef = useRef<string>('');
-  const lastUserIdRef = useRef<string>('');
-  const lastAuthReadyRef = useRef<boolean>(false);
+  
 
   const buildQuery = useMemo(() => {
     return () => {
@@ -62,104 +60,7 @@ export const usePhotoData = (filters: FilterState) => {
     };
   }, [filters, user]);
 
-  useEffect(() => {
-    const filtersString = JSON.stringify(filters);
-    const currentUserId = user?.id || '';
-    
-    // Check if filters, user, OR auth ready state changed
-    const hasFiltersChanged = filtersString !== lastFiltersRef.current;
-    const hasUserChanged = currentUserId !== lastUserIdRef.current;
-    const hasAuthReadyChanged = authReady !== lastAuthReadyRef.current;
-    
-    // Only proceed if something actually changed
-    if (!hasFiltersChanged && !hasUserChanged && !hasAuthReadyChanged) {
-      return;
-    }
-    
-    console.log('usePhotoData: Dependencies changed', {
-      authReady,
-      hasFiltersChanged,
-      hasUserChanged,
-      hasAuthReadyChanged,
-      userId: currentUserId
-    });
-    
-    // Update refs
-    lastFiltersRef.current = filtersString;
-    lastUserIdRef.current = currentUserId;
-    lastAuthReadyRef.current = authReady;
-    
-    // Don't fetch photos until auth is ready (session hydration complete)
-    if (!authReady) {
-      console.log('usePhotoData: Auth not ready yet, waiting for session hydration...');
-      setLoading(true);
-      return;
-    }
-    
-    let isMounted = true;
-    
-    const fetchPhotos = async () => {
-      try {
-        console.log('usePhotoData: Starting photo fetch for user:', currentUserId || 'no user');
-        setLoading(true);
-        
-        if (!user) {
-          // If no user is authenticated, show empty gallery
-          console.log('usePhotoData: No authenticated user, setting empty photos');
-          if (isMounted) {
-            setPhotos([]);
-          }
-          return;
-        }
-
-        console.log('usePhotoData: Fetching photos for user:', user.id);
-        const query = buildQuery();
-        const { data, error } = await query;
-
-        if (error) {
-          throw error;
-        }
-
-        if (isMounted) {
-          console.log('usePhotoData: Photos fetched successfully:', data?.length || 0);
-          setPhotos(data || []);
-        }
-      } catch (error: unknown) {
-        console.error('usePhotoData: Fetch photos error:', error);
-        if (isMounted) {
-          const errorMessage = error instanceof Error ? error.message : "Failed to load photos. Please try again.";
-          toast({
-            title: "Error loading photos",
-            description: errorMessage,
-            variant: "destructive",
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchPhotos();
-
-    return () => {
-      isMounted = false;
-    };
-    
-    const refetch = () => {
-      // This function will be returned to allow manual refetching
-      // It works by updating a dummy state that the effect depends on
-      // A better way is to wrap fetchPhotos in useCallback and return it
-      fetchPhotos();
-    };
-
-    fetchPhotos();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [buildQuery, toast, user, authReady]);
+  
 
   const fetchPhotos = useCallback(async () => {
     let isMounted = true;
