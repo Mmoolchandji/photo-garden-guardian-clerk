@@ -11,7 +11,7 @@ const SharedGalleryPhotoCard = ({ photo }: SharedGalleryPhotoCardProps) => {
     <Card className="overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
         <img
-          src={getOptimizedImageUrl(photo.imageUrl, { width: 640, quality: 80 })}
+          src={getOptimizedImageUrl(photo.imageUrl, { width: 640, quality: 80, resize: 'contain' })}
           alt={photo.title}
           className="w-full h-full object-contain object-center group-hover:scale-100 transition-transform duration-300"
           loading="lazy"

@@ -77,7 +77,7 @@ const CompactPhotoCard = ({ photo, onClick }: CompactPhotoCardProps) => {
     >
       <div className="relative overflow-hidden aspect-[3/4]">
         <img
-          src={getOptimizedImageUrl(photo.imageUrl, { width: 320, quality: 80 })}
+          src={getOptimizedImageUrl(photo.imageUrl, { width: 320, quality: 80, resize: 'contain' })}
           alt={photo.title}
           className="w-full h-full object-contain"
           draggable={false}
