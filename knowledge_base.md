@@ -81,6 +81,11 @@
 
 | Date       | Feature/Update                       | Notes or Context                            |
 | ---------- | ------------------------------------ | ------------------------------------------- |
+| 2025-08-13 | Image Optimization (63e8dc5)         | Enhanced image optimization with height and resize options. |
+| 2025-08-12 | Gallery Layout Fix (b1f30d4)         | Adjusted gallery layout for consistent image display. |
+| 2025-08-12 | Performance Optimizations (a4d8820)  | Implemented image delivery, data fetching, and code-splitting optimizations. |
+| 2025-08-12 | UI Enhancement (e7a79d5)             | Added a gallery button for the desktop view. |
+| 2025-08-01 | UI and Performance (b601e8b, 98c24bd, 6882fce, 494b3b0, 3a8a736) | Optimized search, adjusted photo card displays, and improved drag-and-drop. |
 | 2025-07-28 | Photo Modal Carousel (250a35f)       | Implemented a carousel in the photo modal for easier navigation. |
 | 2025-07-27 | Drag Handle and Grid Refactor (d5f38eb, 40c9167) | Added a drag handle to the compact view and unified the photo grid. |
 | 2025-07-27 | Context and View Mode (fa51fce, ec8cd83) | Added ViewModeContext and fixed a missing PhotoSelectionProvider. |
@@ -111,6 +116,20 @@
 
 #### 5. **Recent Updates**
 
+*   **Image Optimization**:
+    *   Enhanced image optimization by adding height and resize options to `getOptimizedImageUrl`.
+    *   Updated image sources in `CompactPhotoCard`, `PhotoCard`, and `SharedGalleryPhotoCard` to use the new optimization.
+*   **Layout and UI Fixes**:
+    *   Adjusted the gallery layout to ensure consistent image display and prevent cropping.
+    *   Added a dedicated gallery button for the desktop view.
+*   **Performance Optimizations**:
+    *   Implemented Phase 1 of performance optimizations, focusing on image delivery, data fetching, and code-splitting.
+    *   Introduced an image optimization helper, native lazy-loading, and route-level code splitting.
+*   **UI and UX Refinements**:
+    *   Optimized the `SearchBar` with a debouncing mechanism.
+    *   Adjusted the information displayed on photo cards to be more context-aware.
+    *   Set the compact view as the default.
+    *   Improved drag-and-drop performance in the compact view on mobile devices.
 *   **Photo Modal Carousel**:
     *   The `PhotoModal` now features a carousel, allowing users to navigate between photos without closing the modal.
 *   **Drag and Drop Enhancements**:
