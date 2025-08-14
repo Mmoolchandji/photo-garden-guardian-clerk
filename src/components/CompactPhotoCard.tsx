@@ -8,9 +8,10 @@ import { getOptimizedImageUrl } from '@/utils/imageOptimization';
 interface CompactPhotoCardProps {
   photo: PhotoCardData;
   onClick: () => void;
+  priority?: boolean; // For LCP optimization
 }
 
-const CompactPhotoCard = ({ photo, onClick }: CompactPhotoCardProps) => {
+const CompactPhotoCard = ({ photo, onClick, priority = false }: CompactPhotoCardProps) => {
   const { 
     isSelectionMode, 
     isPhotoSelected, 
@@ -81,7 +82,8 @@ const CompactPhotoCard = ({ photo, onClick }: CompactPhotoCardProps) => {
           alt={photo.title}
           className="w-full h-full object-contain"
           draggable={false}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "low"}
           decoding="async"
           sizes="(min-width:1024px) 20vw, (min-width:768px) 25vw, 33vw"
         />

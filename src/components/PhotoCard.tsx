@@ -10,9 +10,10 @@ import { getOptimizedImageUrl } from '@/utils/imageOptimization';
 interface PhotoCardProps {
   photo: PhotoCardData;
   onClick: () => void;
+  priority?: boolean; // For LCP optimization
 }
 
-const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
+const PhotoCard = ({ photo, onClick, priority = false }: PhotoCardProps) => {
   const { 
     isSelectionMode, 
     isPhotoSelected, 
@@ -83,7 +84,8 @@ const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
           alt={photo.title}
           className="w-full h-full object-contain"
           draggable={false}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "low"}
           decoding="async"
           sizes="(min-width:1024px) 25vw, (min-width:768px) 33vw, 50vw"
         />

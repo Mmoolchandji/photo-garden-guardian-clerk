@@ -81,6 +81,7 @@
 
 | Date       | Feature/Update                       | Notes or Context                            |
 | ---------- | ------------------------------------ | ------------------------------------------- |
+| 2025-08-14 | Phase 2 Performance (current)        | Implemented fetchpriority optimization, initial load limiting, and verified CSS purging. |
 | 2025-08-13 | Image Optimization (63e8dc5)         | Enhanced image optimization with height and resize options. |
 | 2025-08-12 | Gallery Layout Fix (b1f30d4)         | Adjusted gallery layout for consistent image display. |
 | 2025-08-12 | Performance Optimizations (a4d8820)  | Implemented image delivery, data fetching, and code-splitting optimizations. |
@@ -116,6 +117,11 @@
 
 #### 5. **Recent Updates**
 
+*   **Phase 2 Performance Optimizations**:
+    *   Added `fetchpriority="high"` to first image in viewport for LCP optimization.
+    *   Implemented initial load limiting (24 photos) with progressive loading capability.
+    *   Enhanced image loading strategy with priority-based lazy loading.
+    *   Verified Tailwind CSS purging is active in production builds.
 *   **Image Optimization**:
     *   Enhanced image optimization by adding height and resize options to `getOptimizedImageUrl`.
     *   Updated image sources in `CompactPhotoCard`, `PhotoCard`, and `SharedGalleryPhotoCard` to use the new optimization.

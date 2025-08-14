@@ -22,11 +22,12 @@ const PhotoGridView = ({ photos, viewMode, onPhotoClick }: PhotoGridViewProps) =
   if (viewMode === 'grid') {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 sm:gap-4 py-4 transition-all duration-300">
-        {photos.map((photo) => (
+        {photos.map((photo, index) => (
           <PhotoCard
             key={photo.id}
             photo={transformPhotoData(photo)}
             onClick={() => onPhotoClick(photo)}
+            priority={index === 0} // First image gets high priority for LCP
           />
         ))}
       </div>
@@ -36,11 +37,12 @@ const PhotoGridView = ({ photos, viewMode, onPhotoClick }: PhotoGridViewProps) =
   // Compact view - maximum density for mobile
   return (
     <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-1 py-2 transition-all duration-300">
-      {photos.map((photo) => (
+      {photos.map((photo, index) => (
         <CompactPhotoCard
           key={photo.id}
           photo={transformPhotoData(photo)}
           onClick={() => onPhotoClick(photo)}
+          priority={index === 0} // First image gets high priority for LCP
         />
       ))}
     </div>

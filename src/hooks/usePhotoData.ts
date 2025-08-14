@@ -9,12 +9,16 @@ import { useAuth } from '@/contexts/AuthContext';
 export const usePhotoData = (filters: FilterState) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const { toast } = useToast();
   const { user, authReady } = useAuth();
   
+  // Limit initial load to improve perceived performance
+  const INITIAL_LIMIT = 24; // Show 24 photos initially (3-4 rows in grid view)
+  
 
   const buildQuery = useMemo(() => {
-    return () => {
+    return (limitResults = false) => {
       if (!user) {
         // If user is not authenticated, return a query that will return no results
         return supabase
@@ -29,6 +33,11 @@ export const usePhotoData = (filters: FilterState) => {
         .eq('user_id', user.id) // Only fetch photos for the authenticated user
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false }); // Fallback for photos without sort_order
+        
+      // For initial load, limit results for better perceived performance
+      if (limitResults) {
+        query = query.limit(INITIAL_LIMIT);
+      }
 
       if (filters.search) {
         query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
@@ -77,7 +86,7 @@ export const usePhotoData = (filters: FilterState) => {
       }
 
       console.log('usePhotoData: Fetching photos for user:', user.id);
-      const query = buildQuery();
+      const query = buildQuery(!initialLoadComplete);
       const { data, error } = await query;
 
       if (error) {
@@ -87,6 +96,9 @@ export const usePhotoData = (filters: FilterState) => {
         if (isMounted) {
           console.log('usePhotoData: Photos fetched successfully:', data?.length || 0);
           setPhotos(data || []);
+          if (!initialLoadComplete) {
+            setInitialLoadComplete(true);
+          }
         }
       } catch (error: unknown) {
         console.error('usePhotoData: Fetch photos error:', error);
@@ -105,7 +117,7 @@ export const usePhotoData = (filters: FilterState) => {
     return () => {
       isMounted = false;
     };
-  }, [buildQuery, user, toast]);
+  }, [buildQuery, user, toast, initialLoadComplete]);
 
 
   useEffect(() => {
@@ -114,5 +126,40 @@ export const usePhotoData = (filters: FilterState) => {
     }
   }, [authReady, fetchPhotos]);
 
-  return { photos, loading, refetch: fetchPhotos };
+  const loadMorePhotos = useCallback(async () => {
+    if (!user || !initialLoadComplete) return;
+    
+    try {
+      const query = supabase
+        .from('photos')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+        .range(photos.length, photos.length + INITIAL_LIMIT - 1);
+
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setPhotos(prev => [...prev, ...data]);
+      }
+    } catch (error) {
+      console.error('usePhotoData: Load more photos error:', error);
+      toast({
+        title: "Error loading more photos",
+        description: "Failed to load additional photos. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [user, initialLoadComplete, photos.length, toast]);
+
+  return { 
+    photos, 
+    loading, 
+    refetch: fetchPhotos, 
+    loadMore: loadMorePhotos,
+    hasInitialLoad: initialLoadComplete 
+  };
 };
