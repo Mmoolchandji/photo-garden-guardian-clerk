@@ -2,7 +2,21 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-
+const tryVisualizer = () => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { visualizer } = require('vite-plugin-visualizer');
+    return visualizer({
+      filename: 'stats.html',
+      template: 'treemap',
+      gzipSize: true,
+      brotliSize: true,
+      open: false,
+    });
+  } catch {
+    return undefined;
+  }
+};
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -11,8 +25,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
+    mode === 'development' && tryVisualizer(),
   ].filter(Boolean),
   resolve: {
     alias: {
