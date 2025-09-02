@@ -47,7 +47,12 @@
 - **Successfully removed**: `date-fns`, `zod`, `input-otp`, `cmdk`, `vaul` (5 packages)
 - **Build status**: ✅ **SUCCESSFUL** - No errors, all functionality preserved
 
+### How to re-run bundle snapshots and audits
+- Visualizer (one-off): `ANALYZE=true npm run build && open stats.html`
+- Size snapshot: `npm run build && npx size-limit`
+- Dependency audit: `npx depcheck`
+
 ### Next Steps
-1. Manual install `vite-plugin-visualizer` for precise measurements
-2. Safe removal PR with comprehensive testing
-3. Verify no Admin features use these libraries in hidden workflows
+1. Keep analyzer behind ANALYZE flag; generate reports on demand
+2. Safe removal PR only via phased approach (nothing auto-removed)
+3. Verify Admin features before any further removals

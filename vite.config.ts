@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
-    mode === 'development' && tryVisualizer(),
+    (process.env.ANALYZE === 'true' || mode === 'development') && tryVisualizer(),
   ].filter(Boolean),
   resolve: {
     alias: {
