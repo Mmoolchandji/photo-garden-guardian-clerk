@@ -1,7 +1,7 @@
 
-import { MessageCircle, Loader2 } from 'lucide-react';
+import { MessageCircle, Loader2, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { shareToWhatsApp, type ShareablePhoto } from '@/utils/sharing';
+import { shareToWhatsApp, type ShareablePhoto, isNativeSharingAvailable } from '@/utils/sharing';
 import { useState } from 'react';
 
 interface WhatsAppShareButtonProps {
@@ -18,6 +18,7 @@ const WhatsAppShareButton = ({
   onClick 
 }: WhatsAppShareButtonProps) => {
   const [isSharing, setIsSharing] = useState(false);
+  const isNativeAvailable = isNativeSharingAvailable();
 
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -61,12 +62,14 @@ const WhatsAppShareButton = ({
       disabled={isSharing}
       className={`bg-[#25D366] hover:bg-[#1DB954] text-white border-[#25D366] hover:border-[#1DB954] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
-      {isSharing ? (
-        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-      ) : (
-        <MessageCircle className="h-4 w-4 mr-2" />
-      )}
-      {isSharing ? 'Preparing...' : 'Share on WhatsApp'}
+        {isSharing ? (
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+        ) : isNativeAvailable ? (
+          <Smartphone className="h-4 w-4 mr-2" />
+        ) : (
+          <MessageCircle className="h-4 w-4 mr-2" />
+        )}
+        {isSharing ? 'Preparing...' : isNativeAvailable ? 'Share via App' : 'Share on WhatsApp'}
     </Button>
   );
 };
