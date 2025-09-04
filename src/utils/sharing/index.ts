@@ -1,18 +1,20 @@
 
 import { toast } from '@/hooks/use-toast';
 import { ShareablePhoto } from './types';
-import { isMobileDevice, canShareFiles } from './deviceDetection';
+import { isMobileDevice, canShareFiles, getNativeSharingCapabilities } from './deviceDetection';
 import { shareMultipleViaWebShareAPI, shareViaWebShareAPI } from './webShareAPI';
 import { shareMultipleViaWhatsAppURL, shareViaWhatsAppURL } from './whatsappURL';
 import { shareBatchedToWhatsApp } from './batchedSharing';
 import { shareGalleryToWhatsApp } from './gallerySharing';
+import { sharePhotoNatively, shareMultiplePhotosNatively, isNativeSharingAvailable } from './nativeSharing';
 
 // Re-export types and utilities
 export type { ShareablePhoto };
-export { isMobileDevice, isIOSDevice, canShareFiles } from './deviceDetection';
+export { isMobileDevice, isIOSDevice, canShareFiles, getNativeSharingCapabilities } from './deviceDetection';
 export { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
 export { shareBatchedToWhatsApp } from './batchedSharing';
 export { shareGalleryToWhatsApp } from './gallerySharing';
+export { sharePhotoNatively, shareMultiplePhotosNatively, isNativeSharingAvailable } from './nativeSharing';
 
 // Enhanced main sharing function for multiple photos with hybrid approach
 export const shareMultipleToWhatsApp = async (
@@ -44,10 +46,17 @@ export const shareMultipleToWhatsApp = async (
     // Execute the chosen method
     switch (finalMethod) {
       case 'files':
-        if (photos.length <= 10 && isMobileDevice() && canShareFiles()) {
+        // Prioritize native sharing for mobile apps
+        if (isNativeSharingAvailable() && photos.length <= 10) {
+          console.log('Using native Capacitor sharing for files');
+          success = await shareMultiplePhotosNatively(photos);
+        }
+        // Fallback to Web Share API
+        if (!success && photos.length <= 10 && isMobileDevice() && canShareFiles()) {
           console.log('Using Web Share API for files');
           success = await shareMultipleViaWebShareAPI(photos);
         }
+        // Final fallback to WhatsApp URL
         if (!success) {
           console.log('Falling back to WhatsApp URL sharing for files');
           success = shareMultipleViaWhatsAppURL(photos);
@@ -96,7 +105,22 @@ export const shareToWhatsApp = async (photo: ShareablePhoto): Promise<void> => {
       description: "Setting up your WhatsApp share",
     });
 
-    // Progressive fallback strategy
+    // Progressive fallback strategy - prioritize native sharing
+    if (isNativeSharingAvailable()) {
+      console.log('Trying native Capacitor sharing');
+      const nativeSuccess = await sharePhotoNatively(photo);
+      
+      if (nativeSuccess) {
+        loadingToast.dismiss();
+        toast({
+          title: "Photo shared successfully",
+          description: "Your saree photo has been shared via the native app",
+        });
+        return;
+      }
+    }
+    
+    // Fallback to Web Share API
     if (isMobileDevice() && canShareFiles()) {
       console.log('Trying Web Share API on mobile device');
       const webShareSuccess = await shareViaWebShareAPI(photo);
