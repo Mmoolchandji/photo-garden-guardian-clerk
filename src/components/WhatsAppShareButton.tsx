@@ -3,6 +3,7 @@ import { MessageCircle, Loader2, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { shareToWhatsApp, type ShareablePhoto, isNativeSharingAvailable } from '@/utils/sharing';
 import { useState } from 'react';
+import { useMobileUX } from '@/hooks/useMobileUX';
 
 interface WhatsAppShareButtonProps {
   photo: ShareablePhoto;
@@ -19,6 +20,7 @@ const WhatsAppShareButton = ({
 }: WhatsAppShareButtonProps) => {
   const [isSharing, setIsSharing] = useState(false);
   const isNativeAvailable = isNativeSharingAvailable();
+  const { triggerLightHaptic } = useMobileUX();
 
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -27,6 +29,9 @@ const WhatsAppShareButton = ({
     if (onClick) {
       onClick(e);
     }
+    
+    // Haptic feedback on native devices
+    await triggerLightHaptic();
     
     setIsSharing(true);
     

@@ -1,5 +1,6 @@
 
 import SearchAndFilters, { FilterState } from './SearchAndFilters';
+import MobileLoadingState from './MobileLoadingState';
 
 interface PhotoLoadingStateProps {
   filters: FilterState;
@@ -19,10 +20,7 @@ const PhotoLoadingState = ({ filters, updateFilters, clearAllFilters }: PhotoLoa
         isAllSelected={false}
         isSelectionMode={false}
       />
-      <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading photos...</p>
-      </div>
+      <MobileLoadingState message="Loading photos..." />
     </div>
   );
 };
