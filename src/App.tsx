@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Suspense, lazy } from 'react';
 import { useMobileUX } from '@/hooks/useMobileUX';
+import { useAppLifecycle } from '@/hooks/useAppLifecycle';
 import MobileLoadingState from '@/components/MobileLoadingState';
 
 const Index = lazy(() => import('./pages/Index'));
@@ -22,6 +23,13 @@ const App = () => {
   useMobileUX({
     statusBarStyle: 'dark',
     enableHaptics: true
+  });
+
+  // Initialize app lifecycle management
+  useAppLifecycle({
+    hideSplashOnMount: true,
+    onAppActive: () => console.log('App resumed'),
+    onAppPaused: () => console.log('App paused')
   });
 
   return (

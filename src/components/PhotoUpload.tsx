@@ -2,6 +2,8 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import FileSelectionCard from './FileSelectionCard';
+import NativePhotoUpload from './NativePhotoUpload';
+import { isCapacitorApp } from '@/utils/sharing/deviceDetection';
 
 interface PhotoUploadProps {
   onPhotoUploaded: () => void;
@@ -47,9 +49,22 @@ const PhotoUpload = ({
   }
 
   return (
-    <FileSelectionCard
-      onFileChange={handleFileChange}
-    />
+    <div className="space-y-4">
+      {isCapacitorApp() && (
+        <NativePhotoUpload
+          onPhotosSelected={(files) => {
+            if (onBulkUploadInitiated) {
+              onBulkUploadInitiated(files);
+            }
+          }}
+          maxFiles={10}
+        />
+      )}
+      
+      <FileSelectionCard
+        onFileChange={handleFileChange}
+      />
+    </div>
   );
 };
 
