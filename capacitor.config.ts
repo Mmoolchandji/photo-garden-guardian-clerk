@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.3a11bdb0a48b4c88a2a1c8af48441c52',
+  appId: 'app.lovable.photogarden.guardian',
   appName: 'photo-garden-guardian-clerk',
   webDir: 'dist',
   server: {
