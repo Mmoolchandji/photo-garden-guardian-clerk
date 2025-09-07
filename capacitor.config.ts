@@ -4,10 +4,6 @@ const config: CapacitorConfig = {
   appId: 'app.lovable.photogarden.guardian',
   appName: 'photo-garden-guardian-clerk',
   webDir: 'dist',
-  server: {
-    url: 'https://3a11bdb0-a48b-4c88-a2a1-c8af48441c52.lovableproject.com?forceHideBadge=true',
-    cleartext: true
-  },
   bundledWebRuntime: false,
   android: {
     minWebViewVersion: 60,
