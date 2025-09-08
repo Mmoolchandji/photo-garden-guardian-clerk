@@ -9,6 +9,7 @@ import { PhotoSelectionProvider } from '@/contexts/PhotoSelectionContext';
 import { ViewModeProvider, useViewMode } from '@/contexts/ViewModeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { PermissionStatus } from '@/components/PermissionStatus';
 
 const IndexContent = () => {
   const { user, authReady } = useAuth();
@@ -64,6 +65,13 @@ const IndexContent = () => {
           </>
         ) : (
           <>
+            {/* Permission Status */}
+            <section className="py-4 px-4">
+              <div className="container mx-auto px-0 py-0 md:px-4 md:py-4">
+                <PermissionStatus />
+              </div>
+            </section>
+            
             {/* Photo Gallery with Search & Filters */}
             <section className="py-4 px-4">
               <div className="container mx-auto px-0 py-0 md:px-4 md:py-4">

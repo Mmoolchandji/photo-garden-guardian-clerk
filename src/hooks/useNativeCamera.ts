@@ -67,6 +67,7 @@ export const useNativeCamera = () => {
 
     try {
       const permissions = await Camera.checkPermissions();
+      console.log('Current permissions:', permissions);
       return permissions.camera === 'granted' && permissions.photos === 'granted';
     } catch (error) {
       console.error('Permission check failed:', error);
@@ -78,12 +79,30 @@ export const useNativeCamera = () => {
     if (!isCapacitorApp()) return false;
 
     try {
+      console.log('Requesting camera and photos permissions...');
       const permissions = await Camera.requestPermissions({
         permissions: ['camera', 'photos']
       });
-      return permissions.camera === 'granted' && permissions.photos === 'granted';
+      console.log('Permission request result:', permissions);
+      
+      const granted = permissions.camera === 'granted' && permissions.photos === 'granted';
+      
+      if (!granted) {
+        toast({
+          title: "Permissions Required",
+          description: "Camera and photo access are needed for full functionality. Please enable them in your device settings.",
+          variant: "destructive"
+        });
+      }
+      
+      return granted;
     } catch (error) {
       console.error('Permission request failed:', error);
+      toast({
+        title: "Permission Error",
+        description: "Failed to request permissions. Please check your device settings.",
+        variant: "destructive"
+      });
       return false;
     }
   };

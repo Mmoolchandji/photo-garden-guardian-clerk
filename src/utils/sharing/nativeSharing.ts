@@ -34,12 +34,24 @@ const savePhotoToDevice = async (photo: ShareablePhoto, index?: number): Promise
     const blob = await fetchImageAsBlob(photo.imageUrl);
     
     if (!blob) {
-      console.error('Failed to fetch photo blob');
+      console.error('Failed to fetch photo blob for:', photo.imageUrl);
       return null;
     }
 
+    console.log('Successfully fetched blob, size:', blob.size, 'type:', blob.type);
     const base64Data = await blobToBase64(blob);
     const filename = generateSafeFilename(photo, index);
+    
+    // Ensure temp_share directory exists
+    try {
+      await Filesystem.mkdir({
+        path: 'temp_share',
+        directory: Directory.Cache,
+        recursive: true
+      });
+    } catch (dirError) {
+      console.log('Directory already exists or created:', dirError);
+    }
     
     console.log('Saving photo to device filesystem:', filename);
     const result = await Filesystem.writeFile({
@@ -49,9 +61,11 @@ const savePhotoToDevice = async (photo: ShareablePhoto, index?: number): Promise
       encoding: Encoding.UTF8
     });
 
+    console.log('File saved successfully, URI:', result.uri);
     return result.uri;
   } catch (error) {
     console.error('Error saving photo to device:', error);
+    console.error('Photo URL that failed:', photo.imageUrl);
     return null;
   }
 };
