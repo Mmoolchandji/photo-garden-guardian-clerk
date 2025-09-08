@@ -30,16 +30,25 @@ const generateSafeFilename = (photo: ShareablePhoto, index?: number): string => 
 // Save photo to device filesystem temporarily
 const savePhotoToDevice = async (photo: ShareablePhoto, index?: number): Promise<string | null> => {
   try {
-    console.log('Fetching photo blob for native sharing:', photo.imageUrl);
+    console.log('🔄 [Native Sharing] Starting photo fetch for:', photo.imageUrl);
     const blob = await fetchImageAsBlob(photo.imageUrl);
     
     if (!blob) {
-      console.error('Failed to fetch photo blob for:', photo.imageUrl);
+      console.error('❌ [Native Sharing] Failed to fetch photo blob for:', photo.imageUrl);
       return null;
     }
 
-    console.log('Successfully fetched blob, size:', blob.size, 'type:', blob.type);
+    console.log('✅ [Native Sharing] Successfully fetched blob - Size:', blob.size, 'Type:', blob.type);
+    
+    // Validate blob is not empty
+    if (blob.size === 0) {
+      console.error('❌ [Native Sharing] Blob is empty for:', photo.imageUrl);
+      return null;
+    }
+    
     const base64Data = await blobToBase64(blob);
+    console.log('✅ [Native Sharing] Converted to base64, length:', base64Data.length);
+    
     const filename = generateSafeFilename(photo, index);
     
     // Ensure temp_share directory exists
@@ -53,12 +62,12 @@ const savePhotoToDevice = async (photo: ShareablePhoto, index?: number): Promise
       console.log('Directory already exists or created:', dirError);
     }
     
-    console.log('Saving photo to device filesystem:', filename);
+    console.log('💾 [Native Sharing] Saving photo to device filesystem:', filename);
     const result = await Filesystem.writeFile({
       path: `temp_share/${filename}`,
       data: base64Data,
-      directory: Directory.Cache,
-      encoding: Encoding.UTF8
+      directory: Directory.Cache
+      // No encoding specified for base64 data - Capacitor handles it automatically
     });
 
     console.log('File saved successfully, URI:', result.uri);
@@ -88,12 +97,15 @@ const cleanupTempFiles = async (filenames: string[]) => {
 // Share single photo using native capabilities
 export const sharePhotoNatively = async (photo: ShareablePhoto): Promise<boolean> => {
   try {
+    console.log('🚀 [Native Sharing] Starting single photo share for:', photo.title);
     const fileUri = await savePhotoToDevice(photo);
     
     if (!fileUri) {
+      console.error('❌ [Native Sharing] Failed to save photo to device');
       throw new Error('Failed to save photo to device');
     }
 
+    console.log('📱 [Native Sharing] Photo saved, preparing to share with URI:', fileUri);
     const message = formatWhatsAppMessage(photo);
     
     await Share.share({
@@ -102,6 +114,8 @@ export const sharePhotoNatively = async (photo: ShareablePhoto): Promise<boolean
       files: [fileUri],
     });
 
+    console.log('✅ [Native Sharing] Share completed successfully');
+    
     // Clean up after a delay to ensure sharing is complete
     setTimeout(() => {
       cleanupTempFiles([generateSafeFilename(photo)]);
@@ -109,7 +123,10 @@ export const sharePhotoNatively = async (photo: ShareablePhoto): Promise<boolean
 
     return true;
   } catch (error) {
-    console.error('Native photo sharing failed:', error);
+    console.error('❌ [Native Sharing] Native photo sharing failed:', error);
+    if (error instanceof Error) {
+      console.error('❌ [Native Sharing] Error details:', error.message, error.stack);
+    }
     return false;
   }
 };

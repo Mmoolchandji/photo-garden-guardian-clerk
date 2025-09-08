@@ -5,9 +5,11 @@ export const fetchImageAsBlob = async (imageUrl: string): Promise<Blob | null> =
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
   
   try {
+    // For Capacitor apps, use no-cors mode to avoid CORS issues
+    const isCapacitor = !!(window as any).Capacitor;
     const response = await fetch(imageUrl, {
       signal: controller.signal,
-      mode: 'cors',
+      mode: isCapacitor ? 'no-cors' : 'cors',
       cache: 'force-cache' // Use cached version if available
     });
     
