@@ -90,25 +90,25 @@
 | 2025-07-28 | Photo Modal Carousel (250a35f)       | Implemented a carousel in the photo modal for easier navigation. |
 | 2025-07-27 | Drag Handle and Grid Refactor (d5f38eb, 40c9167) | Added a drag handle to the compact view and unified the photo grid. |
 | 2025-07-27 | Context and View Mode (fa51fce, ec8cd83) | Added ViewModeContext and fixed a missing PhotoSelectionProvider. |
-| 2025-06-01 | Project Initialized                  | Folder setup, Supabase configured           |
-| 2025-06-05 | Photo Upload & Preview Added         | Both desktop and mobile support             |
-| 2025-06-10 | WhatsApp Sharing (URLs)              | Initial basic sharing implemented           |
-| 2025-06-15 | Multiple Image Sharing + Compression | WhatsApp-style compression logic integrated |
-| 2025-06-18 | Fabric Selector UI Fixes             | Desktop vs. mobile styling issues addressed |
-| 2025-06-27 | Mobile Responsiveness Completed      | All components and pages optimized for mobile, including `PhotoModal`, `FloatingShareButton`, `BulkMetadataForm`, `BulkMetadataStep`, `BulkUploadHeader`, `FabricSelector`, and `BulkActionToolbar` Delete Card. |
-| 2025-06-22 | Knowledge Base Started               | First iteration of documentation            |
-| 2025-06-30 | Admin & Selection UX | Improved admin page with auto-refresh and enhanced selection mode to auto-exit when empty. |
-| 2025-07-01 | Mobile UI & Responsiveness | Major improvements to mobile responsiveness across multiple components, including the share modal and admin page. |
-| 2025-07-02 | Enhanced Photo Editing & Fabrics | Integrated `BulkEditModal`, added full CRUD for fabric types, and improved UX with auto-saving. |
-| 2025-07-04 | Supabase Environment Variables | Moved Supabase credentials to environment variables for improved security and configuration flexibility. |
-| 2025-07-05 | Bulk Upload UX | Added a remove button to the bulk upload preview, allowing users to delete individual photos from the selection. |
-| 2025-07-06 | Code Refinements | Reordered hooks in `BulkUploadModal` for better code organization. |
-| 2025-07-06 | Shared Gallery Redesign | Redesigned the public-facing shared gallery page header and extracted photo card display logic into a reusable `SharedGalleryPhotoCard` component. |
+| 2025-07-08 | Select All Functionality | Added "Select All" checkbox to the photo gallery when selection mode is active, allowing quick selection/deselection of all visible photos. |
+| 2025-07-08 | IconSwitch Component | Implemented `IconSwitch` component for view mode toggling. |
 | 2025-07-07 | Drag and Drop Sorting | Implemented mobile touch interaction, 2D grid sorting, multi-photo group dragging, enhanced visual feedback, database/state management, and mobile UX enhancements for the drag-and-drop photo sorting feature. |
 | 2025-07-07 | Admin Page Header Enhancements | Improved mobile responsiveness of AdminPageHeader and changed button text from "Back to Gallery" to "Gallery". |
 | 2025-07-07 | Unify Admin Photo Card & Sort Mode | Merged `AdminPhotoCard` and `SortableAdminPhotoCard` into a single `SortableAdminPhotoCard` component, enabling conditional drag functionality and a dedicated "Sort" mode. |
-| 2025-07-08 | Select All Functionality | Added "Select All" checkbox to the photo gallery when selection mode is active, allowing quick selection/deselection of all visible photos. |
-| 2025-07-08 | IconSwitch Component | Implemented `IconSwitch` component for view mode toggling. |
+| 2025-07-06 | Code Refinements | Reordered hooks in `BulkUploadModal` for better code organization. |
+| 2025-07-06 | Shared Gallery Redesign | Redesigned the public-facing shared gallery page header and extracted photo card display logic into a reusable `SharedGalleryPhotoCard` component. |
+| 2025-07-05 | Bulk Upload UX | Added a remove button to the bulk upload preview, allowing users to delete individual photos from the selection. |
+| 2025-07-04 | Supabase Environment Variables | Moved Supabase credentials to environment variables for improved security and configuration flexibility. |
+| 2025-07-02 | Enhanced Photo Editing & Fabrics | Integrated `BulkEditModal`, added full CRUD for fabric types, and improved UX with auto-saving. |
+| 2025-07-01 | Mobile UI & Responsiveness | Major improvements to mobile responsiveness across multiple components, including the share modal and admin page. |
+| 2025-06-30 | Admin & Selection UX | Improved admin page with auto-refresh and enhanced selection mode to auto-exit when empty. |
+| 2025-06-27 | Mobile Responsiveness Completed | All components and pages optimized for mobile, including `PhotoModal`, `FloatingShareButton`, `BulkMetadataForm`, `BulkMetadataStep`, `BulkUploadHeader`, `FabricSelector`, and `BulkActionToolbar` Delete Card. |
+| 2025-06-22 | Knowledge Base Started | First iteration of documentation |
+| 2025-06-18 | Fabric Selector UI Fixes | Desktop vs. mobile styling issues addressed |
+| 2025-06-15 | Multiple Image Sharing + Compression | WhatsApp-style compression logic integrated |
+| 2025-06-10 | WhatsApp Sharing (URLs) | Initial basic sharing implemented |
+| 2025-06-05 | Photo Upload & Preview Added | Both desktop and mobile support |
+| 2025-06-01 | Project Initialized | Folder setup, Supabase configured |
 
 > 🕓 *Update this table regularly as new features or fixes are added.*
 
