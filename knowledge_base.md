@@ -12,12 +12,14 @@
 * **Tech Stack:**
   - React (with TypeScript)
   - Supabase (Auth, Storage, DB)
+  - Capacitor (for native mobile app)
+  - Vitest & React Testing Library (for testing)
   - Modern CSS/SCSS
   - WhatsApp Web API (sharing)
   - Tailwind CSS for styling
   - Dnd-kit (for drag-and-drop functionality)
   - Supabase for database managements
-* **Target Platform (Web/Mobile/Desktop):** Web (Mobile-optimized)
+* **Target Platform (Web/Mobile/Desktop):** Web, Android (Mobile-optimized)
 * **Primary Users:**
   - Textile business staff
   - Admins (managing uploads and access)
@@ -40,6 +42,8 @@
 | `src/integrations/`   | External service integrations (e.g., Supabase)       |
 | `src/types/`          | TypeScript types and interfaces                      |
 | `public/`             | Static assets (favicon, placeholder images, etc.)    |
+| `android/`            | Native Android project source                        |
+| `capacitor.config.ts` | Capacitor configuration for native app               |
 | `supabase/config.toml`| Supabase project configuration                       |
 | `package.json`        | Project dependencies and scripts                     |
 | `vite.config.ts`      | Vite build tool configuration                        |
@@ -62,10 +66,11 @@
 * [x] Drag and Drop Photo Sorting
 * [x] "Select All" Functionality for Photos
 * [x] View Mode Toggling
+* [x] Native Android App
 
 - **Photo Upload:** Users can upload one or more fabric images at a time, with drag-and-drop and file picker support. Bulk upload flows are optimized for textile catalogs.
 - **Image Preview & Details:** Uploaded images can be previewed with metadata such as title, description, and fabric type. The photo modal now features a carousel, allowing users to navigate between photos without closing the modal.
-- **WhatsApp Sharing:** Share images directly to WhatsApp, with or without captions. Multiple images can be sent in a single action, with optional compression for mobile compatibility.
+- **WhatsApp Sharing:** Share images directly to WhatsApp, with or without captions. The application supports both web-based and native sharing for mobile devices.
 - **Role-Based Access:** Admins have access to management views and controls. Regular users have restricted access, ensuring security and workflow separation.
 - **Selection Mode (Mobile):** Long-press enables selection mode on mobile devices, allowing batch operations like sharing or deletion. This is complemented by the new "Select All" functionality for efficient bulk operations.
 - **Mobile-Optimized UI:** The app adapts layouts and scroll behaviors for smooth mobile use, including touch gestures and responsive design. This includes significant improvements to `PhotoModal`, `FloatingShareButton`, `BulkMetadataForm`, `BulkMetadataStep`, `BulkUploadHeader`, `FabricSelector` (dropdown overflow), and the Delete Card within `BulkActionToolbar`. The AdminPageHeader has also been enhanced for better mobile responsiveness.
@@ -81,8 +86,13 @@
 
 | Date       | Feature/Update                       | Notes or Context                            |
 | ---------- | ------------------------------------ | ------------------------------------------- |
-| 2025-09-09 | Native Image Sharing Fix (current)   | Fixed Android native sharing to send actual image files instead of links to WhatsApp. |
-| 2025-08-14 | Phase 2 Performance                  | Implemented fetchpriority optimization, initial load limiting, and verified CSS purging. |
+| 2025-09-09 | Native Sharing and Bug Fixes         | Fixed native image sharing and permissions. |
+| 2025-09-07 | Android Platform Support             | Added native Android platform support using Capacitor. |
+| 2025-09-05 | Play Store Preparation               | Implemented preparations for Play Store deployment. |
+| 2025-09-03 | Capacitor Integration                | Initialized Capacitor for native app development. |
+| 2025-09-02 | Bundle Optimization                  | Reduced bundle size by removing unused dependencies. |
+| 2025-09-01 | Testing Suite Integration            | Integrated Vitest and React Testing Library for testing. |
+| 2025-08-14 | Phase 2 Performance (current)        | Implemented fetchpriority optimization, initial load limiting, and verified CSS purging. |
 | 2025-08-13 | Image Optimization (63e8dc5)         | Enhanced image optimization with height and resize options. |
 | 2025-08-12 | Gallery Layout Fix (b1f30d4)         | Adjusted gallery layout for consistent image display. |
 | 2025-08-12 | Performance Optimizations (a4d8820)  | Implemented image delivery, data fetching, and code-splitting optimizations. |
@@ -118,12 +128,15 @@
 
 #### 5. **Recent Updates**
 
-*   **Native Image Sharing Fix (2025-09-09)**:
-    *   Fixed Android native image sharing to send actual image files instead of links to WhatsApp.
-    *   Updated `nativeSharing.ts` to use `BASE64` encoding instead of `UTF8` for proper file handling.
-    *   Enhanced `imageUtils.ts` with Capacitor-specific CORS handling for native app context.
-    *   Improved Android file provider configuration in `AndroidManifest.xml` for better image sharing compatibility.
-    *   Added comprehensive error logging throughout the sharing process for better debugging.
+*   **Native App Support and Sharing**:
+    *   The project has been initialized with Capacitor to support native Android builds, including preparations for the Play Store.
+    *   Implemented native file sharing using Capacitor plugins to send actual image files instead of links to WhatsApp.
+    *   Fixed permissions and sharing logic for a more robust native experience.
+*   **Performance and Dependencies**:
+    *   Reduced bundle size by removing unused dependencies.
+    *   Added bundle analysis and dependency auditing tools.
+*   **Testing**:
+    *   Integrated a testing suite with Vitest and React Testing Library.
 *   **Phase 2 Performance Optimizations**:
     *   Added `fetchpriority="high"` to first image in viewport for LCP optimization.
     *   Implemented initial load limiting (24 photos) with progressive loading capability.
