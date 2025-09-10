@@ -7,6 +7,7 @@ import { shareMultipleViaWhatsAppURL, shareViaWhatsAppURL } from './whatsappURL'
 import { shareBatchedToWhatsApp } from './batchedSharing';
 import { shareGalleryToWhatsApp } from './gallerySharing';
 import { sharePhotoNatively, shareMultiplePhotosNatively, isNativeSharingAvailable } from './nativeSharing';
+import { debugLog, debugError } from './debugLogger';
 
 // Re-export types and utilities
 export type { ShareablePhoto };
@@ -94,9 +95,13 @@ export const shareMultipleToWhatsApp = async (
   }
 };
 
-// Main sharing function with progressive fallback and loading states
+// Main sharing function with progressive fallback and comprehensive debugging
 export const shareToWhatsApp = async (photo: ShareablePhoto): Promise<void> => {
-  console.log('Starting WhatsApp share for:', photo.title);
+  debugLog('🚀 Starting WhatsApp share', { 
+    title: photo.title, 
+    imageUrl: photo.imageUrl,
+    capabilities: getNativeSharingCapabilities()
+  });
   
   try {
     // Show loading toast for better UX
@@ -105,61 +110,97 @@ export const shareToWhatsApp = async (photo: ShareablePhoto): Promise<void> => {
       description: "Setting up your WhatsApp share",
     });
 
-    // Progressive fallback strategy - prioritize native sharing
+    // Progressive fallback strategy - prioritize native sharing for mobile apps
     if (isNativeSharingAvailable()) {
-      console.log('Trying native Capacitor sharing');
-      const nativeSuccess = await sharePhotoNatively(photo);
+      debugLog('🔄 Attempting native Capacitor sharing');
       
-      if (nativeSuccess) {
-        loadingToast.dismiss();
+      try {
+        const nativeSuccess = await sharePhotoNatively(photo);
+        
+        if (nativeSuccess) {
+          loadingToast.dismiss();
+          debugLog('✅ Native sharing successful');
+          toast({
+            title: "Photo shared successfully",
+            description: "Your saree photo has been shared via the native app",
+          });
+          return;
+        } else {
+          debugError('❌ Native sharing failed, trying fallbacks');
+        }
+      } catch (nativeError) {
+        debugError('❌ Native sharing threw an error', nativeError);
+      }
+    } else {
+      debugLog('ℹ️ Native sharing not available');
+    }
+    
+    // Fallback to Web Share API on mobile devices
+    if (isMobileDevice() && canShareFiles()) {
+      debugLog('🔄 Attempting Web Share API on mobile device');
+      
+      try {
+        const webShareSuccess = await shareViaWebShareAPI(photo);
+        
+        if (webShareSuccess) {
+          loadingToast.dismiss();
+          debugLog('✅ Web Share API successful');
+          toast({
+            title: "Photo shared successfully",
+            description: "Your photo has been shared",
+          });
+          return;
+        } else {
+          debugError('❌ Web Share API failed, trying URL fallback');
+        }
+      } catch (webShareError) {
+        debugError('❌ Web Share API threw an error', webShareError);
+      }
+    } else {
+      debugLog('ℹ️ Web Share API not available or not on mobile');
+    }
+    
+    // Final fallback to WhatsApp URL schemes
+    debugLog('🔄 Falling back to WhatsApp URL sharing');
+    try {
+      const urlShareSuccess = shareViaWhatsAppURL(photo);
+      
+      loadingToast.dismiss();
+      
+      if (urlShareSuccess) {
+        debugLog('✅ URL sharing initiated');
         toast({
-          title: "Photo shared successfully",
-          description: "Your saree photo has been shared via the native app",
+          title: "Opening WhatsApp",
+          description: "Redirecting to WhatsApp to share your saree",
         });
         return;
+      } else {
+        debugError('❌ URL sharing failed');
+        throw new Error('All sharing methods failed');
       }
-    }
-    
-    // Fallback to Web Share API
-    if (isMobileDevice() && canShareFiles()) {
-      console.log('Trying Web Share API on mobile device');
-      const webShareSuccess = await shareViaWebShareAPI(photo);
-      
-      if (webShareSuccess) {
-        loadingToast.dismiss();
-        return;
-      }
-    }
-    
-    // Fallback to WhatsApp URL schemes
-    console.log('Falling back to WhatsApp URL sharing');
-    const urlShareSuccess = shareViaWhatsAppURL(photo);
-    
-    loadingToast.dismiss();
-    
-    if (urlShareSuccess) {
-      // Show success message for URL sharing
-      toast({
-        title: "Opening WhatsApp",
-        description: "Redirecting to WhatsApp to share your saree",
-      });
-    } else {
-      throw new Error('All sharing methods failed');
+    } catch (urlError) {
+      debugError('❌ URL sharing threw an error', urlError);
+      throw urlError;
     }
     
   } catch (error) {
-    console.error('All WhatsApp sharing methods failed:', error);
+    debugError('❌ All WhatsApp sharing methods failed', error);
     
     // Enhanced error handling with specific messages
-    let errorMessage = "Sharing via WhatsApp is not supported on this device or browser.";
-    let errorDescription = "Please try copying the image URL manually.";
+    let errorMessage = "Unable to share photo";
+    let errorDescription = "Please try again or use a different sharing method.";
     
-    if (error.message?.includes('network')) {
+    const errorString = error?.toString?.() || '';
+    
+    if (errorString.includes('network') || errorString.includes('fetch')) {
       errorMessage = "Network error occurred";
       errorDescription = "Please check your internet connection and try again.";
-    } else if (error.message?.includes('cors')) {
+    } else if (errorString.includes('cors') || errorString.includes('CORS')) {
       errorMessage = "Image sharing temporarily unavailable";
-      errorDescription = "You can still share the link via WhatsApp Web.";
+      errorDescription = "You can try sharing the link instead.";
+    } else if (errorString.includes('AbortError') || errorString.includes('timeout')) {
+      errorMessage = "Request timed out";
+      errorDescription = "Please try again with a stable internet connection.";
     }
     
     toast({

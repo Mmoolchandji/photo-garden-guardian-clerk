@@ -3,21 +3,23 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { fetchImageAsBlob } from './imageUtils';
 import { ShareablePhoto } from './types';
 import { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
+import { debugLog, debugError } from './debugLogger';
 
 // Convert file URI to content URI for Android compatibility
 const convertToContentUri = async (fileUri: string): Promise<string | null> => {
   try {
+    debugLog('🔄 Converting file URI to content URI', { fileUri });
+    
     // Check if we're on Android and in a Capacitor app
     const isAndroid = (window as any).Capacitor?.getPlatform() === 'android';
     
     if (!isAndroid || !fileUri) {
+      debugLog('ℹ️ Not Android or no file URI, returning original', { isAndroid, hasFileUri: !!fileUri });
       return fileUri;
     }
     
     // For Android, convert file:// URIs to content:// URIs using FileProvider
     if (fileUri.startsWith('file://')) {
-      console.log('🔄 [Native Sharing] Converting file URI to content URI:', fileUri);
-      
       // Extract filename from the URI - it should be in cache/temp_share/filename.jpg format
       const urlParts = fileUri.split('/');
       const filename = urlParts[urlParts.length - 1];
@@ -26,13 +28,20 @@ const convertToContentUri = async (fileUri: string): Promise<string | null> => {
       const authority = 'app.lovable.photogarden.guardian.fileprovider';
       const contentUri = `content://${authority}/cache_files/temp_share/${filename}`;
       
-      console.log('✅ [Native Sharing] Generated content URI:', contentUri);
+      debugLog('✅ Generated content URI', { 
+        originalUri: fileUri, 
+        contentUri, 
+        filename, 
+        authority 
+      });
+      
       return contentUri;
     }
     
+    debugLog('ℹ️ File URI does not start with file://, returning original', { fileUri });
     return fileUri;
   } catch (error) {
-    console.error('❌ [Native Sharing] Error converting to content URI:', error);
+    debugError('❌ Error converting to content URI', error);
     return fileUri;
   }
 };
@@ -63,24 +72,36 @@ const generateSafeFilename = (photo: ShareablePhoto, index?: number): string => 
 // Save photo to device filesystem temporarily
 const savePhotoToDevice = async (photo: ShareablePhoto, index?: number): Promise<string | null> => {
   try {
-    console.log('🔄 [Native Sharing] Starting photo fetch for:', photo.imageUrl);
+    debugLog('🔄 Starting photo fetch for saving to device', { 
+      imageUrl: photo.imageUrl, 
+      title: photo.title,
+      index 
+    });
+    
     const blob = await fetchImageAsBlob(photo.imageUrl);
     
     if (!blob) {
-      console.error('❌ [Native Sharing] Failed to fetch photo blob for:', photo.imageUrl);
+      debugError('❌ Failed to fetch photo blob', { imageUrl: photo.imageUrl });
       return null;
     }
 
-    console.log('✅ [Native Sharing] Successfully fetched blob - Size:', blob.size, 'Type:', blob.type);
+    debugLog('✅ Successfully fetched blob', { 
+      size: blob.size, 
+      type: blob.type,
+      imageUrl: photo.imageUrl 
+    });
     
     // Validate blob is not empty
     if (blob.size === 0) {
-      console.error('❌ [Native Sharing] Blob is empty for:', photo.imageUrl);
+      debugError('❌ Blob is empty', { imageUrl: photo.imageUrl });
       return null;
     }
     
     const base64Data = await blobToBase64(blob);
-    console.log('✅ [Native Sharing] Converted to base64, length:', base64Data.length);
+    debugLog('✅ Converted to base64', { 
+      base64Length: base64Data.length,
+      imageUrl: photo.imageUrl 
+    });
     
     const filename = generateSafeFilename(photo, index);
     
@@ -91,23 +112,27 @@ const savePhotoToDevice = async (photo: ShareablePhoto, index?: number): Promise
         directory: Directory.Cache,
         recursive: true
       });
+      debugLog('✅ Created/verified temp_share directory');
     } catch (dirError) {
-      console.log('Directory already exists or created:', dirError);
+      debugLog('ℹ️ Directory already exists or created', dirError);
     }
     
-    console.log('💾 [Native Sharing] Saving photo to device filesystem:', filename);
+    debugLog('💾 Saving photo to device filesystem', { filename, path: `temp_share/${filename}` });
     const result = await Filesystem.writeFile({
       path: `temp_share/${filename}`,
       data: base64Data,
       directory: Directory.Cache
-      // Capacitor automatically handles base64 data when no encoding specified
+      // Base64 data is automatically detected by Capacitor when no encoding is specified
     });
 
-    console.log('File saved successfully, URI:', result.uri);
+    debugLog('✅ File saved successfully', { uri: result.uri, filename });
     return result.uri;
   } catch (error) {
-    console.error('Error saving photo to device:', error);
-    console.error('Photo URL that failed:', photo.imageUrl);
+    debugError('❌ Error saving photo to device', { 
+      error, 
+      imageUrl: photo.imageUrl,
+      title: photo.title 
+    });
     return null;
   }
 };

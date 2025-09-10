@@ -9,6 +9,7 @@ import { Suspense, lazy } from 'react';
 import { useMobileUX } from '@/hooks/useMobileUX';
 import { useAppLifecycle } from '@/hooks/useAppLifecycle';
 import MobileLoadingState from '@/components/MobileLoadingState';
+import { ShareTestButton } from '@/components/ShareTestButton';
 
 const Index = lazy(() => import('./pages/Index'));
 const Admin = lazy(() => import('./pages/Admin'));
@@ -49,6 +50,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            <ShareTestButton />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

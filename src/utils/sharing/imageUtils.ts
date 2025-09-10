@@ -5,12 +5,17 @@ export const fetchImageAsBlob = async (imageUrl: string): Promise<Blob | null> =
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
   
   try {
-    // For Capacitor apps, use no-cors mode to avoid CORS issues
+    console.log('🔄 [Image Utils] Fetching image:', imageUrl);
+    
+    // For Capacitor apps, handle fetch differently
     const isCapacitor = !!(window as any).Capacitor;
     const response = await fetch(imageUrl, {
       signal: controller.signal,
-      mode: isCapacitor ? 'no-cors' : 'cors',
-      cache: 'force-cache' // Use cached version if available
+      mode: 'cors', // Use cors mode consistently for better error handling
+      cache: 'default', // Use default cache strategy
+      headers: {
+        'Accept': 'image/*',
+      }
     });
     
     clearTimeout(timeoutId);
@@ -20,10 +25,18 @@ export const fetchImageAsBlob = async (imageUrl: string): Promise<Blob | null> =
     }
     
     const blob = await response.blob();
+    console.log('✅ [Image Utils] Blob fetched - Size:', blob.size, 'Type:', blob.type);
     
     // Validate it's actually an image
     if (!blob.type.startsWith('image/')) {
+      console.error('❌ [Image Utils] Invalid blob type:', blob.type);
       throw new Error('Fetched content is not an image');
+    }
+    
+    // Validate blob size
+    if (blob.size === 0) {
+      console.error('❌ [Image Utils] Empty blob received');
+      throw new Error('Empty image blob received');
     }
     
     return blob;

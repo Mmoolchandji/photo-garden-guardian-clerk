@@ -149,11 +149,13 @@ export const shareViaWebShareAPI = async (photo: ShareablePhoto): Promise<boolea
       return false;
     }
     
+    console.log('🔄 [Web Share API] Fetching image blob for:', photo.imageUrl);
     const imageBlob = await fetchImageAsBlob(photo.imageUrl);
     if (!imageBlob) {
-      console.log('Failed to fetch image blob, falling back to URL sharing');
+      console.log('❌ [Web Share API] Failed to fetch image blob, falling back to URL sharing');
       return false;
     }
+    console.log('✅ [Web Share API] Image blob fetched successfully - Size:', imageBlob.size);
 
     // Check file size for single photo
     if (imageBlob.size > WEB_SHARE_LIMITS.MAX_SINGLE_FILE_SIZE) {
