@@ -170,6 +170,7 @@ npm test             # Run all tests
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
 npm run test:ui      # Open Vitest UI
+git push origin main --force
 ```
 
 ## Project Structure

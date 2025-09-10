@@ -12,7 +12,11 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "android:sync": "npx cap sync android",
+    "android:run": "npx cap run android --target ac3afca8",
+    "android:build-and-sync": "npm run build && npm run android:sync",
+    "android:deploy": "npm run build && npm run android:sync && npm run android:run"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
