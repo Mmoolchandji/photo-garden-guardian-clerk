@@ -4,6 +4,39 @@ import { fetchImageAsBlob } from './imageUtils';
 import { ShareablePhoto } from './types';
 import { formatWhatsAppMessage, formatMultiplePhotosMessage } from './messageFormatting';
 
+// Convert file URI to content URI for Android compatibility
+const convertToContentUri = async (fileUri: string): Promise<string | null> => {
+  try {
+    // Check if we're on Android and in a Capacitor app
+    const isAndroid = (window as any).Capacitor?.getPlatform() === 'android';
+    
+    if (!isAndroid || !fileUri) {
+      return fileUri;
+    }
+    
+    // For Android, convert file:// URIs to content:// URIs using FileProvider
+    if (fileUri.startsWith('file://')) {
+      console.log('🔄 [Native Sharing] Converting file URI to content URI:', fileUri);
+      
+      // Extract filename from the URI - it should be in cache/temp_share/filename.jpg format
+      const urlParts = fileUri.split('/');
+      const filename = urlParts[urlParts.length - 1];
+      
+      // Use the FileProvider authority we configured
+      const authority = 'app.lovable.photogarden.guardian.fileprovider';
+      const contentUri = `content://${authority}/cache_files/temp_share/${filename}`;
+      
+      console.log('✅ [Native Sharing] Generated content URI:', contentUri);
+      return contentUri;
+    }
+    
+    return fileUri;
+  } catch (error) {
+    console.error('❌ [Native Sharing] Error converting to content URI:', error);
+    return fileUri;
+  }
+};
+
 // Convert blob to base64 for Capacitor filesystem
 const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -67,7 +100,7 @@ const savePhotoToDevice = async (photo: ShareablePhoto, index?: number): Promise
       path: `temp_share/${filename}`,
       data: base64Data,
       directory: Directory.Cache
-      // No encoding specified for base64 data - Capacitor handles it automatically
+      // Capacitor automatically handles base64 data when no encoding specified
     });
 
     console.log('File saved successfully, URI:', result.uri);
@@ -108,10 +141,15 @@ export const sharePhotoNatively = async (photo: ShareablePhoto): Promise<boolean
     console.log('📱 [Native Sharing] Photo saved, preparing to share with URI:', fileUri);
     const message = formatWhatsAppMessage(photo);
     
+    // Convert file URI to content URI for Android
+    const contentUri = await convertToContentUri(fileUri);
+    console.log('🔗 [Native Sharing] Content URI generated:', contentUri);
+    
     await Share.share({
       title: `Share ${photo.title || 'Photo'}`,
       text: message,
-      files: [fileUri],
+      files: [contentUri || fileUri],
+      dialogTitle: `Share ${photo.title || 'Photo'}`
     });
 
     console.log('✅ [Native Sharing] Share completed successfully');
@@ -154,13 +192,23 @@ export const shareMultiplePhotosNatively = async (photos: ShareablePhoto[]): Pro
       throw new Error('No photos could be saved to device');
     }
 
+    // Convert all file URIs to content URIs for Android
+    const contentUris: string[] = [];
+    for (const fileUri of fileUris) {
+      const contentUri = await convertToContentUri(fileUri);
+      contentUris.push(contentUri || fileUri);
+    }
+    
+    console.log('🔗 [Native Sharing] Content URIs generated:', contentUris);
+    
     // Create message for multiple photos
     const message = formatMultiplePhotosMessage(photos.slice(0, fileUris.length));
 
     await Share.share({
       title: `Share ${fileUris.length} Photo${fileUris.length > 1 ? 's' : ''}`,
       text: message,
-      files: fileUris,
+      files: contentUris,
+      dialogTitle: `Share ${fileUris.length} Photo${fileUris.length > 1 ? 's' : ''}`
     });
 
     // Clean up after a delay
